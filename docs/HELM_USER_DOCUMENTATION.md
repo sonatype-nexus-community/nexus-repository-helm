@@ -36,14 +36,14 @@ details. Minimal configuration steps are:
 Configuring Helm to use Nexus Repository is fairly easy! Once you have Helm up and running you'll want to run a command similar to the following:
 
 ```
-helm repo add nexus http://localhost:8081/repository/helm-proxy/
+helm repo add nexusrepo http://localhost:8081/repository/helm-proxy/
 ```
 
-Replace `nexus` with what you'd like the repo to be called, and the url with what the full url to your proxy repository is.
+Replace `nexusrepo` with what you'd like the repo to be called, and the url with what the full url to your proxy repository is.
 
 From that point you can install helm charts using a command similar to the following:
 
-`helm install nexus/mongodb`
+`helm install nexusrepo/mongodb`
 
 If everything went smoothly, the command above will install the latest version of `mongodb`.
 
