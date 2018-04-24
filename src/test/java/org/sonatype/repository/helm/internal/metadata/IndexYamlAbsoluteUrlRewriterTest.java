@@ -81,7 +81,7 @@ public class IndexYamlAbsoluteUrlRewriterTest
   }
 
   private void setupIndexMock() throws Exception {
-    when(tempBlob.get()).thenReturn(getClass().getResourceAsStream("index.yaml"));
+    when(tempBlob.get()).thenReturn(getClass().getResourceAsStream(INDEX_YAML));
     when(tempBlob.getBlob()).thenReturn(mock(Blob.class));
   }
 
