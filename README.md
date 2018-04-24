@@ -60,7 +60,7 @@ The application will now be available from your browser at http://localhost:8081
 
 ## Using Helm With Nexus Repository Manager 3
 
-[We have detailed instructions on how to get started here!](docs/COMPOSER_USER_DOCUMENTATION.md)
+[We have detailed instructions on how to get started here!](docs/HELM_USER_DOCUMENTATION.md)
 
 ## Installing the plugin
 

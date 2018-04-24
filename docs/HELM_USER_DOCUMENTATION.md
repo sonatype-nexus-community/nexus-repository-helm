@@ -16,16 +16,38 @@
 
 ### Introduction
 
-TBD
+[Helm](https://helm.sh/) is a package management format used for Helm Charts, which are effectively recipes for Kubernetes. 
 
 ### Proxying Helm Repositories
 
-TBD
+You can set up an Helm proxy repository to access a remote repository location, for example to proxy the stable charts 
+at [https://kubernetes-charts.storage.googleapis.com/](https://kubernetes-charts.storage.googleapis.com/)
+
+To proxy a Helm repository, you simply create a new 'helm (proxy)' as documented in 
+[Repository Management](https://help.sonatype.com/display/NXRM3/Configuration#Configuration-RepositoryManagement) in
+details. Minimal configuration steps are:
+
+- Define 'Name'
+- Define URL for 'Remote storage' e.g. [https://kubernetes-charts.storage.googleapis.com/](https://kubernetes-charts.storage.googleapis.com/)
+- Select a 'Blob store' for 'Storage'
 
 ### Configuring Helm 
 
+Configuring Helm to use Nexus Repository is fairly easy! Once you have Helm up and running you'll want to run a command similar to the following:
+
+```
+helm repo add nexus http://localhost:8081/repository/helm-proxy/
+```
+
+Replace `nexus` with what you'd like the repo to be called, and the url with what the full url to your proxy repository is.
+
+From that point you can install helm charts using a command similar to the following:
+
+`helm install nexus/mongodb`
+
+If everything went smoothly, the command above will install the latest version of `mongodb`.
 
 ### Browsing Helm Repository Packages
 
-You can browse Helm  repositories in the user interface inspecting the components and assets and their details, as
+You can browse Helm repositories in the user interface inspecting the components and assets and their details, as
 described in [Browsing Repositories and Repository Groups](https://help.sonatype.com/display/NXRM3/Browsing+Repositories+and+Repository+Groups).

@@ -29,7 +29,7 @@ Ext.define('NX.helm.app.PluginStrings', {
     SearchHelm_Group: 'Helm Repositories',
     SearchHelm_License_FieldLabel: 'License',
     SearchHelm_Text: 'Helm',
-    SearchHelm_Description: 'Search for components in Helm repositories',
+    SearchHelm_Description: 'Search for components in Helm repositories'
   }
 }, function(self) {
   NX.I18n.register(self);
