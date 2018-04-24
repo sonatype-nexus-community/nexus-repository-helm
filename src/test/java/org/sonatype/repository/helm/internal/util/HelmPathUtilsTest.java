@@ -27,7 +27,6 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-
 public class HelmPathUtilsTest
     extends TestSupport
 {

@@ -20,7 +20,6 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
