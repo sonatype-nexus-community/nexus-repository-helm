@@ -20,6 +20,8 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -30,6 +32,7 @@ import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.thread.io.StreamCopier;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.emitter.Emitter;
@@ -51,6 +54,10 @@ public class IndexYamlAbsoluteUrlRewriter
     extends ComponentSupport
 {
   private static final String URLS = "urls";
+
+  private static final String HTTP = "http://";
+
+  private static final String HTTPS = "https://";
 
   private StorageFacet storageFacet;
 
@@ -75,7 +82,7 @@ public class IndexYamlAbsoluteUrlRewriter
         if (event instanceof ScalarEvent) {
           ScalarEvent scalarEvent = (ScalarEvent) event;
           if (rewrite) {
-            event = setAbsoluteUrlAsRelative(scalarEvent);
+            event = maybeSetAbsoluteUrlAsRelative(scalarEvent);
           }
           else if (URLS.equals(scalarEvent.getValue())) {
             rewrite = true;
@@ -95,13 +102,20 @@ public class IndexYamlAbsoluteUrlRewriter
     }
   }
 
-  private Event setAbsoluteUrlAsRelative(ScalarEvent scalarEvent) throws MalformedURLException {
+  private Event maybeSetAbsoluteUrlAsRelative(ScalarEvent scalarEvent) throws MalformedURLException {
     String oldUrl = scalarEvent.getValue();
-    String fileName = oldUrl.substring(oldUrl.lastIndexOf('/') + 1, oldUrl.length());
-    scalarEvent = new ScalarEvent(scalarEvent.getAnchor(), scalarEvent.getTag(),
-        scalarEvent.getImplicit(), fileName, scalarEvent.getStartMark(),
-        scalarEvent.getEndMark(), scalarEvent.getStyle());
-
+    try {
+      URI uri = new URIBuilder(oldUrl).build();
+      if (uri.isAbsolute()) {
+        String fileName = uri.getPath();
+        scalarEvent = new ScalarEvent(scalarEvent.getAnchor(), scalarEvent.getTag(),
+            scalarEvent.getImplicit(), fileName, scalarEvent.getStartMark(),
+            scalarEvent.getEndMark(), scalarEvent.getStyle());
+      }
+    }
+    catch (URISyntaxException ex) {
+      log.debug("Invalid URI in index.yaml", ex);
+    }
     return scalarEvent;
   }
 
