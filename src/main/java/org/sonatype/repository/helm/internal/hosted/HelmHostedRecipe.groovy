@@ -10,7 +10,7 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.internal.proxy
+package org.sonatype.repository.helm.internal.hosted
 
 import javax.annotation.Nonnull
 import javax.inject.Inject
@@ -22,37 +22,48 @@ import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.Repository
 import org.sonatype.nexus.repository.Type
 import org.sonatype.nexus.repository.http.HttpHandlers
-import org.sonatype.nexus.repository.proxy.ProxyHandler
-import org.sonatype.nexus.repository.types.ProxyType
+import org.sonatype.nexus.repository.types.HostedType
 import org.sonatype.nexus.repository.view.ConfigurableViewFacet
+import org.sonatype.nexus.repository.view.Context
+import org.sonatype.nexus.repository.view.Matcher
 import org.sonatype.nexus.repository.view.Route
 import org.sonatype.nexus.repository.view.Router
 import org.sonatype.nexus.repository.view.ViewFacet
 import org.sonatype.nexus.repository.view.handlers.BrowseUnsupportedHandler
+import org.sonatype.nexus.repository.view.matchers.ActionMatcher
+import org.sonatype.nexus.repository.view.matchers.logic.LogicMatchers
+import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher
+import org.sonatype.repository.helm.internal.AssetKind
 import org.sonatype.repository.helm.internal.HelmFormat
 import org.sonatype.repository.helm.internal.HelmRecipeSupport
+import org.sonatype.repository.helm.internal.createindex.CreateIndexFacetImpl
+
+import static org.sonatype.nexus.repository.http.HttpMethods.PUT
+import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE
 
 /**
- * Helm proxy repository recipe.
+ * Helm Hosted Recipe
  *
- * @since 0.0.1
+ * @since 0.0.2
  */
-@Named(HelmProxyRecipe.NAME)
+@Named(HelmHostedRecipe.NAME)
 @Singleton
-class HelmProxyRecipe
+class HelmHostedRecipe
   extends HelmRecipeSupport
 {
-  public static final String NAME = 'helm-proxy'
+  public static final String NAME = 'helm-hosted'
 
   @Inject
-  Provider<HelmProxyFacetImpl> proxyFacet
+  HostedHandlers hostedHandlers
 
   @Inject
-  ProxyHandler proxyHandler
+  Provider<CreateIndexFacetImpl> createIndexFacet
 
   @Inject
-  HelmProxyRecipe(@Named(ProxyType.NAME) final Type type,
-                  @Named(HelmFormat.NAME) final Format format) {
+  Provider<HelmHostedFacetImpl> hostedFacet
+
+  @Inject
+  HelmHostedRecipe(@Named(HostedType.NAME) final Type type, @Named(HelmFormat.NAME) final Format format) {
     super(type, format)
   }
 
@@ -61,12 +72,12 @@ class HelmProxyRecipe
     repository.attach(securityFacet.get())
     repository.attach(configure(viewFacet.get()))
     repository.attach(httpClientFacet.get())
-    repository.attach(negativeCacheFacet.get())
     repository.attach(componentMaintenanceFacet.get())
-    repository.attach(proxyFacet.get())
+    repository.attach(negativeCacheFacet.get())
     repository.attach(storageFacet.get())
+    repository.attach(hostedFacet.get())
+    repository.attach(createIndexFacet.get())
     repository.attach(searchFacet.get())
-    repository.attach(purgeUnusedFacet.get())
     repository.attach(attributesFacet.get())
   }
 
@@ -86,9 +97,21 @@ class HelmProxyRecipe
           .handler(partialFetchHandler)
           .handler(contentHeadersHandler)
           .handler(unitOfWorkHandler)
-          .handler(proxyHandler)
+          .handler(hostedHandlers.get)
           .create())
     }
+
+    builder.route(new Route.Builder().matcher(chartUploadMatcher())
+        .handler(timingHandler)
+        .handler(securityHandler)
+        .handler(exceptionHandler)
+        .handler(handlerContributor)
+        .handler(conditionalRequestHandler)
+        .handler(partialFetchHandler)
+        .handler(contentHeadersHandler)
+        .handler(unitOfWorkHandler)
+        .handler(hostedHandlers.upload)
+        .create())
 
     builder.route(new Route.Builder()
         .matcher(BrowseUnsupportedHandler.MATCHER)
@@ -100,5 +123,23 @@ class HelmProxyRecipe
     facet.configure(builder.create())
 
     return facet
+  }
+
+  static Matcher chartUploadMatcher() {
+    LogicMatchers.and(
+        new ActionMatcher(PUT),
+        tokenMatcherForExtensionAndName('tgz'),
+        new Matcher() {
+          @Override
+          boolean matches(final Context context) {
+            context.attributes.set(AssetKind.class, HELM_PACKAGE)
+            return true
+          }
+        }
+    )
+  }
+
+  static TokenMatcher tokenMatcherForExtensionAndName(final String extension, final String filename = '.+') {
+    new TokenMatcher("/{filename:${filename}}.{extension:${extension}}")
   }
 }

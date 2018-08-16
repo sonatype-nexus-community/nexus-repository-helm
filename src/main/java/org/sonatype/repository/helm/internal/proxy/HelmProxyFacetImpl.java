@@ -13,8 +13,6 @@
 package org.sonatype.repository.helm.internal.proxy;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,10 +40,9 @@ import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
+import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
-import org.sonatype.repository.helm.internal.util.TgzParser;
-import org.sonatype.repository.helm.internal.util.YamlParser;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
@@ -64,9 +61,7 @@ public class HelmProxyFacetImpl
 
   private final HelmDataAccess helmDataAccess;
 
-  private final TgzParser tgzParser;
-
-  private final YamlParser yamlParser;
+  private final HelmAttributeParser helmAttributeParser;
 
   private final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter;
 
@@ -75,14 +70,12 @@ public class HelmProxyFacetImpl
   @Inject
   public HelmProxyFacetImpl(final HelmPathUtils helmPathUtils,
                             final HelmDataAccess helmDataAccess,
-                            final TgzParser tgzParser,
-                            final YamlParser yamlParser,
+                            final HelmAttributeParser helmAttributeParser,
                             final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter)
   {
     this.helmPathUtils = checkNotNull(helmPathUtils);
     this.helmDataAccess = checkNotNull(helmDataAccess);
-    this.tgzParser = checkNotNull(tgzParser);
-    this.yamlParser = checkNotNull(yamlParser);
+    this.helmAttributeParser = checkNotNull(helmAttributeParser);
     this.indexYamlAbsoluteUrlRewriter = checkNotNull(indexYamlAbsoluteUrlRewriter);
   }
 
@@ -154,7 +147,7 @@ public class HelmProxyFacetImpl
                                final AssetKind assetKind) throws IOException {
     StorageFacet storageFacet = facet(StorageFacet.class);
     try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
-      HelmAttributes helmAttributes = getAttributesFromTempBlob(tempBlob);
+      HelmAttributes helmAttributes = helmAttributeParser.getAttributesFromInputStream(tempBlob.get());
       return doCreateOrSaveComponent(helmAttributes, fileName, tempBlob, content, assetKind);
     }
   }
@@ -202,17 +195,6 @@ public class HelmProxyFacetImpl
       tx.saveAsset(asset);
     }
     return helmDataAccess.toContent(asset, tx.requireBlob(asset.requireBlobRef()));
-  }
-
-  protected HelmAttributes getAttributesFromTempBlob(final TempBlob tempBlob) throws IOException {
-    try (InputStream is = tgzParser.getChartFromTempBlob(tempBlob)) {
-      Map<String, Object> attributes = yamlParser.load(is);
-      HelmAttributes helmAttributes = new HelmAttributes();
-      helmAttributes.setName(attributes.get("name").toString());
-      helmAttributes.setVersion(attributes.get("version").toString());
-
-      return helmAttributes;
-    }
   }
 
   @Override

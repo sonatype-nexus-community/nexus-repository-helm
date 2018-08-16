@@ -14,18 +14,34 @@ package org.sonatype.repository.helm.internal.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.Map;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+
+import org.sonatype.goodies.common.ComponentSupport;
+import org.sonatype.repository.helm.internal.metadata.ChartEntry;
+import org.sonatype.repository.helm.internal.metadata.ChartIndex;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.IOUtils;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
+import org.yaml.snakeyaml.introspector.Property;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.NodeId;
+import org.yaml.snakeyaml.nodes.NodeTuple;
+import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.reader.UnicodeReader;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.resolver.Resolver;
@@ -33,13 +49,14 @@ import org.yaml.snakeyaml.resolver.Resolver;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Utility methods for getting attributes from yaml files
+ * Utility methods for getting attributes from yaml files, writing to yaml files
  *
  * @since 0.0.1
  */
 @Named
 @Singleton
 public class YamlParser
+    extends ComponentSupport
 {
   private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -58,5 +75,82 @@ public class YamlParser
       map = (Map<String, Object>) mapper.readValue(data, Map.class);
     }
     return map;
+  }
+
+  public void write(final OutputStream os, final ChartIndex index) {
+    try (OutputStreamWriter writer = new OutputStreamWriter(os)) {
+      Yaml yaml = new Yaml(new JodaPropertyConstructor(),
+          setupRepresenter(),
+          new DumperOptions(),
+          new Resolver());
+      String result = yaml.dumpAsMap(index);
+      writer.write(result);
+    }
+    catch (IOException ex) {
+      log.error("Unable to write to OutputStream for index.yaml", ex);
+    }
+  }
+
+  private Representer setupRepresenter() {
+    Representer representer = new JodaTimeRepresenter();
+
+    representer.addClassTag(ChartEntry.class, Tag.MAP);
+
+    return representer;
+  }
+
+  private class JodaPropertyConstructor extends Constructor {
+    public JodaPropertyConstructor() {
+      yamlClassConstructors.put(NodeId.scalar, new TimeStampConstruct());
+    }
+
+    class TimeStampConstruct extends Constructor.ConstructScalar {
+      @Override
+      public Object construct(Node nnode) {
+        if (nnode.getTag().equals("tag:yaml.org,2002:timestamp")) {
+          Construct dateConstructor = yamlConstructors.get(Tag.TIMESTAMP);
+          Date date = (Date) dateConstructor.construct(nnode);
+          return new DateTime(date, DateTimeZone.UTC);
+        } else {
+          return super.construct(nnode);
+        }
+      }
+    }
+  }
+
+  /**
+   * Necessary to output Joda DateTime correctly with Snakey Yamls
+   * See: https://bitbucket.org/asomov/snakeyaml/wiki/Howto#markdown-header-how-to-parse-jodatime
+   */
+  class JodaTimeRepresenter extends Representer {
+    public JodaTimeRepresenter() {
+      multiRepresenters.put(DateTime.class, new RepresentJodaDateTime());
+    }
+
+    /**
+     * Prevents writing null values out to index.yaml, not a part of JodaTimeRepresenter necessarily
+     * but included here as we are setting up a {@link Representer}
+     */
+    @Override
+    protected NodeTuple representJavaBeanProperty(Object javaBean,
+                                                  Property property,
+                                                  Object propertyValue,
+                                                  Tag customTag)
+    {
+      // if value of property is null, ignore it.
+      if (propertyValue == null) {
+        return null;
+      }
+      else {
+        return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
+      }
+    }
+
+    private class RepresentJodaDateTime extends RepresentDate {
+      public Node representData(Object data) {
+        DateTime date = (DateTime) data;
+        return super.representData(new Date(date.getMillis()));
+      }
+    }
   }
 }

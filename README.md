@@ -48,11 +48,11 @@ If everything checks out, the bundle for Helm should be available in the `target
 
 #### Build with Docker
 
-`docker build -t nexus-repository-helm:0.0.1 .`
+`docker build -t nexus-repository-helm:0.0.2 .`
 
 #### Run as a Docker container
 
-`docker run -d -p 8081:8081 --name nexus nexus-repository-helm:0.0.1` 
+`docker run -d -p 8081:8081 --name nexus nexus-repository-helm:0.0.2` 
 
 For further information like how to persist volumes check out [the GitHub repo for our official image](https://github.com/sonatype/docker-nexus3).
 

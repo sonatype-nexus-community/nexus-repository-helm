@@ -27,6 +27,7 @@ public final class HelmAttributes
   private String engine;
   private String home;
   private String icon;
+  private String appVersion;
   private List<String> keywords;
   private List<Map<String, String>> maintainers;
   private String name;
@@ -103,5 +104,13 @@ public final class HelmAttributes
 
   public void setVersion(final String version) {
     this.version = version;
+  }
+
+  public String getAppVersion() {
+    return appVersion;
+  }
+
+  public void setAppVersion(final String appVersion) {
+    this.appVersion = appVersion;
   }
 }

@@ -36,6 +36,10 @@ public class HelmPathUtils
     return match(state, "filename");
   }
 
+  public String extension(final TokenMatcher.State state) {
+    return match(state, "extension");
+  }
+
   /**
    * Utility method encapsulating getting a particular token by name from a matcher, including preconditions.
    */
@@ -51,5 +55,11 @@ public class HelmPathUtils
    */
   public TokenMatcher.State matcherState(final Context context) {
     return context.getAttributes().require(TokenMatcher.State.class);
+  }
+
+  public String buildAssetPath(final TokenMatcher.State matcherState) {
+    String filename = filename(matcherState);
+    String extension = extension(matcherState);
+    return filename + "." + extension;
   }
 }

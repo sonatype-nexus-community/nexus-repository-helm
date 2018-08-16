@@ -13,19 +13,29 @@
 package org.sonatype.repository.helm.internal.util;
 
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.sonatype.goodies.testsupport.TestSupport;
+import org.sonatype.repository.helm.internal.HelmListTestHelper;
+import org.sonatype.repository.helm.internal.metadata.ChartEntry;
+import org.sonatype.repository.helm.internal.metadata.ChartIndex;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 
 public class YamlParserTest
     extends TestSupport
@@ -54,6 +64,19 @@ public class YamlParserTest
     assertThat(helmYaml.get("sources"), is(equalTo(getSources())));
   }
 
+  @Test
+  public void testWriteIndexYaml() throws Exception {
+    InputStream expected = getClass().getResourceAsStream("indexresult.yaml");
+    StringWriter writer = new StringWriter();
+    IOUtils.copy(expected, writer);
+    String expectedResult = writer.toString();
+    OutputStream os = new ByteArrayOutputStream();
+    underTest.write(os, createChartIndex());
+
+    assertThat(os, is(notNullValue()));
+    assertEquals(os.toString(), expectedResult);
+  }
+
   private List<String> getKeywords() {
     List<String> list = new ArrayList<>();
     list.add("mongodb");
@@ -78,5 +101,81 @@ public class YamlParserTest
     List<String> list = new ArrayList<>();
     list.add("https://github.com/bitnami/bitnami-docker-mongodb");
     return list;
+  }
+
+  private ChartIndex createChartIndex() {
+    ChartIndex chartIndex = new ChartIndex();
+    chartIndex.setApiVersion("1.0");
+
+    chartIndex.addEntry(createChartEntry(
+        "NoSQL document-oriented database that stores JSON-like documents with\n" +
+            "  dynamic schemas, simplifying the integration of data in content-driven applications.",
+        "mongodb",
+        "0.4.9",
+        DateTime.parse("2018-08-13T22:05:33.023Z"),
+        "0.0.1",
+        "12345",
+        "https://bitnami.com/assets/stacks/mongodb/img/mongodb-stack-220x234.png",
+        HelmListTestHelper.getUrlList(),
+        HelmListTestHelper.getSourcesList(),
+        HelmListTestHelper.getMaintainersList()
+    ));
+
+    chartIndex.addEntry(createChartEntry(
+        "NoSQL document-oriented database that stores JSON-like documents with\n" +
+            "  dynamic schemas, simplifying the integration of data in content-driven applications.",
+        "mongodb",
+        "0.4.8",
+        DateTime.parse("2018-08-13T22:05:33.023Z"),
+        "0.0.2",
+        "12345",
+        "https://bitnami.com/assets/stacks/mongodb/img/mongodb-stack-220x234.png",
+        HelmListTestHelper.getUrlList(),
+        HelmListTestHelper.getSourcesList(),
+        HelmListTestHelper.getMaintainersList()
+    ));
+
+    chartIndex.addEntry(createChartEntry(
+        "NoSQL document-oriented database that stores JSON-like documents with\n" +
+            "  dynamic schemas, simplifying the integration of data in content-driven applications.",
+        "notmongdb",
+        "1.0.0",
+        DateTime.parse("2018-08-13T22:05:33.023Z"),
+        "0.0.1",
+        "12345",
+        "https://bitnami.com/assets/stacks/mongodb/img/mongodb-stack-220x234.png",
+        HelmListTestHelper.getUrlList(),
+        HelmListTestHelper.getSourcesList(),
+        HelmListTestHelper.getMaintainersList()
+    ));
+
+    return chartIndex;
+  }
+
+  private ChartEntry createChartEntry(final String description,
+                                      final String name,
+                                      final String version,
+                                      final DateTime created,
+                                      final String appVersion,
+                                      final String digest,
+                                      final String icon,
+                                      final List<String> urls,
+                                      final List<String> sources,
+                                      final List<Map<String, String>> maintainers)
+  {
+    ChartEntry chartEntry = new ChartEntry();
+
+    chartEntry.setDescription(description);
+    chartEntry.setName(name);
+    chartEntry.setCreated(created);
+    chartEntry.setVersion(version);
+    chartEntry.setAppVersion(appVersion);
+    chartEntry.setDigest(digest);
+    chartEntry.setIcon(icon);
+    chartEntry.setUrls(urls);
+    chartEntry.setSources(sources);
+    chartEntry.setMaintainers(maintainers);
+
+    return chartEntry;
   }
 }

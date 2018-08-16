@@ -19,6 +19,7 @@ import java.io.InputStream;
 import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.validation.constraints.Null;
 
 import org.sonatype.nexus.repository.storage.TempBlob;
 
@@ -38,8 +39,8 @@ public class TgzParser
   private static final String CHART_NAME = "Chart.yaml";
 
   @Nullable
-  public InputStream getChartFromTempBlob(final TempBlob tempBlob) throws IOException {
-    try (GzipCompressorInputStream gzis = new GzipCompressorInputStream(tempBlob.get())) {
+  public InputStream getChartFromInputStream(final InputStream is) throws IOException {
+    try (GzipCompressorInputStream gzis = new GzipCompressorInputStream(is)) {
       try (TarArchiveInputStream tais = new TarArchiveInputStream(gzis)) {
         ArchiveEntry currentEntry = tais.getNextEntry();
 
@@ -55,5 +56,10 @@ public class TgzParser
       }
     }
     return null;
+  }
+
+  @Nullable
+  public InputStream getChartFromTempBlob(final TempBlob tempBlob) throws IOException {
+    return getChartFromInputStream(tempBlob.get());
   }
 }

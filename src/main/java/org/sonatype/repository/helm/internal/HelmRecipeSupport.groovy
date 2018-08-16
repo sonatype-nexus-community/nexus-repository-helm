@@ -15,6 +15,12 @@ package org.sonatype.repository.helm.internal
 import javax.inject.Inject
 import javax.inject.Provider
 
+import org.sonatype.nexus.repository.view.Context
+import org.sonatype.nexus.repository.view.Matcher
+import org.sonatype.nexus.repository.view.matchers.ActionMatcher
+import org.sonatype.nexus.repository.view.matchers.LiteralMatcher
+import org.sonatype.nexus.repository.view.matchers.logic.LogicMatchers
+import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher
 import org.sonatype.repository.helm.internal.security.HelmSecurityFacet
 
 import org.sonatype.nexus.repository.Format
@@ -38,6 +44,11 @@ import org.sonatype.nexus.repository.view.handlers.ContentHeadersHandler
 import org.sonatype.nexus.repository.view.handlers.ExceptionHandler
 import org.sonatype.nexus.repository.view.handlers.HandlerContributor
 import org.sonatype.nexus.repository.view.handlers.TimingHandler
+
+import static org.sonatype.nexus.repository.http.HttpMethods.GET
+import static org.sonatype.nexus.repository.http.HttpMethods.HEAD
+import static org.sonatype.repository.helm.internal.AssetKind.HELM_INDEX
+import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE
 
 /**
  * Support for Helm recipes.
@@ -104,5 +115,39 @@ abstract class HelmRecipeSupport
 
   protected HelmRecipeSupport(final Type type, final Format format) {
     super(type, format)
+  }
+
+  /**
+   * Matcher for index.yaml
+   */
+  static Matcher indexMatcher() {
+    LogicMatchers.and(
+        new ActionMatcher(GET, HEAD),
+        new LiteralMatcher('/index.yaml'),
+        new Matcher() {
+          @Override
+          boolean matches(final Context context) {
+            context.attributes.set(AssetKind.class, HELM_INDEX)
+            return true
+          }
+        }
+    )
+  }
+
+  /**
+   * Matcher for package mapping.
+   */
+  static Matcher packageMatcher() {
+    LogicMatchers.and(
+        new ActionMatcher(GET, HEAD),
+        new TokenMatcher('/{filename:.+}'),
+        new Matcher() {
+          @Override
+          boolean matches(final Context context) {
+            context.attributes.set(AssetKind.class, HELM_PACKAGE)
+            return true
+          }
+        }
+    )
   }
 }

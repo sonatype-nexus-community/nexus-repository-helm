@@ -29,6 +29,7 @@ import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter;
 import org.sonatype.nexus.repository.storage.Query;
+import org.sonatype.nexus.repository.storage.Query.Builder;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
@@ -39,8 +40,13 @@ import com.google.common.collect.ImmutableList;
 
 import static java.util.Collections.singletonList;
 import static org.sonatype.nexus.common.hash.HashAlgorithm.SHA1;
+import static org.sonatype.nexus.common.hash.HashAlgorithm.SHA256;
+import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_COMPONENT;
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
+import static org.sonatype.nexus.repository.storage.Query.builder;
+import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
+import static org.sonatype.repository.helm.internal.database.HelmProperties.ATTRIBUTES_HELM_ASSET_KIND;
 
 /**
  * Shared code between Helm facets.
@@ -48,7 +54,7 @@ import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_
 @Named
 public class HelmDataAccess
 {
-  public static final List<HashAlgorithm> HASH_ALGORITHMS = ImmutableList.of(SHA1);
+  public static final List<HashAlgorithm> HASH_ALGORITHMS = ImmutableList.of(SHA1, SHA256);
 
   /**
    * Find a component by its name and tag (version)
@@ -72,6 +78,23 @@ public class HelmDataAccess
       return components.iterator().next();
     }
     return null;
+  }
+
+  /**
+   * Find assets for Helm components (charts)
+   *
+   * @return found assets or null if not found
+   */
+  @Nullable
+  public Iterable<Asset> browseComponentAssets(final StorageTx tx,
+                                               final Bucket bucket)
+  {
+    Builder builder = builder()
+        .where(P_COMPONENT).isNotNull();
+
+    Query query = builder.build();
+
+    return tx.browseAssets(query, bucket);
   }
 
   /**
