@@ -108,6 +108,10 @@ public class IndexYamlAbsoluteUrlRewriter
       URI uri = new URIBuilder(oldUrl).build();
       if (uri.isAbsolute()) {
         String fileName = uri.getPath();
+        //remove leading "/" to avoid URI missing, by ref: https://github.com/helm/helm/issues/3878
+        log.debug("Before:{}", fileName);
+        fileName = fileName.startsWith("/") ? fileName.substring(1, fileName.length()) : fileName;
+        log.debug("After:{}", fileName);
         scalarEvent = new ScalarEvent(scalarEvent.getAnchor(), scalarEvent.getTag(),
             scalarEvent.getImplicit(), fileName, scalarEvent.getStartMark(),
             scalarEvent.getEndMark(), scalarEvent.getStyle());
