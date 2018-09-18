@@ -102,12 +102,22 @@ public class IndexYamlAbsoluteUrlRewriter
     }
   }
 
+  /**
+   * 设置绝对路径为相对路径
+   * @param scalarEvent
+   * @return
+   * @throws MalformedURLException
+   */
   private Event maybeSetAbsoluteUrlAsRelative(ScalarEvent scalarEvent) throws MalformedURLException {
     String oldUrl = scalarEvent.getValue();
     try {
       URI uri = new URIBuilder(oldUrl).build();
       if (uri.isAbsolute()) {
         String fileName = uri.getPath();
+        //remove leading "/" to avoid URI missing, by ref: https://github.com/helm/helm/issues/3878
+        log.debug("Before:{}", fileName);
+        fileName = fileName.startsWith("/") ? fileName.substring(fileName.lastIndexOf("/")+1) : fileName;
+        log.debug("After:{}", fileName);
         scalarEvent = new ScalarEvent(scalarEvent.getAnchor(), scalarEvent.getTag(),
             scalarEvent.getImplicit(), fileName, scalarEvent.getStartMark(),
             scalarEvent.getEndMark(), scalarEvent.getStyle());

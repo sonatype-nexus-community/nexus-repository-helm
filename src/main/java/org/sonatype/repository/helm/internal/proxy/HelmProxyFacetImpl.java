@@ -183,6 +183,11 @@ public class HelmProxyFacetImpl
     return helmDataAccess.saveAsset(tx, asset, componentContent, payload);
   }
 
+  /**
+   * 获取资源
+   * @param name
+   * @return
+   */
   @TransactionalTouchBlob
   protected Content getAsset(final String name) {
     StorageTx tx = UnitOfWork.currentTx();
