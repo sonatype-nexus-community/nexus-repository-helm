@@ -26,6 +26,7 @@ import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.sonatype.repository.helm.internal.database.HelmProperties.APP_VERSION;
 import static org.sonatype.repository.helm.internal.database.HelmProperties.DESCRIPTION;
 import static org.sonatype.repository.helm.internal.database.HelmProperties.ICON;
 import static org.sonatype.repository.helm.internal.database.HelmProperties.MAINTAINERS;
@@ -57,18 +58,22 @@ public class HelmAttributeParser
       HelmAttributes helmAttributes = new HelmAttributes();
       helmAttributes.setName(attributes.get(NAME).toString());
       helmAttributes.setVersion(attributes.get(VERSION).toString());
-      if (attributes.get(DESCRIPTION) != null) {
+      if (null != attributes.get(DESCRIPTION)) {
         helmAttributes.setDescription(attributes.get(DESCRIPTION).toString());
       }
-      if (attributes.get(ICON) != null) {
+      if (null != attributes.get(ICON)) {
         helmAttributes.setIcon(attributes.get(ICON).toString());
       }
-      if (attributes.get(MAINTAINERS) != null) {
+      if (null != attributes.get(MAINTAINERS)) {
         helmAttributes.setMaintainers((List<Map<String, String>>)attributes.get(MAINTAINERS));
       }
-      if (attributes.get(SOURCES) != null) {
+      if (null != attributes.get(SOURCES)) {
         helmAttributes.setSources((List<String>)attributes.get(SOURCES));
       }
+      if (null != attributes.get(APP_VERSION)) {
+        helmAttributes.setAppVersion(attributes.get(APP_VERSION).toString());
+      }
+
       return helmAttributes;
     }
   }
