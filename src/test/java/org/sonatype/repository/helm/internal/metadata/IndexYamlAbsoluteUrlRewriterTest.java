@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.CoreMatchers.either;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.not;
@@ -86,11 +87,17 @@ public class IndexYamlAbsoluteUrlRewriterTest
 
   private void checkThatAbsoluteUrlRemoved(final InputStream is) throws Exception {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+      boolean checkNext = false;
       String line;
       while ((line = reader.readLine()) != null) {
         line = line.trim();
-        if (line.contains(INDEX_YAML_URL_NODE)) {
+        if (checkNext) {
           assertThat(line, either(not(containsString(HTTP))).or(not(containsString(HTTPS))));
+          assertThat(line, not(startsWith("- /")));
+          checkNext = false;
+        }
+        if (line.contains(INDEX_YAML_URL_NODE)) {
+          checkNext = true;
         }
       }
     }
