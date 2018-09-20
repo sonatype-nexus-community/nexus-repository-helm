@@ -94,6 +94,8 @@ public class HelmHostedFacetImpl
     return helmDataAccess.toContent(asset, tx.requireBlob(asset.requireBlobRef()));
   }
 
+
+
   @Override
   public void upload(final String path,
                      final Payload payload,
@@ -109,6 +111,19 @@ public class HelmHostedFacetImpl
     try (TempBlob tempBlob = facet(StorageFacet.class).createTempBlob(payload, HASH_ALGORITHMS)) {
       storeChart(path, tempBlob, payload);
     }
+  }
+
+  @Override
+  public Asset upload(String path, TempBlob tempBlob,Payload payload) throws IOException {
+    checkNotNull(path);
+    checkNotNull(tempBlob);
+
+    StorageTx tx = UnitOfWork.currentTx();
+    Bucket bucket = tx.findBucket(getRepository());
+
+    Asset asset = createChartAsset(path, tx, bucket, tempBlob.get());
+    helmDataAccess.saveAsset(tx, asset, tempBlob, payload);
+    return asset;
   }
 
   @Override
