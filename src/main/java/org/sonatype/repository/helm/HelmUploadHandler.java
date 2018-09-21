@@ -33,6 +33,10 @@ import java.util.Set;
 
 import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
 
+/**
+ * Support helm upload for web page
+ * @author yinlongfei
+ */
 @Singleton
 @Named(HelmFormat.NAME)
 public class HelmUploadHandler extends UploadHandlerSupport {
@@ -42,15 +46,13 @@ public class HelmUploadHandler extends UploadHandlerSupport {
 
     private final HelmAttributeParser helmPackageParser;
 
-    private final HelmPathUtils helmPathUtils;
 
     @Inject
-    public HelmUploadHandler(final ContentPermissionChecker contentPermissionChecker,final HelmPathUtils helmPathUtils,final HelmAttributeParser helmPackageParser, @Named("simple") final VariableResolverAdapter variableResolverAdapter, final Set<UploadDefinitionExtension> uploadDefinitionExtensions){
+    public HelmUploadHandler(final ContentPermissionChecker contentPermissionChecker,final HelmAttributeParser helmPackageParser, @Named("simple") final VariableResolverAdapter variableResolverAdapter, final Set<UploadDefinitionExtension> uploadDefinitionExtensions){
         super(uploadDefinitionExtensions);
-        this.contentPermissionChecker=contentPermissionChecker;
+        this.contentPermissionChecker = contentPermissionChecker;
         this.variableResolverAdapter = variableResolverAdapter;
         this.helmPackageParser = helmPackageParser;
-        this.helmPathUtils = helmPathUtils;
     }
 
 
@@ -61,13 +63,9 @@ public class HelmUploadHandler extends UploadHandlerSupport {
 
 
         return TransactionalStoreBlob.operation.withDb(storageFacet.txSupplier()).throwing(IOException.class).call(()->{
-            //获取上传信息
             PartPayload payload = upload.getAssetUploads().get(0).getPayload();
             TempBlob tempBlob = storageFacet.createTempBlob(payload,HASH_ALGORITHMS);
             HelmAttributes attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get());
-
-            String filename = upload.getAssetUploads().get(0).getPayload().getName();
-
 
             String name = attributesFromInputStream.getName();
             String version = attributesFromInputStream.getVersion();
