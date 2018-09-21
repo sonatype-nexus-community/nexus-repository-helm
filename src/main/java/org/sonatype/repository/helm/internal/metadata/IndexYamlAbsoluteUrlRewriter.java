@@ -102,12 +102,6 @@ public class IndexYamlAbsoluteUrlRewriter
     }
   }
 
-  /**
-   * 设置绝对路径为相对路径
-   * @param scalarEvent
-   * @return
-   * @throws MalformedURLException
-   */
   private Event maybeSetAbsoluteUrlAsRelative(ScalarEvent scalarEvent) throws MalformedURLException {
     String oldUrl = scalarEvent.getValue();
     try {
