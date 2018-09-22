@@ -108,10 +108,9 @@ public class IndexYamlAbsoluteUrlRewriter
       URI uri = new URIBuilder(oldUrl).build();
       if (uri.isAbsolute()) {
         String fileName = uri.getPath();
-        // Strip leading slash
-        if (!fileName.isEmpty()) {
-            fileName = fileName.substring(1);
-        }
+        //remove leading "/" to avoid URI missing, by ref: https://github.com/helm/helm/issues/3878
+        //fix https://github.com/sonatype-nexus-community/nexus-repository-helm/issues/14
+        fileName = fileName.startsWith("/") ? fileName.substring(fileName.lastIndexOf("/")+1) : fileName;
         scalarEvent = new ScalarEvent(scalarEvent.getAnchor(), scalarEvent.getTag(),
             scalarEvent.getImplicit(), fileName, scalarEvent.getStartMark(),
             scalarEvent.getEndMark(), scalarEvent.getStyle());
