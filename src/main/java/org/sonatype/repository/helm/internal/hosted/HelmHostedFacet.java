@@ -35,7 +35,7 @@ public interface HelmHostedFacet
 
   void upload(String path, Payload payload, final AssetKind assetKind) throws IOException;
 
-  Asset upload(String path, TempBlob tempBlob,Payload payload) throws IOException;
+  Asset upload(String path, TempBlob tempBlob, Payload payload) throws IOException;
 
   boolean delete(String path);
 }

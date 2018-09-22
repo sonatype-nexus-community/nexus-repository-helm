@@ -26,7 +26,8 @@ public class HelmIndexInvalidationEvent
   private final boolean waitBeforeRebuild;
 
   public HelmIndexInvalidationEvent(final String repositoryName,
-                                    final boolean waitBeforeRebuild) {
+                                    final boolean waitBeforeRebuild)
+  {
     this.repositoryName = checkNotNull(repositoryName);
     this.waitBeforeRebuild = waitBeforeRebuild;
   }

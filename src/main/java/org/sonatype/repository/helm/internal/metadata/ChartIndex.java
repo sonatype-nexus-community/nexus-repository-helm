@@ -27,7 +27,9 @@ import org.joda.time.DateTime;
 public final class ChartIndex
 {
   private String apiVersion;
+
   private Map<String, List<ChartEntry>> entries;
+
   private DateTime generated;
 
   public ChartIndex() {

@@ -133,7 +133,8 @@ public class CreateIndexServiceImplTest
   }
 
   private void initializeSystemUnderTest() {
-    underTest = Guice.createInjector(new TransactionModule(), new AbstractModule() {
+    underTest = Guice.createInjector(new TransactionModule(), new AbstractModule()
+    {
       @Override
       protected void configure() {
         bind(HelmDataAccess.class).toInstance(helmDataAccess);

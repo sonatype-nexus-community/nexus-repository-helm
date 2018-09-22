@@ -38,6 +38,7 @@ import org.sonatype.repository.helm.internal.HelmAssetAttributePopulator;
 import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmDataAccess;
+
 import com.google.common.base.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -70,7 +71,8 @@ public class HelmHostedFacetImpl
   @Inject
   public HelmHostedFacetImpl(final HelmDataAccess helmDataAccess,
                              final HelmAssetAttributePopulator helmAssetAttributePopulator,
-                             final HelmAttributeParser helmAttributeParser){
+                             final HelmAttributeParser helmAttributeParser)
+  {
     this.helmDataAccess = checkNotNull(helmDataAccess);
     this.helmAssetAttributePopulator = checkNotNull(helmAssetAttributePopulator);
     this.helmAttributeParser = checkNotNull(helmAttributeParser);
@@ -95,7 +97,6 @@ public class HelmHostedFacetImpl
   }
 
 
-
   @Override
   public void upload(final String path,
                      final Payload payload,
@@ -114,7 +115,7 @@ public class HelmHostedFacetImpl
   }
 
   @Override
-  public Asset upload(String path, TempBlob tempBlob,Payload payload) throws IOException {
+  public Asset upload(String path, TempBlob tempBlob, Payload payload) throws IOException {
     checkNotNull(path);
     checkNotNull(tempBlob);
 
@@ -137,7 +138,8 @@ public class HelmHostedFacetImpl
     Asset asset = helmDataAccess.findAsset(tx, bucket, path);
     if (asset == null) {
       return false;
-    } else {
+    }
+    else {
       tx.deleteAsset(asset);
       return true;
     }
@@ -145,8 +147,8 @@ public class HelmHostedFacetImpl
 
   @TransactionalStoreBlob
   protected Content storeChart(final String assetPath,
-                             final Supplier<InputStream> chartContent,
-                             final Payload payload) throws IOException
+                               final Supplier<InputStream> chartContent,
+                               final Payload payload) throws IOException
   {
     StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(getRepository());

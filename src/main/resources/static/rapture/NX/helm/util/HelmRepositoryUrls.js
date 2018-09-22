@@ -19,8 +19,8 @@ Ext.define('NX.helm.util.HelmRepositoryUrls', {
     'NX.util.Url'
   ]
 }, function(self) {
-	NX.coreui.util.RepositoryUrls.addRepositoryUrlStrategy('helm', function (assetModel) {
-      var repositoryName = assetModel.get('repositoryName'), assetName = assetModel.get('name');
-      return NX.util.Url.asLink(NX.util.Url.baseUrl + '/repository/' + repositoryName + '/' + assetName, assetName);
-    });
+  NX.coreui.util.RepositoryUrls.addRepositoryUrlStrategy('helm', function(assetModel) {
+    var repositoryName = assetModel.get('repositoryName'), assetName = assetModel.get('name');
+    return NX.util.Url.asLink(NX.util.Url.baseUrl + '/repository/' + repositoryName + '/' + assetName, assetName);
+  });
 });

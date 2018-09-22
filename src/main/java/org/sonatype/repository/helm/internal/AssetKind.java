@@ -21,6 +21,7 @@ import org.sonatype.nexus.repository.cache.CacheControllerHolder.CacheType;
  * Asset kinds for Helm
  *
  * Examples of all can be found at: https://github.com/kubernetes/helm/blob/master/docs/chart_repository.md#the-chart-repository-structure
+ *
  * @since 0.0.1
  */
 public enum AssetKind

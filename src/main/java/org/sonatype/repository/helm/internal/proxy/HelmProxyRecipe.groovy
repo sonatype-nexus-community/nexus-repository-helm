@@ -1,12 +1,15 @@
 /*
  * Sonatype Nexus (TM) Open Source Version
  * Copyright (c) 2018-present Sonatype, Inc.
- * All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
+ * All rights reserved. Includes the third-party code listed at http://links.sonatype
+ * .com/products/nexus/oss/attributions.
  *
- * This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
+ * This program and the accompanying materials are made available under the terms of the Eclipse Public License
+ * Version 1.0,
  * which accompanies this distribution and is available at http://www.eclipse.org/legal/epl-v10.html.
  *
- * Sonatype Nexus (TM) Professional Version is available from Sonatype, Inc. "Sonatype" and "Sonatype Nexus" are trademarks
+ * Sonatype Nexus (TM) Professional Version is available from Sonatype, Inc. "Sonatype" and "Sonatype Nexus" are
+ * trademarks
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
@@ -40,7 +43,7 @@ import org.sonatype.repository.helm.internal.HelmRecipeSupport
 @Named(HelmProxyRecipe.NAME)
 @Singleton
 class HelmProxyRecipe
-  extends HelmRecipeSupport
+    extends HelmRecipeSupport
 {
   public static final String NAME = 'helm-proxy'
 
@@ -52,7 +55,8 @@ class HelmProxyRecipe
 
   @Inject
   HelmProxyRecipe(@Named(ProxyType.NAME) final Type type,
-                  @Named(HelmFormat.NAME) final Format format) {
+                  @Named(HelmFormat.NAME) final Format format)
+  {
     super(type, format)
   }
 
