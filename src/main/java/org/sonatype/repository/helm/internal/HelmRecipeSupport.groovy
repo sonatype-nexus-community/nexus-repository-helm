@@ -110,12 +110,6 @@ abstract class HelmRecipeSupport
   @Inject
   Provider<PurgeUnusedFacet> purgeUnusedFacet
 
-  @Inject
-  Provider<NegativeCacheFacet> negativeCacheFacet
-
-  @Inject
-  NegativeCacheHandler negativeCacheHandler
-
   protected HelmRecipeSupport(final Type type, final Format format) {
     super(type, format)
   }
