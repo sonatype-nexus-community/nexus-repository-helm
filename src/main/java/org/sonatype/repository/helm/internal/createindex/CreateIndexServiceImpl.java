@@ -68,8 +68,7 @@ public class CreateIndexServiceImpl
 
   @Inject
   public CreateIndexServiceImpl(final HelmDataAccess helmDataAccess,
-                                final IndexYamlBuilder indexYamlBuilder)
-  {
+                                final IndexYamlBuilder indexYamlBuilder) {
     this.helmDataAccess = checkNotNull(helmDataAccess);
     this.indexYamlBuilder = checkNotNull(indexYamlBuilder);
   }

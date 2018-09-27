@@ -42,13 +42,11 @@ import static org.sonatype.repository.helm.internal.database.HelmProperties.VERS
 public class HelmAttributeParser
 {
   private TgzParser tgzParser;
-
   private YamlParser yamlParser;
 
   @Inject
   public HelmAttributeParser(final TgzParser tgzParser,
-                             final YamlParser yamlParser)
-  {
+                             final YamlParser yamlParser) {
     this.tgzParser = checkNotNull(tgzParser);
     this.yamlParser = checkNotNull(yamlParser);
 
@@ -67,10 +65,10 @@ public class HelmAttributeParser
         helmAttributes.setIcon(attributes.get(ICON).toString());
       }
       if (null != attributes.get(MAINTAINERS)) {
-        helmAttributes.setMaintainers((List<Map<String, String>>) attributes.get(MAINTAINERS));
+        helmAttributes.setMaintainers((List<Map<String, String>>)attributes.get(MAINTAINERS));
       }
       if (null != attributes.get(SOURCES)) {
-        helmAttributes.setSources((List<String>) attributes.get(SOURCES));
+        helmAttributes.setSources((List<String>)attributes.get(SOURCES));
       }
       if (null != attributes.get(APP_VERSION)) {
         helmAttributes.setAppVersion(attributes.get(APP_VERSION).toString());

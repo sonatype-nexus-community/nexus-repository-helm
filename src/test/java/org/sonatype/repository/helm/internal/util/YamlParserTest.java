@@ -55,12 +55,10 @@ public class YamlParserTest
     assertThat(helmYaml.get("version").toString(), is(equalTo("0.4.9")));
     assertThat(helmYaml.get("name").toString(), is(equalTo("mongodb")));
     assertThat(helmYaml.get("home").toString(), is(equalTo("https://mongodb.org")));
-    assertThat(helmYaml.get("description").toString(),
-        is(equalTo("NoSQL document-oriented database that stores JSON-like documents with" +
-            " dynamic schemas, simplifying the integration of data in content-driven applications.")));
+    assertThat(helmYaml.get("description").toString(), is(equalTo("NoSQL document-oriented database that stores JSON-like documents with" +
+        " dynamic schemas, simplifying the integration of data in content-driven applications.")));
     assertThat(helmYaml.get("engine").toString(), is(equalTo("gotpl")));
-    assertThat(helmYaml.get("icon").toString(),
-        is(equalTo("https://bitnami.com/assets/stacks/mongodb/img/mongodb-stack-220x234.png")));
+    assertThat(helmYaml.get("icon").toString(), is(equalTo("https://bitnami.com/assets/stacks/mongodb/img/mongodb-stack-220x234.png")));
     assertThat(helmYaml.get("keywords"), is(equalTo(getKeywords())));
     assertThat(helmYaml.get("maintainers"), is(equalTo(getMaintainers())));
     assertThat(helmYaml.get("sources"), is(equalTo(getSources())));
@@ -89,8 +87,7 @@ public class YamlParserTest
 
   private List<Map<String, Object>> getMaintainers() {
     List<Map<String, Object>> listMap = new ArrayList<Map<String, Object>>();
-    Map<String, Object> map = new HashMap<String, Object>()
-    {
+    Map<String, Object> map = new HashMap<String, Object>() {
       {
         put("email", "containers@bitnami.com");
         put("name", "Bitnami");

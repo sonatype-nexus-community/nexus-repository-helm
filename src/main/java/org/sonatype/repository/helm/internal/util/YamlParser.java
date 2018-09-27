@@ -99,24 +99,19 @@ public class YamlParser
     return representer;
   }
 
-  private class JodaPropertyConstructor
-      extends Constructor
-  {
+  private class JodaPropertyConstructor extends Constructor {
     public JodaPropertyConstructor() {
       yamlClassConstructors.put(NodeId.scalar, new TimeStampConstruct());
     }
 
-    class TimeStampConstruct
-        extends Constructor.ConstructScalar
-    {
+    class TimeStampConstruct extends Constructor.ConstructScalar {
       @Override
       public Object construct(Node nnode) {
         if (nnode.getTag().equals("tag:yaml.org,2002:timestamp")) {
           Construct dateConstructor = yamlConstructors.get(Tag.TIMESTAMP);
           Date date = (Date) dateConstructor.construct(nnode);
           return new DateTime(date, DateTimeZone.UTC);
-        }
-        else {
+        } else {
           return super.construct(nnode);
         }
       }
@@ -127,9 +122,7 @@ public class YamlParser
    * Necessary to output Joda DateTime correctly with Snakey Yamls
    * See: https://bitbucket.org/asomov/snakeyaml/wiki/Howto#markdown-header-how-to-parse-jodatime
    */
-  class JodaTimeRepresenter
-      extends Representer
-  {
+  class JodaTimeRepresenter extends Representer {
     public JodaTimeRepresenter() {
       multiRepresenters.put(DateTime.class, new RepresentJodaDateTime());
     }
@@ -153,9 +146,7 @@ public class YamlParser
       }
     }
 
-    private class RepresentJodaDateTime
-        extends RepresentDate
-    {
+    private class RepresentJodaDateTime extends RepresentDate {
       public Node representData(Object data) {
         DateTime date = (DateTime) data;
         return super.representData(new Date(date.getMillis()));

@@ -103,7 +103,7 @@ public class HelmProxyFacetImpl
   @Override
   protected Content store(final Context context, final Content content) throws IOException {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
-    switch (assetKind) {
+    switch(assetKind) {
       case HELM_INDEX:
         return putMetadata(INDEX_YAML, content, assetKind);
       case HELM_PACKAGE:
@@ -117,8 +117,7 @@ public class HelmProxyFacetImpl
   private Content putMetadata(final String path, final Content content, final AssetKind assetKind) throws IOException {
     StorageFacet storageFacet = facet(StorageFacet.class);
     try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
-      try (TempBlob newTempBlob = indexYamlAbsoluteUrlRewriter
-          .removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, getRepository())) {
+      try (TempBlob newTempBlob = indexYamlAbsoluteUrlRewriter.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, getRepository()) ) {
         return saveMetadataAsAsset(path, newTempBlob, content, assetKind);
       }
     }
@@ -145,8 +144,7 @@ public class HelmProxyFacetImpl
 
   private Content putComponent(final Content content,
                                final String fileName,
-                               final AssetKind assetKind) throws IOException
-  {
+                               final AssetKind assetKind) throws IOException {
     StorageFacet storageFacet = facet(StorageFacet.class);
     try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
       HelmAttributes helmAttributes = helmAttributeParser.getAttributesFromInputStream(tempBlob.get());
@@ -185,6 +183,11 @@ public class HelmProxyFacetImpl
     return helmDataAccess.saveAsset(tx, asset, componentContent, payload);
   }
 
+  /**
+   * 获取资源
+   * @param name
+   * @return
+   */
   @TransactionalTouchBlob
   protected Content getAsset(final String name) {
     StorageTx tx = UnitOfWork.currentTx();

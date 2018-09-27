@@ -29,8 +29,8 @@ public class HelmSecurityFacet
 {
   @Inject
   public HelmSecurityFacet(final HelmFormatSecurityContributor securityResource,
-                           @Named("simple") final VariableResolverAdapter variableResolverAdapter,
-                           final ContentPermissionChecker contentPermissionChecker)
+                            @Named("simple") final VariableResolverAdapter variableResolverAdapter,
+                            final ContentPermissionChecker contentPermissionChecker)
   {
     super(securityResource, variableResolverAdapter, contentPermissionChecker);
   }

@@ -24,23 +24,14 @@ import java.util.Map;
 public final class HelmAttributes
 {
   private String description;
-
   private String engine;
-
   private String home;
-
   private String icon;
-
   private String appVersion;
-
   private List<String> keywords;
-
   private List<Map<String, String>> maintainers;
-
   private String name;
-
   private List<String> sources;
-
   private String version;
 
   public String getDescription() {
