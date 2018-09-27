@@ -21,6 +21,8 @@ import javax.inject.Singleton
 import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.Repository
 import org.sonatype.nexus.repository.Type
+import org.sonatype.nexus.repository.cache.NegativeCacheFacet
+import org.sonatype.nexus.repository.cache.NegativeCacheHandler
 import org.sonatype.nexus.repository.http.HttpHandlers
 import org.sonatype.nexus.repository.proxy.ProxyHandler
 import org.sonatype.nexus.repository.types.ProxyType
@@ -49,6 +51,12 @@ class HelmProxyRecipe
 
   @Inject
   ProxyHandler proxyHandler
+
+  @Inject
+  NegativeCacheHandler negativeCacheHandler
+
+  @Inject
+  Provider<NegativeCacheFacet> negativeCacheFacet
 
   @Inject
   HelmProxyRecipe(@Named(ProxyType.NAME) final Type type,
