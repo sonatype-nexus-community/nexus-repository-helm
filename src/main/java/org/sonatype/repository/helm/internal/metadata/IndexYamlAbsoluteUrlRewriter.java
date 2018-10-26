@@ -53,6 +53,7 @@ import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALG
 public class IndexYamlAbsoluteUrlRewriter
     extends ComponentSupport
 {
+
   private static final String URLS = "urls";
 
   private static final String HTTP = "http://";
@@ -65,13 +66,16 @@ public class IndexYamlAbsoluteUrlRewriter
                                                             final Repository repository)
   {
     storageFacet = repository.facet(StorageFacet.class);
+    String remoteUrl = (String) repository.getConfiguration().attributes("proxy")
+        .get("remoteUrl");
 
-    return new StreamCopier<>(outputStream -> updateUrls(index.get(), outputStream),
+    return new StreamCopier<>(outputStream -> updateUrls(index.get(), outputStream, remoteUrl),
         this::createTempBlob).read();
   }
 
   private void updateUrls(final InputStream is,
-                          final OutputStream os)
+                          final OutputStream os,
+                          String remoteUrl)
   {
     try (Reader reader = new InputStreamReader(is);
          Writer writer = new OutputStreamWriter(os)) {
@@ -82,7 +86,7 @@ public class IndexYamlAbsoluteUrlRewriter
         if (event instanceof ScalarEvent) {
           ScalarEvent scalarEvent = (ScalarEvent) event;
           if (rewrite) {
-            event = maybeSetAbsoluteUrlAsRelative(scalarEvent);
+            event = maybeSetAbsoluteUrlAsRelative(scalarEvent, remoteUrl);
           }
           else if (URLS.equals(scalarEvent.getValue())) {
             rewrite = true;
@@ -102,15 +106,17 @@ public class IndexYamlAbsoluteUrlRewriter
     }
   }
 
-  private Event maybeSetAbsoluteUrlAsRelative(ScalarEvent scalarEvent) throws MalformedURLException {
+  private Event maybeSetAbsoluteUrlAsRelative(ScalarEvent scalarEvent, String remoteUrl)
+      throws MalformedURLException
+  {
     String oldUrl = scalarEvent.getValue();
     try {
       URI uri = new URIBuilder(oldUrl).build();
       if (uri.isAbsolute()) {
-        String fileName = uri.getPath();
+        String fileName = uri.toString().replace(remoteUrl, "");
         // Strip leading slash
-        if (!fileName.isEmpty()) {
-            fileName = fileName.substring(1);
+        if (!fileName.isEmpty() && fileName.charAt(0) == '/') {
+          fileName = fileName.substring(1);
         }
         scalarEvent = new ScalarEvent(scalarEvent.getAnchor(), scalarEvent.getTag(),
             scalarEvent.getImplicit(), fileName, scalarEvent.getStartMark(),
