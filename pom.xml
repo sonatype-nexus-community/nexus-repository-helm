@@ -24,7 +24,7 @@
   <groupId>org.sonatype.repository</groupId>
   <artifactId>nexus-repository-helm</artifactId>
   <name>${project.groupId}:${project.artifactId}</name>
-  <version>0.0.5</version>
+  <version>0.0.6</version>
   <inceptionYear>2018</inceptionYear>
   <packaging>bundle</packaging>
 
