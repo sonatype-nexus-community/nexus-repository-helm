@@ -31,7 +31,7 @@ public interface HelmProperties
 
   String MAINTAINERS = "maintainers";
 
-  String APP_VERSION = "app_version";
+  String APP_VERSION = "appVersion";
 
   String ATTRIBUTES_HELM_ASSET_KIND = "attributes.helm.asset_kind";
 }
