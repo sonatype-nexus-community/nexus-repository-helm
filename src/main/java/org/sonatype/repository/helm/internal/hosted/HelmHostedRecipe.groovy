@@ -38,6 +38,7 @@ import org.sonatype.repository.helm.internal.HelmFormat
 import org.sonatype.repository.helm.internal.HelmRecipeSupport
 import org.sonatype.repository.helm.internal.createindex.CreateIndexFacetImpl
 
+import static org.sonatype.nexus.repository.http.HttpMethods.DELETE
 import static org.sonatype.nexus.repository.http.HttpMethods.PUT
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE
 
@@ -111,6 +112,18 @@ class HelmHostedRecipe
         .handler(hostedHandlers.upload)
         .create())
 
+    builder.route(new Route.Builder().matcher(chartDeleteMatcher())
+        .handler(timingHandler)
+        .handler(securityHandler)
+        .handler(exceptionHandler)
+        .handler(handlerContributor)
+        .handler(conditionalRequestHandler)
+        .handler(partialFetchHandler)
+        .handler(contentHeadersHandler)
+        .handler(unitOfWorkHandler)
+        .handler(hostedHandlers.delete)
+        .create())
+
     builder.route(new Route.Builder()
         .matcher(BrowseUnsupportedHandler.MATCHER)
         .handler(browseUnsupportedHandler)
@@ -124,8 +137,16 @@ class HelmHostedRecipe
   }
 
   static Matcher chartUploadMatcher() {
+    chartMethodMatcher(PUT)
+  }
+
+  static Matcher chartDeleteMatcher() {
+    chartMethodMatcher(DELETE)
+  }
+
+  static Matcher chartMethodMatcher(final String... httpMethods) {
     LogicMatchers.and(
-        new ActionMatcher(PUT),
+        new ActionMatcher(httpMethods),
         tokenMatcherForExtensionAndName('tgz'),
         new Matcher() {
           @Override

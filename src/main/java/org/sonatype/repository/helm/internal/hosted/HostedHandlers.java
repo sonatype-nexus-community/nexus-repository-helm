@@ -67,4 +67,13 @@ public class HostedHandlers
     context.getRepository().facet(HelmHostedFacet.class).upload(path, context.getRequest().getPayload(), assetKind);
     return ok();
   };
+
+  final Handler delete = context -> {
+    State state = context.getAttributes().require(TokenMatcher.State.class);
+    String path = helmPathUtils.buildAssetPath(state);
+
+    boolean deleted = context.getRepository().facet(HelmHostedFacet.class).delete(path);
+
+    return (deleted) ? ok() : notFound();
+  };
 }
