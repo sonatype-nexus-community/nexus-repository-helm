@@ -92,13 +92,18 @@ All released versions can be found [here](https://github.com/sonatype-nexus-comm
 
 `* tested primarily against the Google Helm Chart registry, not guaranteed to work on the wide wild world of Helm repositories.`
 
-### Supported Puppet Commands
+### Supported Helm Commands
 
 #### Proxy
 
 | Plugin Version               | Implemented              |
 |------------------------------|--------------------------|
-| `puppet module install`      | :heavy_check_mark:       |
+| `helm repo add`              | :heavy_check_mark:       |
+| `helm install`               | :heavy_check_mark:       |
+
+#### Hosted
+
+TBD
 
 ## Installing the plugin
 
