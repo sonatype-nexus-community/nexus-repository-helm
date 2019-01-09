@@ -19,12 +19,12 @@
   <parent>
     <groupId>org.sonatype.nexus.plugins</groupId>
     <artifactId>nexus-plugins</artifactId>
-    <version>3.13.0-01</version>
+    <version>3.14.0-04</version>
   </parent>
-  <groupId>org.sonatype.repository</groupId>
+
   <artifactId>nexus-repository-helm</artifactId>
   <name>${project.groupId}:${project.artifactId}</name>
-  <version>0.0.6</version>
+  <version>0.0.7</version>
   <inceptionYear>2018</inceptionYear>
   <packaging>bundle</packaging>
 
@@ -46,11 +46,6 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
       <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>se.sawano.java</groupId>
-      <artifactId>alphanumeric-comparator</artifactId>
     </dependency>
 
     <dependency>

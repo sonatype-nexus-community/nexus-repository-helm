@@ -14,7 +14,11 @@
 -->
 # Nexus Repository Helm Format
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.sonatype.nexus.plugins/nexus-repository-helm/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.sonatype.nexus.plugins/nexus-repository-helm)
+
 [![Build Status](https://travis-ci.org/sonatype-nexus-community/nexus-repository-helm.svg?branch=master)](https://travis-ci.org/sonatype-nexus-community/nexus-repository-helm) [![Join the chat at https://gitter.im/sonatype/nexus-developers](https://badges.gitter.im/sonatype/nexus-developers.svg)](https://gitter.im/sonatype/nexus-developers?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[![DepShield Badge](https://depshield.sonatype.org/badges/sonatype-nexus-community/nexus-repository-helm/depshield.svg)](https://depshield.github.io)
 
 # Table Of Contents
 * [Developing](#developing)
@@ -48,11 +52,11 @@ If everything checks out, the bundle for Helm should be available in the `target
 
 #### Build with Docker
 
-`docker build -t nexus-repository-helm:0.0.6 .`
+`docker build -t nexus-repository-helm:0.0.7 .`
 
 #### Run as a Docker container
 
-`docker run -d -p 8081:8081 --name nexus nexus-repository-helm:0.0.6` 
+`docker run -d -p 8081:8081 --name nexus nexus-repository-helm:0.0.7` 
 
 For further information like how to persist volumes check out [the GitHub repo for our official image](https://github.com/sonatype/docker-nexus3).
 
@@ -61,6 +65,40 @@ The application will now be available from your browser at http://localhost:8081
 ## Using Helm With Nexus Repository Manager 3
 
 [We have detailed instructions on how to get started here!](docs/HELM_USER_DOCUMENTATION.md)
+
+## Compatibility with Nexus Repository Manager 3 Versions
+
+The table below outlines what version of Nexus Repository the plugin was built against
+
+| Plugin Version | Nexus Repository Version |
+|----------------|--------------------------|
+| v0.0.6         | 3.13.0-01                |
+| v0.0.7         | 3.14.0-04                |
+
+If a new version of Nexus Repository is released and the plugin needs changes, a new release will be made, and this
+table will be updated to indicate which version of Nexus Repository it will function against. This is done on a time 
+available basis, as this is community supported. If you see a new version of Nexus Repository, go ahead and update the
+plugin and send us a PR after testing it out!
+
+All released versions can be found [here](https://github.com/sonatype-nexus-community/nexus-repository-helm/releases).
+
+## Features Implemented In This Plugin 
+
+| Feature | Implemented          |
+|---------|----------------------|
+| Proxy   | :heavy_check_mark: * |
+| Hosted  | :heavy_check_mark: * |
+| Group   |                      |
+
+`* tested primarily against the Google Helm Chart registry, not guaranteed to work on the wide wild world of Helm repositories.`
+
+### Supported Puppet Commands
+
+#### Proxy
+
+| Plugin Version               | Implemented              |
+|------------------------------|--------------------------|
+| `puppet module install`      | :heavy_check_mark:       |
 
 ## Installing the plugin
 
@@ -81,7 +119,7 @@ good installation path if you are just testing or doing development on the plugi
   # sudo su - nexus
   $ cd <nexus_dir>/bin
   $ ./nexus run
-  > bundle:install file:///tmp/nexus-repository-helm-0.0.6.jar
+  > bundle:install file:///tmp/nexus-repository-helm-0.0.7.jar
   > bundle:list
   ```
   (look for org.sonatype.nexus.plugins:nexus-repository-helm ID, should be the last one)
@@ -93,7 +131,7 @@ good installation path if you are just testing or doing development on the plugi
 
 For more permanent installs of the nexus-repository-helm plugin, follow these instructions:
 
-* Copy the bundle (nexus-repository-helm-0.0.6.jar) into <nexus_dir>/deploy
+* Copy the bundle (nexus-repository-helm-0.0.7.jar) into <nexus_dir>/deploy
 
 This will cause the plugin to be loaded with each restart of Nexus Repository. As well, this folder is monitored
 by Nexus Repository and the plugin should load within 60 seconds of being copied there if Nexus Repository
@@ -103,7 +141,7 @@ is running. You will still need to start the bundle using the karaf commands men
 
 If you are trying to use the Helm plugin permanently, it likely makes more sense to do the following:
 
-* Copy the bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-helm/0.0.6/nexus-repository-helm-0.0.6.jar`
+* Copy the bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-helm/0.0.7/nexus-repository-helm-0.0.7.jar`
 * Make the following additions marked with + to `<nexus_dir>/system/org/sonatype/nexus/assemblies/nexus-core-feature/3.x.y/nexus-core-feature-3.x.y-features.xml`
 
    ```
@@ -114,9 +152,9 @@ If you are trying to use the Helm plugin permanently, it likely makes more sense
    ```
    And
    ```
-   + <feature name="nexus-repository-helm" description="org.sonatype.nexus.plugins:nexus-repository-helm" version="0.0.6">
+   + <feature name="nexus-repository-helm" description="org.sonatype.nexus.plugins:nexus-repository-helm" version="0.0.7">
    +     <details>org.sonatype.nexus.plugins:nexus-repository-helm</details>
-   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-helm/0.0.6</bundle>
+   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-helm/0.0.7</bundle>
    + </feature>
     </features>
    ```
