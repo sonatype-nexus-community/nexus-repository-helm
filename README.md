@@ -96,7 +96,7 @@ All released versions can be found [here](https://github.com/sonatype-nexus-comm
 
 #### Proxy
 
-| Plugin Version               | Implemented              |
+| Command                      | Implemented              |
 |------------------------------|--------------------------|
 | `helm repo add`              | :heavy_check_mark:       |
 | `helm install`               | :heavy_check_mark:       |
