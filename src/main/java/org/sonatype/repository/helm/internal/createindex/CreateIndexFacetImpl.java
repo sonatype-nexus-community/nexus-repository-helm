@@ -23,6 +23,7 @@ import org.sonatype.nexus.common.event.EventManager;
 import org.sonatype.nexus.common.stateguard.Guarded;
 import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.Repository;
+import org.sonatype.nexus.repository.manager.RepositoryCreatedEvent;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.AssetCreatedEvent;
 import org.sonatype.nexus.repository.storage.AssetDeletedEvent;
@@ -105,6 +106,15 @@ public class CreateIndexFacetImpl
   @AllowConcurrentEvents
   public void on(final AssetUpdatedEvent updated) {
     maybeInvalidateIndex(updated);
+  }
+
+  @Subscribe
+  @Guarded(by = STARTED)
+  @AllowConcurrentEvents
+  public void on(RepositoryCreatedEvent createdEvent) {
+    // at repository creation time, create index.yaml with empty entries
+    log.debug("Initializing index.yaml for hosted repository {}", getRepository().getName());
+    invalidateIndex();
   }
 
   private void maybeInvalidateIndex(final AssetEvent event) {
