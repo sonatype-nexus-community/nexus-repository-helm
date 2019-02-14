@@ -28,3 +28,9 @@ target/
 atlassian-ide-plugin.xml
 dependency-reduced-pom.xml
 out
+.factorypath
+Dockerfile.old
+bin/
+logback-access.xml
+logback.xml
+run
