@@ -31,6 +31,3 @@ out
 .factorypath
 Dockerfile.old
 bin/
-logback-access.xml
-logback.xml
-run

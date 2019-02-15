@@ -1,12 +1,10 @@
-ARG NEXUS_VERSION=3.14.0
-
 FROM maven:3-jdk-8-alpine AS build
 LABEL maintainer devops@cuebiq.com
-ARG NEXUS_VERSION=3.14.0
-ARG NEXUS_BUILD=04
+ARG NEXUS_VERSION=3.15.2
+ARG NEXUS_BUILD=01
 
 COPY . /nexus-repository-helm/
-RUN cd /nexus-repository-helm/; sed -i "s/3.14.0-04/${NEXUS_VERSION}-${NEXUS_BUILD}/g" pom.xml; \
+RUN cd /nexus-repository-helm/; sed -i "s/3.15.2-01/${NEXUS_VERSION}-${NEXUS_BUILD}/g" pom.xml; \
     mvn clean package -Dmaven.test.skip=true;
 
 
