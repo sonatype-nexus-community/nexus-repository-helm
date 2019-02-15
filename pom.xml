@@ -24,7 +24,7 @@
 
   <artifactId>nexus-repository-helm</artifactId>
   <name>${project.groupId}:${project.artifactId}</name>
-  <version>0.0.7</version>
+  <version>0.0.8</version>
   <inceptionYear>2018</inceptionYear>
   <packaging>bundle</packaging>
 
