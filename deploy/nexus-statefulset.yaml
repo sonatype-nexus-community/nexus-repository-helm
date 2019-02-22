@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: nexus
+  name: nexus
+spec:
+  replicas: 1
+  serviceName: nexus
+  selector:
+    matchLabels:
+      app: nexus
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      containers:
+        - name: nexus
+          image: "quay.io/fbalicchia/nexus-with-helm-repo:3.15.2-01"
+          imagePullPolicy: Always
+          env:
+            - name: INSTALL4J_ADD_VM_PARAMS
+              value: "-Xms1200M -Xmx1200M -XX:MaxDirectMemorySize=2G -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+          resources:
+            requests:
+              #cpu: 250m
+              # Based on https://support.sonatype.com/hc/en-us/articles/115006448847#mem
+              # and https://twitter.com/analytically/status/894592422382063616:
+              #   Xms == Xmx
+              #   Xmx <= 4G
+              #   MaxDirectMemory >= 2G
+              #   Xmx + MaxDirectMemory <= RAM * 2/3 (hence the request for 4800Mi)
+              #   MaxRAMFraction=1 is not being set as it would allow the heap
+              #     to use all the available memory.
+              #memory: 4800Mi
+          ports:
+            - containerPort: 5003
+              name: nexus-docker-g
+            - containerPort: 8081
+              name: nexus-http
+          volumeMounts:
+            - mountPath: /nexus-data
+              name: nexus-data
+      terminationGracePeriodSeconds: 10
+  volumeClaimTemplates:
+    - metadata:
+        name: nexus-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: standard
