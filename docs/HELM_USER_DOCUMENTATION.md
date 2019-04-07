@@ -33,7 +33,7 @@ details. Minimal configuration steps are:
 
 ### Configuring Helm 
 
-Configuring Helm to use Nexus Repository is fairly easy! Once you have Helm up and running you'll want to run a command similar to the following:
+Configuring Helm to use Nexus Repository is fairly easy! Once you have Helm up and running with at least one chart uploaded, you would like to run a command similar to the following:
 
 ```
 helm repo add nexusrepo http://localhost:8081/repository/helm-proxy/
