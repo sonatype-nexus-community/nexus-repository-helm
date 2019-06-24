@@ -1,15 +1,15 @@
-ARG NEXUS_VERSION=3.16.0
+ARG NEXUS_VERSION=3.16.2
 
 FROM maven:3-jdk-8-alpine AS build
-ARG NEXUS_VERSION=3.16.0
+ARG NEXUS_VERSION=3.16.2
 ARG NEXUS_BUILD=01
 
 COPY . /nexus-repository-helm/
-RUN cd /nexus-repository-helm/; sed -i "s/3.16.0-01/${NEXUS_VERSION}-${NEXUS_BUILD}/g" pom.xml; \
+RUN cd /nexus-repository-helm/; sed -i "s/3.16.2-01/${NEXUS_VERSION}-${NEXUS_BUILD}/g" pom.xml; \
     mvn clean package;
 
 FROM sonatype/nexus3:$NEXUS_VERSION
-ARG NEXUS_VERSION=3.16.0
+ARG NEXUS_VERSION=3.16.2
 ARG NEXUS_BUILD=01
 ARG HELM_VERSION=0.0.9
 ARG TARGET_DIR=/opt/sonatype/nexus/system/org/sonatype/nexus/plugins/nexus-repository-helm/${HELM_VERSION}/
