@@ -52,15 +52,26 @@ If everything checks out, the bundle for Helm should be available in the `target
 
 #### Build with Docker
 
-`docker build -t nexus-repository-helm:0.0.9 .`
+`docker build -t nexus-repository-helm:0.0.10 .`
 
 #### Run as a Docker container
 
-`docker run -d -p 8081:8081 --name nexus nexus-repository-helm:0.0.9` 
+`docker run -d -p 8081:8081 --name nexus nexus-repository-helm:0.0.10` 
 
 For further information like how to persist volumes check out [the GitHub repo for our official image](https://github.com/sonatype/docker-nexus3).
 
 The application will now be available from your browser at http://localhost:8081
+
+* As of Nexus Repository Manager Version 3.17, the default admin password is randomly generated.
+  If running in a Docker container, you will need to view the generated password file 
+  (/nexus-data/admin.password) in order to login to Nexus. The command below will open a bash shell 
+  in the container named `nexus`:
+
+      docker exec -it nexus /bin/bash
+      $ cat /nexus-data/admin.password 
+      
+  Once logged into the application UI as `admin` using the generated password, you may also want to 
+  turn on "Enable anonymous access" when prompted by the setup wizard.     
 
 ## Using Helm With Nexus Repository Manager 3
 
@@ -76,6 +87,7 @@ The table below outlines what version of Nexus Repository the plugin was built a
 | v0.0.7         | 3.14.0-04                |
 | v0.0.8         | 3.15.2-01                |
 | v0.0.9         | 3.16.2-01                |
+| v0.0.10        | 3.17.0-01                |
 
 If a new version of Nexus Repository is released and the plugin needs changes, a new release will be made, and this
 table will be updated to indicate which version of Nexus Repository it will function against. This is done on a time 
@@ -126,7 +138,7 @@ good installation path if you are just testing or doing development on the plugi
   # sudo su - nexus
   $ cd <nexus_dir>/bin
   $ ./nexus run
-  > bundle:install file:///tmp/nexus-repository-helm-0.0.9.jar
+  > bundle:install file:///tmp/nexus-repository-helm-0.0.10.jar
   > bundle:list
   ```
   (look for org.sonatype.nexus.plugins:nexus-repository-helm ID, should be the last one)
@@ -138,7 +150,7 @@ good installation path if you are just testing or doing development on the plugi
 
 For more permanent installs of the nexus-repository-helm plugin, follow these instructions:
 
-* Copy the bundle (nexus-repository-helm-0.0.9.jar) into <nexus_dir>/deploy
+* Copy the bundle (nexus-repository-helm-0.0.10.jar) into <nexus_dir>/deploy
 
 This will cause the plugin to be loaded with each restart of Nexus Repository. As well, this folder is monitored
 by Nexus Repository and the plugin should load within 60 seconds of being copied there if Nexus Repository
@@ -148,7 +160,7 @@ is running. You will still need to start the bundle using the karaf commands men
 
 If you are trying to use the Helm plugin permanently, it likely makes more sense to do the following:
 
-* Copy the bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-helm/0.0.9/nexus-repository-helm-0.0.9.jar`
+* Copy the bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-helm/0.0.10/nexus-repository-helm-0.0.10.jar`
 * Make the following additions marked with + to `<nexus_dir>/system/org/sonatype/nexus/assemblies/nexus-core-feature/3.x.y/nexus-core-feature-3.x.y-features.xml`
 
    ```
@@ -159,9 +171,9 @@ If you are trying to use the Helm plugin permanently, it likely makes more sense
    ```
    And
    ```
-   + <feature name="nexus-repository-helm" description="org.sonatype.nexus.plugins:nexus-repository-helm" version="0.0.9">
+   + <feature name="nexus-repository-helm" description="org.sonatype.nexus.plugins:nexus-repository-helm" version="0.0.10">
    +     <details>org.sonatype.nexus.plugins:nexus-repository-helm</details>
-   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-helm/0.0.9</bundle>
+   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-helm/0.0.10</bundle>
    + </feature>
     </features>
    ```
