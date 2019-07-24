@@ -11,7 +11,7 @@ RUN cd /nexus-repository-helm/; sed -i "s/3.17.0-01/${NEXUS_VERSION}-${NEXUS_BUI
 FROM sonatype/nexus3:$NEXUS_VERSION
 ARG NEXUS_VERSION=3.17.0
 ARG NEXUS_BUILD=01
-ARG HELM_VERSION=0.0.10
+ARG HELM_VERSION=0.0.11
 ARG COMP_VERSION=1.18
 ARG TARGET_DIR=/opt/sonatype/nexus/system/org/sonatype/nexus/plugins/nexus-repository-helm/${HELM_VERSION}/
 USER root
