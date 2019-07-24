@@ -56,10 +56,12 @@ public class IndexYamlBuilderTest
 
   @Test
   public void testChartIndexPassedCorrectly() throws Exception {
+    ArgumentCaptor<InputStream> captorStorage = ArgumentCaptor.forClass(InputStream.class);
     ArgumentCaptor<ChartIndex> captor = ArgumentCaptor.forClass(ChartIndex.class);
 
     TempBlob tempBlob = underTest.build(index, storageFacet);
 
+    verify(storageFacet).createTempBlob(captorStorage.capture(), eq(HelmDataAccess.HASH_ALGORITHMS));
     verify(yamlParser).write(any(OutputStream.class), captor.capture());
 
     assertEquals(index, captor.getValue());
