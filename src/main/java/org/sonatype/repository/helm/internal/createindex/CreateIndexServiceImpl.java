@@ -85,14 +85,9 @@ public class CreateIndexServiceImpl
       parseAssetIntoChartEntry(index, asset);
     }
 
-    if (index.getEntries().size() == 0) {
-      return null;
-    }
-    else {
-      index.setApiVersion(API_VERSION);
-      index.setGenerated(new DateTime());
-      return indexYamlBuilder.build(index, storageFacet);
-    }
+    index.setApiVersion(API_VERSION);
+    index.setGenerated(new DateTime());
+    return indexYamlBuilder.build(index, storageFacet);
   }
 
   private void parseAssetIntoChartEntry(final ChartIndex index, final Asset asset) {

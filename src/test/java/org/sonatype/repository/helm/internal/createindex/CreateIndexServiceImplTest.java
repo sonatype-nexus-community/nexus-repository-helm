@@ -121,15 +121,16 @@ public class CreateIndexServiceImplTest
   }
 
   @Test
-  public void testIndexYamlNotBuiltWhenNoAssets() throws Exception {
+  public void testIndexYamlBuiltEvenWhenNoAssets() throws Exception {
     when(assets.iterator()).thenReturn(assetIterator);
     when(assetIterator.next()).thenReturn(asset);
     when(asset.componentId()).thenReturn(null);
     when(helmDataAccess.browseComponentAssets(storageTx, bucket)).thenReturn(assets);
+    when(indexYamlBuilder.build(anyObject(), anyObject())).thenReturn(tempBlob);
 
     TempBlob result = underTest.buildIndexYaml(repository);
 
-    assertThat(result, is(nullValue()));
+    assertThat(result, is(notNullValue()));
   }
 
   private void initializeSystemUnderTest() {
