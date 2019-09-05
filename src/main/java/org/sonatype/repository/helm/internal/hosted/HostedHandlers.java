@@ -24,7 +24,7 @@ import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
 
-import java.util.Objects;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.repository.http.HttpResponses.notFound;
 import static org.sonatype.nexus.repository.http.HttpResponses.ok;
 
@@ -42,7 +42,7 @@ public class HostedHandlers
 
   @Inject
   public HostedHandlers(final HelmPathUtils helmPathUtils) {
-    this.helmPathUtils = Objects.requireNonNull(helmPathUtils);
+    this.helmPathUtils = checkNotNull(helmPathUtils);
   }
 
   final Handler get = context -> {
