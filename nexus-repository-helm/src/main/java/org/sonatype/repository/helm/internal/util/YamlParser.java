@@ -107,7 +107,7 @@ public class YamlParser
     class TimeStampConstruct extends Constructor.ConstructScalar {
       @Override
       public Object construct(Node nnode) {
-        if (nnode.getTag().equals("tag:yaml.org,2002:timestamp")) {
+        if (nnode.getTag().toString().equals("tag:yaml.org,2002:timestamp")) {
           Construct dateConstructor = yamlConstructors.get(Tag.TIMESTAMP);
           Date date = (Date) dateConstructor.construct(nnode);
           return new DateTime(date, DateTimeZone.UTC);

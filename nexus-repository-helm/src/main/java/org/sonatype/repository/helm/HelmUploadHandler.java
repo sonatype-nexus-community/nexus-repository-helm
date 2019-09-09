@@ -98,7 +98,7 @@ public class HelmUploadHandler
 
       String path = name + "-" + version + "." + extension;
 
-      ensurePermitted(repository.getName(), HelmFormat.NAME, path, Collections.EMPTY_MAP);
+      ensurePermitted(repository.getName(), HelmFormat.NAME, path, Collections.emptyMap());
       return TransactionalStoreBlob.operation.withDb(storageFacet.txSupplier()).throwing(IOException.class)
           .call(() -> new UploadResponse(facet.upload(path, tempBlob, payload)));
     }
