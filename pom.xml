@@ -13,9 +13,9 @@
     Eclipse Foundation. All other trademarks are the property of their respective owners.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.sonatype.nexus.plugins</groupId>
     <artifactId>nexus-plugins</artifactId>
@@ -23,10 +23,11 @@
   </parent>
 
   <artifactId>nexus-repository-helm</artifactId>
-  <name>${project.groupId}:${project.artifactId}</name>
   <version>0.0.12</version>
-  <inceptionYear>2018</inceptionYear>
   <packaging>bundle</packaging>
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <inceptionYear>2018</inceptionYear>
 
   <dependencies>
 
@@ -74,6 +75,14 @@
 
   </dependencies>
 
+  <repositories>
+    <!-- ensure we can find the parent pom when starting from an empty local .m2 repository -->
+    <repository>
+      <id>rso-snapshots</id>
+      <url>https://repository.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+  </repositories>
+
   <build>
     <plugins>
       <plugin>
@@ -113,6 +122,58 @@
         </configuration>
       </plugin>
 
+      <!--
+      used to deploy to central
+      -->
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>rso</serverId>
+          <nexusUrl>https://repository.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>false</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>deploy</id>
+      <!--
+      only sign during deploy phase
+      -->
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
