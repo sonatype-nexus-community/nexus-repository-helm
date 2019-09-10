@@ -19,7 +19,6 @@ import java.io.InputStream;
 import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javax.validation.constraints.Null;
 
 import org.sonatype.nexus.repository.storage.TempBlob;
 

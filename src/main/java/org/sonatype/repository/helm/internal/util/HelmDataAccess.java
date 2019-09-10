@@ -45,8 +45,6 @@ import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_COMPONE
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
 import static org.sonatype.nexus.repository.storage.Query.builder;
-import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
-import static org.sonatype.repository.helm.internal.database.HelmProperties.ATTRIBUTES_HELM_ASSET_KIND;
 
 /**
  * Shared code between Helm facets.

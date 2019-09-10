@@ -14,7 +14,6 @@ package org.sonatype.repository.helm.internal.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +21,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
 
 import static com.google.common.base.Preconditions.checkNotNull;

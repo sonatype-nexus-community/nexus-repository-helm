@@ -13,7 +13,6 @@
 package org.sonatype.repository.helm.internal.createindex;
 
 import org.sonatype.nexus.repository.Repository;
-import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
 
 /**
