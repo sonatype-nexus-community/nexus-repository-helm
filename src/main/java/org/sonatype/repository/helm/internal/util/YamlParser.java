@@ -69,7 +69,7 @@ public class YamlParser
     try {
       Yaml yaml = new Yaml(new Constructor(), new Representer(),
           new DumperOptions(), new Resolver());
-      map = (Map<String, Object>) yaml.load(data);
+      map = yaml.load(data);
     }
     catch (YAMLException e) {
       map = (Map<String, Object>) mapper.readValue(data, Map.class);
