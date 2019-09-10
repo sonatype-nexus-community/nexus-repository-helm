@@ -50,7 +50,9 @@ To build the project and generate the bundle use Maven
 
     mvn clean package
 
-If everything checks out, the bundle for Helm should be available in the `target` folder
+If everything checks out, the bundle for Helm should be available in the `target` folder.
+
+In the examples below, substitute `0.0.12` with the current version of the helm format plugin.
 
 #### Build with Docker
 
@@ -92,6 +94,7 @@ The table below outlines what version of Nexus Repository the plugin was built a
 | v0.0.10        | 3.17.0-01                |
 | v0.0.11        | 3.18.0-01                |
 | v0.0.12        | 3.18.0-01                |
+| v0.0.13        | 3.18.0-01                |
 
 If a new version of Nexus Repository is released and the plugin needs changes, a new release will be made, and this
 table will be updated to indicate which version of Nexus Repository it will function against. This is done on a time 
