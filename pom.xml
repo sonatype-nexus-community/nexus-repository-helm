@@ -23,7 +23,7 @@
   </parent>
 
   <artifactId>nexus-repository-helm</artifactId>
-  <version>0.0.12</version>
+  <version>0.0.13</version>
   <packaging>bundle</packaging>
 
   <name>${project.groupId}:${project.artifactId}</name>
