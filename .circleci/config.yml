@@ -14,8 +14,7 @@ mvn-collect-artifacts-command: &mvn-collect-artifacts-command
   mvn-collect-artifacts-command: |
     mkdir -p ~/project/artifacts/junit/
     find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/project/artifacts/junit/ \;
-#   Uncomment this when adding integration tests
-#   cp ~/project/nexus-repository-r-it/target/failsafe-reports/*.xml ~/project/artifacts/junit/
+    cp ~/project/nexus-repository-helm-it/target/failsafe-reports/*.xml ~/project/artifacts/junit/
 
 workflows:
   workflow:
