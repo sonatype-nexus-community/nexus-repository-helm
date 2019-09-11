@@ -19,7 +19,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -54,10 +53,6 @@ public class IndexYamlAbsoluteUrlRewriter
     extends ComponentSupport
 {
   private static final String URLS = "urls";
-
-  private static final String HTTP = "http://";
-
-  private static final String HTTPS = "https://";
 
   private StorageFacet storageFacet;
 
@@ -102,7 +97,7 @@ public class IndexYamlAbsoluteUrlRewriter
     }
   }
 
-  private Event maybeSetAbsoluteUrlAsRelative(ScalarEvent scalarEvent) throws MalformedURLException {
+  private Event maybeSetAbsoluteUrlAsRelative(ScalarEvent scalarEvent) {
     String oldUrl = scalarEvent.getValue();
     try {
       URI uri = new URIBuilder(oldUrl).build();

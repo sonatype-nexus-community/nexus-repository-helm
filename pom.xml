@@ -19,61 +19,33 @@
   <parent>
     <groupId>org.sonatype.nexus.plugins</groupId>
     <artifactId>nexus-plugins</artifactId>
-    <version>3.18.0-01</version>
+    <version>3.19.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>nexus-repository-helm</artifactId>
-  <version>0.0.13</version>
-  <packaging>bundle</packaging>
-
+  <artifactId>nexus-repository-base</artifactId>
+  <groupId>org.sonatype.nexus.plugins</groupId>
   <name>${project.groupId}:${project.artifactId}</name>
+  <version>1.0.0</version>
   <inceptionYear>2018</inceptionYear>
+  <packaging>pom</packaging>
 
-  <dependencies>
+  <modules>
+    <module>nexus-repository-helm</module>
+    <!-- Uncomment this when adding adding IT -->
+    <!--<module>nexus-repository-helm-it</module>-->
+  </modules>
 
-    <dependency>
-      <groupId>org.sonatype.nexus</groupId>
-      <artifactId>nexus-plugin-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
-    <dependency>
-      <groupId>org.sonatype.nexus</groupId>
-      <artifactId>nexus-repository</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-compress</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.sonatype.goodies</groupId>
-      <artifactId>goodies-testsupport</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.spockframework</groupId>
-      <artifactId>spock-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.sonatype.nexus</groupId>
-      <artifactId>nexus-rapture</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>1.20</version>
-    </dependency>
-
-  </dependencies>
+  <properties>
+    <nxrm-version>3.19.0-SNAPSHOT</nxrm-version>
+    <helm-plugin-version>0.0.13</helm-plugin-version>
+  </properties>
 
   <repositories>
     <!-- ensure we can find the parent pom when starting from an empty local .m2 repository -->
@@ -85,46 +57,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.sonatype.nexus.buildsupport</groupId>
-        <artifactId>extjs-maven-plugin</artifactId>
-        <configuration>
-          <namespace>NX.helm</namespace>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>yuicompressor-maven-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.karaf.tooling</groupId>
-        <artifactId>karaf-maven-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.20</version>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <configuration>
-          <instructions>
-            <Embed-Dependency>
-              snakeyaml
-            </Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
-          </instructions>
-        </configuration>
-      </plugin>
-
-      <!--
-      used to deploy to central
-      -->
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
