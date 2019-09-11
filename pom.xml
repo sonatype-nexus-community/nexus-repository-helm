@@ -31,8 +31,7 @@
 
   <modules>
     <module>nexus-repository-helm</module>
-    <!-- Uncomment this when adding adding IT -->
-    <!--<module>nexus-repository-helm-it</module>-->
+    <module>nexus-repository-helm-it</module>
   </modules>
 
   <distributionManagement>
