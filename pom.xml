@@ -43,7 +43,6 @@
 
   <properties>
     <nxrm-version>3.19.0-SNAPSHOT</nxrm-version>
-    <helm-plugin-version>0.0.13</helm-plugin-version>
   </properties>
 
   <repositories>
