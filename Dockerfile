@@ -4,7 +4,7 @@ FROM maven:3-jdk-8-alpine AS build
 ARG NEXUS_VERSION=3.18.0
 ARG NEXUS_BUILD=01
 
-COPY . /nexus-repository-helm/
+COPY nexus-repository-helm /nexus-repository-helm/
 RUN cd /nexus-repository-helm/; sed -i "s/nexus-repository-base/nexus-plugins/g" pom.xml; \
     sed -i "s/0.0.13/${NEXUS_VERSION}-${NEXUS_BUILD}/g" pom.xml; \
     mvn clean package;
