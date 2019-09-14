@@ -25,7 +25,7 @@
   <artifactId>nexus-repository-base</artifactId>
   <groupId>org.sonatype.nexus.plugins</groupId>
   <name>${project.groupId}:${project.artifactId}</name>
-  <version>1.0.0</version>
+  <version>0.0.13</version>
   <inceptionYear>2018</inceptionYear>
   <packaging>pom</packaging>
 

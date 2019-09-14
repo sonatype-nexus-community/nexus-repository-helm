@@ -6,7 +6,7 @@ ARG NEXUS_BUILD=01
 
 COPY . /nexus-repository-helm/
 RUN cd /nexus-repository-helm/; sed -i "s/nexus-repository-base/nexus-plugins/g" pom.xml; \
-    sed -i "s/1.0.0/${NEXUS_VERSION}-${NEXUS_BUILD}/g" pom.xml; \
+    sed -i "s/0.0.13/${NEXUS_VERSION}-${NEXUS_BUILD}/g" pom.xml; \
     mvn clean package;
 
 FROM sonatype/nexus3:$NEXUS_VERSION

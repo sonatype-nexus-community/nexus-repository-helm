@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.sonatype.nexus.plugins</groupId>
     <artifactId>nexus-repository-base</artifactId>
-    <version>1.0.0</version>
+    <version>0.0.13</version>
   </parent>
 
   <artifactId>nexus-repository-helm-it</artifactId>
