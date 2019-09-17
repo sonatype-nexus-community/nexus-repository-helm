@@ -25,14 +25,13 @@
   <artifactId>nexus-repository-base</artifactId>
   <groupId>org.sonatype.nexus.plugins</groupId>
   <name>${project.groupId}:${project.artifactId}</name>
-  <version>1.0.0</version>
+  <version>0.0.13</version>
   <inceptionYear>2018</inceptionYear>
   <packaging>pom</packaging>
 
   <modules>
     <module>nexus-repository-helm</module>
-    <!-- Uncomment this when adding adding IT -->
-    <!--<module>nexus-repository-helm-it</module>-->
+    <module>nexus-repository-helm-it</module>
   </modules>
 
   <distributionManagement>
@@ -44,7 +43,6 @@
 
   <properties>
     <nxrm-version>3.19.0-SNAPSHOT</nxrm-version>
-    <helm-plugin-version>0.0.13</helm-plugin-version>
   </properties>
 
   <repositories>

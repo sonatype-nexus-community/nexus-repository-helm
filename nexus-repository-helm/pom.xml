@@ -19,12 +19,11 @@
   <parent>
     <artifactId>nexus-repository-base</artifactId>
     <groupId>org.sonatype.nexus.plugins</groupId>
-    <version>1.0.0</version>
+    <version>0.0.13</version>
   </parent>
 
   <artifactId>nexus-repository-helm</artifactId>
   <name>${project.groupId}:${project.artifactId}</name>
-  <version>${helm-plugin-version}</version>
   <inceptionYear>2018</inceptionYear>
   <packaging>bundle</packaging>
 
@@ -111,6 +110,21 @@
             <Embed-Transitive>true</Embed-Transitive>
           </instructions>
         </configuration>
+      </plugin>
+
+      <!--
+during 'verify' phase, ensure the new repository format plugin is installed locally, for use by ITs.
+-->
+      <plugin>
+        <artifactId>maven-install-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>install</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
     </plugins>
