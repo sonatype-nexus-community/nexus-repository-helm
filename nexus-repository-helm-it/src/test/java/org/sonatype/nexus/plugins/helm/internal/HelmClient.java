@@ -24,8 +24,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import static org.sonatype.nexus.plugins.helm.internal.HelmITSupport.CONTENT_TYPE_YAML;
-
 /**
  * A simple test client for Helm repositories.
  *
