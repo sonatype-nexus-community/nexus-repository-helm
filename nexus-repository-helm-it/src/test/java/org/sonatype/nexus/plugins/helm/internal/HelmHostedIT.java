@@ -90,11 +90,11 @@ public class HelmHostedIT
   public void testMetadataProcessing() throws Exception
   {
     // We need to wait for 1.3 sec after packages are uploaded at #setUp because of CreateIndexFacetImpl#maybeWait()
-    TimeUnit.MILLISECONDS.sleep(1300);
+    TimeUnit.SECONDS.sleep(2);
     // Verify metadata contains appropriate content about helm package.
     final InputStream content = client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML).getEntity().getContent();
 
-    verifyYamlContent(content, YAML_MONGO_728_STRING_DATA);
+    checkYamlIncludesContent(content, YAML_MONGO_728_STRING_DATA);
 
     //Verify metadata is clean if component has been deleted
     List<Component> components = getAllComponents(repository);
@@ -102,9 +102,9 @@ public class HelmHostedIT
     maintenanceFacet.deleteComponent(components.get(1).getEntityMetadata().getId());
 
     //Sleeping again to rebuild index.yaml
-    TimeUnit.MILLISECONDS.sleep(1300);
+    TimeUnit.SECONDS.sleep(2);
     final InputStream contentAfterDelete = client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML).getEntity().getContent();
-    verifyYamlContent(contentAfterDelete, YAML_MONGO_600_STRING_DATA);
+    checkYamlIncludesContent(contentAfterDelete, YAML_MONGO_600_STRING_DATA);
   }
 
   //TODO check after NEXUS-20949 is fixed

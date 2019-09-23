@@ -96,10 +96,7 @@ public class HelmITSupport
   protected HelmClient helmClient(final Repository repository) throws Exception {
     checkNotNull(repository);
     final URL repositoryUrl = repositoryBaseUrl(repository);
-    return helmClient(repositoryUrl);
-  }
 
-  protected HelmClient helmClient(final URL repositoryUrl) throws Exception {
     return new HelmClient(
         clientBuilder(repositoryUrl).build(),
         clientContext(),
@@ -120,7 +117,7 @@ public class HelmITSupport
     return new ByteArrayEntity(Files.readAllBytes(getFilePathByName(name)));
   }
 
-  protected void verifyYamlContent(InputStream is, String expectedContent) throws Exception {
+  protected void checkYamlIncludesContent(InputStream is, String expectedContent) throws Exception {
     String downloadedPackageData = IOUtils.toString(is);
     assertThat(downloadedPackageData, containsString(expectedContent));
   }
