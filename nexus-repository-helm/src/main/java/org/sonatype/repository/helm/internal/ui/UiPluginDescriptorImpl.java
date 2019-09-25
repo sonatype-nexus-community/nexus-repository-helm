@@ -16,7 +16,7 @@ import javax.annotation.Priority;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.sonatype.nexus.rapture.UiPluginDescriptorSupport;
+import org.sonatype.nexus.ui.UiPluginDescriptorSupport;
 
 @Named
 @Singleton
