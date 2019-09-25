@@ -25,7 +25,6 @@
   </parent>
 
   <artifactId>nexus-repository-helm-it</artifactId>
-  <packaging>bundle</packaging>
 
   <dependencies>
     <!--
@@ -177,5 +176,4 @@
 
     </plugins>
   </build>
-
 </project>

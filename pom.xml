@@ -23,11 +23,10 @@
   </parent>
 
   <artifactId>nexus-repository-base</artifactId>
-  <groupId>org.sonatype.nexus.plugins</groupId>
-  <name>${project.groupId}:${project.artifactId}</name>
   <version>0.0.13</version>
-  <inceptionYear>2018</inceptionYear>
   <packaging>pom</packaging>
+
+  <inceptionYear>2018</inceptionYear>
 
   <modules>
     <module>nexus-repository-helm</module>
@@ -55,15 +54,27 @@
 
   <build>
     <plugins>
+      <!--
+      Ensure use of Java 8, as required by NXRM
+      -->
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <serverId>rso</serverId>
-          <nexusUrl>https://repository.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>false</autoReleaseAfterClose>
-        </configuration>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.4.1</version>
+        <executions>
+          <execution>
+            <id>enforce-java</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[1.8,1.9)</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
@@ -101,6 +112,16 @@
                 </configuration>
               </execution>
             </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>rso</serverId>
+              <nexusUrl>https://repository.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>false</autoReleaseAfterClose>
+            </configuration>
           </plugin>
         </plugins>
       </build>
