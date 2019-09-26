@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.core.MediaType;
+
 import org.sonatype.nexus.common.app.BaseUrlHolder;
 import org.sonatype.nexus.pax.exam.NexusPaxExamSupport;
 import org.sonatype.nexus.repository.Repository;
@@ -61,12 +63,12 @@ public class HelmHostedIT
     BaseUrlHolder.set(this.nexusUrl.toString());
     repository = repos.createHelmHosted("helm-hosted-test");
     client = createHelmClient(repository);
-    uploadPackages(MONGO_PKG_FILE_NAME_600_TGZ, MONGO_PKG_FILE_NAME_728_TGZ);
   }
 
   @Test
-  public void testPackageUpload()
+  public void testPackageUpload() throws IOException
   {
+    uploadPackages(MONGO_PKG_FILE_NAME_600_TGZ, MONGO_PKG_FILE_NAME_728_TGZ);
     //Verify DB contains data about uploaded component and asset
     Component component = findComponent(repository, MONGO_PKG_NAME);
     assertThat(component.name(), is(equalTo(MONGO_PKG_NAME)));
@@ -79,8 +81,16 @@ public class HelmHostedIT
   }
 
   @Test
+  public void testFetchPackageOnEmptyRepository() throws Exception
+  {
+    HttpResponse resp = client.fetch(MONGO_PATH_FULL_728_TARGZ, CONTENT_TYPE_TGZ);
+    assertThat(resp.getEntity().getContentType().getValue(), equalTo(MediaType.TEXT_HTML));
+  }
+
+  @Test
   public void testFetchPackage() throws Exception
   {
+    uploadPackages(MONGO_PKG_FILE_NAME_600_TGZ, MONGO_PKG_FILE_NAME_728_TGZ);
     HttpResponse resp = client.fetch(MONGO_PATH_FULL_728_TARGZ, CONTENT_TYPE_TGZ);
     assertThat(resp.getEntity().getContentType().getValue(), equalTo(CONTENT_TYPE_TGZ));
     assertSuccessResponseMatches(resp, MONGO_PKG_FILE_NAME_728_TGZ);
@@ -89,6 +99,7 @@ public class HelmHostedIT
   @Test
   public void testMetadataProcessing() throws Exception
   {
+    uploadPackages(MONGO_PKG_FILE_NAME_600_TGZ, MONGO_PKG_FILE_NAME_728_TGZ);
     // We need to wait for 1.3 sec after packages are uploaded at #setUp because of CreateIndexFacetImpl#maybeWait()
     TimeUnit.SECONDS.sleep(2);
     // Verify metadata contains appropriate content about helm package.
@@ -110,7 +121,8 @@ public class HelmHostedIT
   //TODO check after NEXUS-20949 is fixed
   @Ignore
   @Test
-  public void testDeletingRemainingAssetAlsoDeletesComponent() {
+  public void testDeletingRemainingAssetAlsoDeletesComponent() throws IOException {
+    uploadPackages(MONGO_PKG_FILE_NAME_600_TGZ, MONGO_PKG_FILE_NAME_728_TGZ);
     final Asset asset = findAsset(repository, MONGO_PATH_FULL_600_TARGZ);
     assertNotNull(asset);
     assertNotNull(asset.componentId());
@@ -127,7 +139,8 @@ public class HelmHostedIT
   }
 
   @Test
-  public void testDeletingComponentDeletesAllAssociatedAssets() {
+  public void testDeletingComponentDeletesAllAssociatedAssets() throws IOException {
+    uploadPackages(MONGO_PKG_FILE_NAME_600_TGZ, MONGO_PKG_FILE_NAME_728_TGZ);
     final Asset asset = findAsset(repository, MONGO_PATH_FULL_600_TARGZ);
     assertNotNull(asset);
     assertNotNull(asset.componentId());
