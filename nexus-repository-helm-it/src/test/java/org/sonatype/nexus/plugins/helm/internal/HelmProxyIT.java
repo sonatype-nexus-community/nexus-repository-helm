@@ -58,7 +58,6 @@ public class HelmProxyIT
         .start();
     repository = repos.createHelmProxy("helm-proxy-test", server.getUrl().toExternalForm());
     client = helmClient(repository);
-
   }
 
   @After
