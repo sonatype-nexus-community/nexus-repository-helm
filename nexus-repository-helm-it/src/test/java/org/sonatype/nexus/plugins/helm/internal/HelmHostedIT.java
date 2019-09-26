@@ -28,6 +28,7 @@ import org.sonatype.nexus.repository.storage.ComponentMaintenance;
 import org.sonatype.nexus.testsuite.testsupport.NexusITSupport;
 
 import org.apache.http.HttpResponse;
+import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -42,6 +43,8 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.sonatype.nexus.repository.http.HttpStatus.NOT_FOUND;
+import static org.sonatype.nexus.testsuite.testsupport.FormatClientSupport.status;
 
 public class HelmHostedIT
     extends HelmITSupport
@@ -85,6 +88,7 @@ public class HelmHostedIT
   {
     HttpResponse resp = client.fetch(MONGO_PATH_FULL_728_TARGZ, CONTENT_TYPE_TGZ);
     assertThat(resp.getEntity().getContentType().getValue(), equalTo(MediaType.TEXT_HTML));
+    MatcherAssert.assertThat(status(resp), is(NOT_FOUND));
   }
 
   @Test
