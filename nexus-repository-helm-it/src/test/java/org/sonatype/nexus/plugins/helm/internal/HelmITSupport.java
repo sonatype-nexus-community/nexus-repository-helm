@@ -60,15 +60,20 @@ public class HelmITSupport
 
   public static final String MONGO_PKG_VERSION_728 = "7.2.8";
 
+  public static final String MONGO_PKG_VERSION_404 = "4.0.4";
+
   public static final String TGZ_EXT = ".tgz";
 
   public static final String YAML_EXT = ".yaml";
 
+  public static final String MONGO_PKG_FILE_NAME_728_TGZ = format("%s-%s%s",
+      MONGO_PKG_NAME, MONGO_PKG_VERSION_728, TGZ_EXT);
+
   public static final String MONGO_PKG_FILE_NAME_600_TGZ = format("%s-%s%s",
     MONGO_PKG_NAME, MONGO_PKG_VERSION_600, TGZ_EXT);
 
-  public static final String MONGO_PKG_FILE_NAME_728_TGZ = format("%s-%s%s",
-      MONGO_PKG_NAME, MONGO_PKG_VERSION_728, TGZ_EXT);
+  public static final String MONGO_PKG_FILE_NAME_404_TGZ = format("%s-%s%s",
+      MONGO_PKG_NAME, MONGO_PKG_VERSION_404, TGZ_EXT);
 
   public static final String CONTENT_TYPE_TGZ = "application/x-tgz";
 
