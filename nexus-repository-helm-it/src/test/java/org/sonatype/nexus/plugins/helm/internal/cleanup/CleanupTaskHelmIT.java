@@ -80,7 +80,6 @@ public class CleanupTaskHelmIT
         () -> deployArtifacts(MONGO_PKG_FILE_NAME_728_TGZ), 1L);
   }
 
-
   @Test
   public void cleanupByRegex() throws Exception {
     assertCleanupByRegex(repository, NAMES.length, "bin.*-[4,7].*.tgz",
