@@ -30,7 +30,6 @@ import org.sonatype.nexus.testsuite.testsupport.NexusITSupport;
 import org.apache.http.HttpResponse;
 import org.hamcrest.MatcherAssert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -122,8 +121,6 @@ public class HelmHostedIT
     checkYamlIncludesContent(contentAfterDelete, YAML_MONGO_600_STRING_DATA);
   }
 
-  //TODO check after NEXUS-20949 is fixed
-  @Ignore
   @Test
   public void testDeletingRemainingAssetAlsoDeletesComponent() throws IOException {
     uploadPackages(MONGO_PKG_FILE_NAME_600_TGZ, MONGO_PKG_FILE_NAME_728_TGZ);
