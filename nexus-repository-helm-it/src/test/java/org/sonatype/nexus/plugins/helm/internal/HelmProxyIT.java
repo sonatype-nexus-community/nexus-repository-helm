@@ -17,6 +17,7 @@ import org.sonatype.nexus.common.app.BaseUrlHolder;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.Component;
+import org.sonatype.nexus.repository.storage.ComponentMaintenance;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -93,6 +94,35 @@ public class HelmProxyIT
     Assert.assertThat(component.format(), is(equalTo(HELM_FORMAT_NAME)));
     Assert.assertThat(component.group(), is(nullValue()));
     Assert.assertThat(component.version(), is(equalTo(MONGO_PKG_VERSION_600)));
+  }
+
+  @Test
+  public void testDeletingComponentDeletesAllAssociatedAssets() throws Exception {
+    client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
+    final Component component = findComponent(repository, MONGO_PKG_NAME);
+    Assert.assertNotNull(component);
+    Assert.assertFalse(findAssetsByComponent(repository, component).isEmpty());
+
+    ComponentMaintenance maintenanceFacet = repository.facet(ComponentMaintenance.class);
+    maintenanceFacet.deleteComponent(component.getEntityMetadata().getId(), true);
+
+    Assert.assertNull(findComponent(repository, MONGO_PKG_NAME));
+    Assert.assertTrue(findAssetsByComponent(repository, component).isEmpty());
+  }
+
+  @Test
+  public void testDeletingRemainingAssetAlsoDeletesComponent() throws Exception {
+    client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
+
+    final Asset asset = findAsset(repository, MONGO_PKG_FILE_NAME_600_TGZ);
+    Assert.assertNotNull(asset);
+    Assert.assertNotNull(findComponentById(repository, asset.componentId()));
+
+    ComponentMaintenance maintenanceFacet = repository.facet(ComponentMaintenance.class);
+    maintenanceFacet.deleteAsset(asset.getEntityMetadata().getId(), true);
+
+    Assert.assertNull(findAsset(repository, MONGO_PKG_FILE_NAME_600_TGZ));
+    Assert.assertNull(findComponentById(repository, asset.componentId()));
   }
 
   @Test
