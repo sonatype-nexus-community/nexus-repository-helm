@@ -65,7 +65,7 @@ public class CleanupTaskHelmIT
   public void setup() {
     testData.addDirectory(NexusPaxExamSupport.resolveBaseFile("target/test-classes/helm"));
     repository = repos.createHelmHosted(testName.getMethodName());
-    deployArtifacts(NAMES);
+    assertThat(deployArtifacts(NAMES), is(NAMES.length));
   }
 
   @Test
