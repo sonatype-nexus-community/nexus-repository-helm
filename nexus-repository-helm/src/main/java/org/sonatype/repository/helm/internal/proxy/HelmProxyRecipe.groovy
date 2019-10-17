@@ -86,6 +86,7 @@ class HelmProxyRecipe
 
     [indexMatcher(), packageMatcher()].each { matcher ->
       builder.route(new Route.Builder().matcher(matcher)
+          .handler(formatHighAvailabilitySupportHandler)
           .handler(timingHandler)
           .handler(securityHandler)
           .handler(exceptionHandler)
