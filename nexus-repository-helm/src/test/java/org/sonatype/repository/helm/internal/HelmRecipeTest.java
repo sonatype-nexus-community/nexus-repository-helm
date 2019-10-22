@@ -32,7 +32,6 @@ import static org.mockito.Mockito.when;
 public class HelmRecipeTest
     extends TestSupport
 {
-  private static final String FORMAT_NAME = HelmFormat.NAME;
 
   @Mock
   private HelmFormat helmFormat;
@@ -46,7 +45,7 @@ public class HelmRecipeTest
 
   @Before
   public void setUp() {
-    when(helmFormat.getValue()).thenReturn(FORMAT_NAME);
+    when(helmFormat.getValue()).thenReturn(HelmFormat.NAME);
     helmProxyRecipe = new HelmProxyRecipe(new ProxyType(), helmFormat);
     helmHostedRecipe = new HelmHostedRecipe(new HostedType(), helmFormat);
     helmProxyRecipe.setHighAvailabilitySupportChecker(highAvailabilitySupportChecker);
@@ -55,29 +54,29 @@ public class HelmRecipeTest
 
   @Test
   public void haEnabledHostedRepository() {
-    when(highAvailabilitySupportChecker.isSupported(FORMAT_NAME)).thenReturn(true);
+    when(highAvailabilitySupportChecker.isSupported(HelmFormat.NAME)).thenReturn(true);
     assertThat(helmHostedRecipe.isFeatureEnabled(), is(equalTo(true)));
-    verify(highAvailabilitySupportChecker).isSupported(FORMAT_NAME);
+    verify(highAvailabilitySupportChecker).isSupported(HelmFormat.NAME);
   }
 
   @Test
   public void haDisabledHostedRepository() {
-    when(highAvailabilitySupportChecker.isSupported(FORMAT_NAME)).thenReturn(false);
+    when(highAvailabilitySupportChecker.isSupported(HelmFormat.NAME)).thenReturn(false);
     assertThat(helmHostedRecipe.isFeatureEnabled(), is(equalTo(false)));
-    verify(highAvailabilitySupportChecker).isSupported(FORMAT_NAME);
+    verify(highAvailabilitySupportChecker).isSupported(HelmFormat.NAME);
   }
 
   @Test
   public void haEnabledProxyRepository() {
-    when(highAvailabilitySupportChecker.isSupported(FORMAT_NAME)).thenReturn(true);
+    when(highAvailabilitySupportChecker.isSupported(HelmFormat.NAME)).thenReturn(true);
     assertThat(helmProxyRecipe.isFeatureEnabled(), is(equalTo(true)));
-    verify(highAvailabilitySupportChecker).isSupported(FORMAT_NAME);
+    verify(highAvailabilitySupportChecker).isSupported(HelmFormat.NAME);
   }
 
   @Test
   public void haDisabledProxyRepository() {
-    when(highAvailabilitySupportChecker.isSupported(FORMAT_NAME)).thenReturn(false);
+    when(highAvailabilitySupportChecker.isSupported(HelmFormat.NAME)).thenReturn(false);
     assertThat(helmProxyRecipe.isFeatureEnabled(), is(equalTo(false)));
-    verify(highAvailabilitySupportChecker).isSupported(FORMAT_NAME);
+    verify(highAvailabilitySupportChecker).isSupported(HelmFormat.NAME);
   }
 }

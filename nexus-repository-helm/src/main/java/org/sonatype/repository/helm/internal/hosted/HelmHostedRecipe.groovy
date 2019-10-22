@@ -89,9 +89,9 @@ class HelmHostedRecipe
 
     [indexMatcher(), packageMatcher()].each { matcher ->
       builder.route(new Route.Builder().matcher(matcher)
-          .handler(formatHighAvailabilitySupportHandler)
           .handler(timingHandler)
           .handler(securityHandler)
+          .handler(formatHighAvailabilitySupportHandler)
           .handler(exceptionHandler)
           .handler(handlerContributor)
           .handler(partialFetchHandler)
@@ -102,9 +102,9 @@ class HelmHostedRecipe
     }
 
     builder.route(new Route.Builder().matcher(chartUploadMatcher())
-        .handler(formatHighAvailabilitySupportHandler)
         .handler(timingHandler)
         .handler(securityHandler)
+        .handler(formatHighAvailabilitySupportHandler)
         .handler(exceptionHandler)
         .handler(handlerContributor)
         .handler(conditionalRequestHandler)
@@ -115,9 +115,9 @@ class HelmHostedRecipe
         .create())
 
     builder.route(new Route.Builder().matcher(chartDeleteMatcher())
-        .handler(formatHighAvailabilitySupportHandler)
         .handler(timingHandler)
         .handler(securityHandler)
+        .handler(formatHighAvailabilitySupportHandler)
         .handler(exceptionHandler)
         .handler(handlerContributor)
         .handler(conditionalRequestHandler)
