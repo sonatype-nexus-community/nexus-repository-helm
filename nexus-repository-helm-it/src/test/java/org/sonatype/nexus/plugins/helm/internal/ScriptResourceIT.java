@@ -62,11 +62,12 @@ public class ScriptResourceIT
 
   @Test
   public void createHelmProxyScript() {
-    String repoName = "helm-script-repo";
+    String repoName = "helm-proxy-repository";
+    String scriptName = "helm-proxy-script";
     String content = format("repository.createHelmProxy('%s','http://someurl')", repoName);
 
-    scriptClient.add(new ScriptXO(repoName, content, "groovy"));
-    scriptClient.run(repoName, "");
+    scriptClient.add(new ScriptXO(scriptName, content, "groovy"));
+    scriptClient.run(scriptName, "");
     Repository repo = repositoryManager.get(repoName);
     assertThat(repo.getFormat().getValue(), is("helm"));
     assertThat(repo.getName(), is(repoName));
@@ -75,11 +76,12 @@ public class ScriptResourceIT
 
   @Test
   public void createHelmHostedScript() {
-    String repoName = "helm-script-hosted-repo";
+    String repoName = "helm-hosted-repository";
+    String scriptName = "helm-hosted-script";
     String content = format("repository.createHelmHosted('%s')", repoName);
 
-    scriptClient.add(new ScriptXO(repoName, content, "groovy"));
-    scriptClient.run(repoName, "");
+    scriptClient.add(new ScriptXO(scriptName, content, "groovy"));
+    scriptClient.run(scriptName, "");
     Repository repo = repositoryManager.get(repoName);
     assertThat(repo.getFormat().getValue(), is("helm"));
     assertThat(repo.getName(), is(repoName));
