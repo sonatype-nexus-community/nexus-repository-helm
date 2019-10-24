@@ -88,6 +88,7 @@ class HelmProxyRecipe
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)
           .handler(securityHandler)
+          .handler(formatHighAvailabilitySupportHandler)
           .handler(exceptionHandler)
           .handler(handlerContributor)
           .handler(negativeCacheHandler)

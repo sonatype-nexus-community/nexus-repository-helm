@@ -14,7 +14,8 @@ package org.sonatype.repository.helm.internal
 
 import javax.inject.Inject
 import javax.inject.Provider
-
+import org.sonatype.nexus.repository.view.handlers.FormatHighAvailabilitySupportHandler
+import org.sonatype.nexus.repository.view.handlers.HighAvailabilitySupportChecker
 import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.RecipeSupport
 import org.sonatype.nexus.repository.Type
@@ -104,8 +105,19 @@ abstract class HelmRecipeSupport
   @Inject
   Provider<PurgeUnusedFacet> purgeUnusedFacet
 
+  @Inject
+  FormatHighAvailabilitySupportHandler formatHighAvailabilitySupportHandler
+
+  @Inject
+  HighAvailabilitySupportChecker highAvailabilitySupportChecker
+
   protected HelmRecipeSupport(final Type type, final Format format) {
     super(type, format)
+  }
+
+  @Override
+  boolean isFeatureEnabled() {
+    return highAvailabilitySupportChecker.isSupported(getFormat().getValue())
   }
 
   /**
