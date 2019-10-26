@@ -74,6 +74,7 @@ class HelmHostedRecipe
     repository.attach(configure(viewFacet.get()))
     repository.attach(httpClientFacet.get())
     repository.attach(componentMaintenanceFacet.get())
+    repository.attach(helmRestoreFacet.get())
     repository.attach(storageFacet.get())
     repository.attach(hostedFacet.get())
     repository.attach(createIndexFacet.get())
