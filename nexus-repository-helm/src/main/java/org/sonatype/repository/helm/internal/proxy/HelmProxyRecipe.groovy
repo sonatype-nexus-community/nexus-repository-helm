@@ -31,7 +31,6 @@ import org.sonatype.nexus.repository.view.Route
 import org.sonatype.nexus.repository.view.Router
 import org.sonatype.nexus.repository.view.ViewFacet
 import org.sonatype.nexus.repository.view.handlers.BrowseUnsupportedHandler
-import org.sonatype.repository.helm.HelmRestoreFacet
 import org.sonatype.repository.helm.internal.HelmFormat
 import org.sonatype.repository.helm.internal.HelmRecipeSupport
 
@@ -60,9 +59,6 @@ class HelmProxyRecipe
   Provider<NegativeCacheFacet> negativeCacheFacet
 
   @Inject
-  Provider<HelmRestoreFacet> helmRestoreFacetProvider;
-
-  @Inject
   HelmProxyRecipe(@Named(ProxyType.NAME) final Type type,
                   @Named(HelmFormat.NAME) final Format format) {
     super(type, format)
@@ -75,8 +71,9 @@ class HelmProxyRecipe
     repository.attach(httpClientFacet.get())
     repository.attach(negativeCacheFacet.get())
     repository.attach(componentMaintenanceFacet.get())
+    repository.attach(helmFacet.get())
     repository.attach(proxyFacet.get())
-    repository.attach(helmRestoreFacetProvider.get())
+    repository.attach(helmRestoreFacet.get())
     repository.attach(storageFacet.get())
     repository.attach(searchFacet.get())
     repository.attach(purgeUnusedFacet.get())

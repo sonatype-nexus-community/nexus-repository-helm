@@ -42,6 +42,7 @@ import org.sonatype.nexus.repository.view.matchers.ActionMatcher
 import org.sonatype.nexus.repository.view.matchers.LiteralMatcher
 import org.sonatype.nexus.repository.view.matchers.logic.LogicMatchers
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher
+import org.sonatype.repository.helm.HelmFacet
 import org.sonatype.repository.helm.HelmRestoreFacet
 import org.sonatype.repository.helm.internal.security.HelmSecurityFacet
 
@@ -108,7 +109,10 @@ abstract class HelmRecipeSupport
   Provider<PurgeUnusedFacet> purgeUnusedFacet
 
   @Inject
-  Provider<HelmRestoreFacet> helmRestoreFacet
+  protected Provider<HelmFacet> helmFacet
+
+  @Inject
+  protected Provider<HelmRestoreFacet> helmRestoreFacet
 
   @Inject
   FormatHighAvailabilitySupportHandler formatHighAvailabilitySupportHandler

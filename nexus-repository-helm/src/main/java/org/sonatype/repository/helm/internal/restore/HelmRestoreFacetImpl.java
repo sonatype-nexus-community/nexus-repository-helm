@@ -15,10 +15,11 @@ package org.sonatype.repository.helm.internal.restore;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sonatype.nexus.common.collect.AttributesMap;
+import org.sonatype.nexus.repository.FacetSupport;
+import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.AssetBlob;
 import org.sonatype.nexus.repository.storage.Bucket;
@@ -27,12 +28,9 @@ import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.transaction.UnitOfWork;
+import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.HelmRestoreFacet;
-import org.sonatype.repository.helm.internal.HelmAssetAttributePopulator;
-import org.sonatype.repository.helm.HelmAttributes;
-import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
-import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
@@ -42,23 +40,15 @@ import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_
  */
 @Named
 public class HelmRestoreFacetImpl
-    extends HelmFacet
+    extends FacetSupport
     implements HelmRestoreFacet
 {
-  private final HelmDataAccess helmDataAccess;
+  private HelmFacet helmFacet;
 
-  private final HelmAttributeParser helmAttributeParser;
-
-  private final HelmAssetAttributePopulator helmAssetAttributePopulator;
-
-  @Inject
-  public HelmRestoreFacetImpl(
-      final HelmDataAccess helmDataAccess, final HelmAttributeParser helmAttributeParser,
-      final HelmAssetAttributePopulator helmAssetAttributePopulator)
-  {
-    this.helmDataAccess = helmDataAccess;
-    this.helmAttributeParser = helmAttributeParser;
-    this.helmAssetAttributePopulator = helmAssetAttributePopulator;
+  @Override
+  protected void doInit(final Configuration configuration) throws Exception {
+    super.doInit(configuration);
+    helmFacet = facet(HelmFacet.class);
   }
 
   @Override
@@ -67,14 +57,14 @@ public class HelmRestoreFacetImpl
     StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(getRepository());
     HelmAttributes attributes =
-        helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
+        helmFacet.getHelmAttributeParser().getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
 
     Asset asset;
     if (componentRequired(path)) {
-      asset = findOrCreateAssetWithComponent(path, tx, bucket, attributes);
+      asset = helmFacet.findOrCreateAssetWithComponent(path, tx, bucket, attributes);
     }
     else {
-      asset = findOrCreateAssetWithFormat(path, tx, bucket, attributes);
+      asset = helmFacet.findOrCreateAssetWithAttributes(path, tx, bucket, attributes);
     }
 
     tx.attachBlob(asset, assetBlob);
@@ -102,16 +92,6 @@ public class HelmRestoreFacetImpl
 
   @Override
   public HelmAttributes extractComponentAttributesFromArchive(final InputStream is) throws IOException {
-    return helmAttributeParser.getAttributesFromInputStream(is);
-  }
-
-  @Override
-  public HelmDataAccess getHelmDataAccess() {
-    return helmDataAccess;
-  }
-
-  @Override
-  public HelmAssetAttributePopulator getHelmAssetAttributePopulator() {
-    return helmAssetAttributePopulator;
+    return helmFacet.getHelmAttributeParser().getAttributesFromInputStream(is);
   }
 }
