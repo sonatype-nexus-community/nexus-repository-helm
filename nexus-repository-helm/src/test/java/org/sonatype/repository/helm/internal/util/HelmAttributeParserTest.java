@@ -15,7 +15,7 @@ package org.sonatype.repository.helm.internal.util;
 import java.io.InputStream;
 
 import org.sonatype.goodies.testsupport.TestSupport;
-import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
+import org.sonatype.repository.helm.HelmAttributes;
 
 import org.junit.Before;
 import org.junit.Test;

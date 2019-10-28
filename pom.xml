@@ -31,6 +31,7 @@
   <modules>
     <module>nexus-repository-helm</module>
     <module>nexus-repository-helm-it</module>
+    <module>nexus-restore-helm</module>
   </modules>
 
   <distributionManagement>

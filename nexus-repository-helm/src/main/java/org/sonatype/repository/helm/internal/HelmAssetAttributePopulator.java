@@ -17,7 +17,7 @@ import javax.inject.Singleton;
 
 import org.sonatype.goodies.common.ComponentSupport;
 import org.sonatype.nexus.common.collect.NestedAttributesMap;
-import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
+import org.sonatype.repository.helm.HelmAttributes;
 
 import static org.sonatype.repository.helm.internal.database.HelmProperties.*;
 

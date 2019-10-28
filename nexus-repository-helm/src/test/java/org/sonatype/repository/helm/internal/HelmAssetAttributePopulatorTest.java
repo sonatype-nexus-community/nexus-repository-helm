@@ -17,7 +17,7 @@ import java.util.HashMap;
 import org.sonatype.goodies.testsupport.TestSupport;
 import org.sonatype.nexus.common.collect.NestedAttributesMap;
 import org.sonatype.repository.helm.internal.database.HelmProperties;
-import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
+import org.sonatype.repository.helm.HelmAttributes;
 
 import org.junit.Before;
 import org.junit.Test;
