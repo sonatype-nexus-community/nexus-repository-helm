@@ -29,7 +29,6 @@ import org.sonatype.nexus.repository.view.PartPayload;
 import org.sonatype.nexus.rest.ValidationErrorsException;
 import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
-import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import javax.inject.Inject;

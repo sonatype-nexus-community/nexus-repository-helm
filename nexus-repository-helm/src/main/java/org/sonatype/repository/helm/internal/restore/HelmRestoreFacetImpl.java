@@ -30,7 +30,7 @@ import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.HelmRestoreFacet;
 import org.sonatype.repository.helm.internal.HelmAssetAttributePopulator;
-import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
+import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 

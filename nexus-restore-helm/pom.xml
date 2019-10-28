@@ -24,6 +24,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>nexus-restore-helm</artifactId>
+  <packaging>bundle</packaging>
 
   <dependencies>
     <dependency>

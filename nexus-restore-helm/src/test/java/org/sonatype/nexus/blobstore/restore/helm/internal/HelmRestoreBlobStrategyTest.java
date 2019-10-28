@@ -30,7 +30,7 @@ import org.sonatype.nexus.repository.storage.AssetBlob;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.repository.helm.HelmRestoreFacet;
-import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
+import org.sonatype.repository.helm.HelmAttributes;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +52,7 @@ import static org.sonatype.nexus.common.hash.HashAlgorithm.SHA256;
 /**
  * @since 1.1.next
  */
-public class RRestoreBlobStrategyTest
+public class HelmRestoreBlobStrategyTest
     extends TestSupport
 {
   private static final String TEST_BLOB_STORE_NAME = "test";

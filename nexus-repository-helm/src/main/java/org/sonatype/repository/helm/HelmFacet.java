@@ -7,7 +7,6 @@ import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.repository.helm.internal.HelmAssetAttributePopulator;
-import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
 import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;

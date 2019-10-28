@@ -33,7 +33,7 @@ import org.sonatype.nexus.repository.storage.AssetBlob;
 import org.sonatype.nexus.repository.storage.Query;
 import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.HelmRestoreFacet;
-import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
+import org.sonatype.repository.helm.HelmAttributes;
 
 import com.google.common.collect.ImmutableList;
 
