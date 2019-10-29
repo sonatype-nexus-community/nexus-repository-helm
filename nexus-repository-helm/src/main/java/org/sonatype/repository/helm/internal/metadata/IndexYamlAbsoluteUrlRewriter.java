@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -103,9 +104,9 @@ public class IndexYamlAbsoluteUrlRewriter
       URI uri = new URIBuilder(oldUrl).build();
       if (uri.isAbsolute()) {
         String fileName = uri.getPath();
-        // Strip leading slash
+        // Rewrite absolute paths to relative
         if (!fileName.isEmpty()) {
-            fileName = fileName.substring(1);
+          fileName = Paths.get(fileName).getFileName().toString();
         }
         scalarEvent = new ScalarEvent(scalarEvent.getAnchor(), scalarEvent.getTag(),
             scalarEvent.getImplicit(), fileName, scalarEvent.getStartMark(),
