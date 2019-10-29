@@ -17,20 +17,14 @@ import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.storage.StorageTx;
-import org.sonatype.repository.helm.internal.HelmAssetAttributePopulator;
-import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
-import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
+/**
+ * @since 1.1.next
+ */
 @Facet.Exposed
 public interface HelmFacet
     extends Facet
 {
-  HelmDataAccess getHelmDataAccess();
-
-  HelmAssetAttributePopulator getHelmAssetAttributePopulator();
-
-  HelmAttributeParser getHelmAttributeParser();
-
   Asset findOrCreateAssetWithComponent(
       final String assetPath,
       final StorageTx tx,

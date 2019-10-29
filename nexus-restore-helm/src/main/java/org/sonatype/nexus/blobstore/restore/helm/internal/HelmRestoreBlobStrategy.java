@@ -86,7 +86,6 @@ public class HelmRestoreBlobStrategy
   @Override
   protected boolean assetExists(@Nonnull final HelmRestoreBlobData helmRestoreBlobData) {
     HelmRestoreFacet facet = getRestoreFacet(helmRestoreBlobData);
-
     return facet.assetExists(getAssetPath(helmRestoreBlobData));
   }
 

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sonatype.nexus.repository.FacetSupport;
@@ -34,6 +35,8 @@ import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
+import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
+import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import com.google.common.base.Supplier;
 
@@ -51,13 +54,26 @@ public class HelmHostedFacetImpl
     extends FacetSupport
     implements HelmHostedFacet
 {
+  private final HelmDataAccess helmDataAccess;
+
+  private final HelmAttributeParser helmAttributeParser;
+
   private HelmFacet helmFacet;
+
+  @Inject
+  public HelmHostedFacetImpl(
+      final HelmDataAccess helmDataAccess,
+      final HelmAttributeParser helmAttributeParser)
+  {
+    this.helmDataAccess = helmDataAccess;
+    this.helmAttributeParser = helmAttributeParser;
+  }
 
   @Override
   protected void doInit(final Configuration configuration) throws Exception {
     super.doInit(configuration);
     getRepository().facet(StorageFacet.class).registerWritePolicySelector(new HelmHostedWritePolicySelector());
-    helmFacet = facet(HelmFacet.class);
+    this.helmFacet = facet(HelmFacet.class);
   }
 
   @Nullable
@@ -67,7 +83,7 @@ public class HelmHostedFacetImpl
     checkNotNull(path);
     StorageTx tx = UnitOfWork.currentTx();
 
-    Asset asset = helmFacet.getHelmDataAccess().findAsset(tx, tx.findBucket(getRepository()), path);
+    Asset asset = helmDataAccess.findAsset(tx, tx.findBucket(getRepository()), path);
     if (asset == null) {
       return null;
     }
@@ -75,7 +91,7 @@ public class HelmHostedFacetImpl
       tx.saveAsset(asset);
     }
 
-    return helmFacet.getHelmDataAccess().toContent(asset, tx.requireBlob(asset.requireBlobRef()));
+    return helmDataAccess.toContent(asset, tx.requireBlob(asset.requireBlobRef()));
   }
 
   @Override
@@ -104,7 +120,7 @@ public class HelmHostedFacetImpl
     Bucket bucket = tx.findBucket(getRepository());
 
     Asset asset = createChartAsset(path, tx, bucket, tempBlob.get());
-    helmFacet.getHelmDataAccess().saveAsset(tx, asset, tempBlob, payload);
+    helmDataAccess.saveAsset(tx, asset, tempBlob, payload);
     return asset;
   }
 
@@ -116,7 +132,7 @@ public class HelmHostedFacetImpl
     StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(getRepository());
 
-    Asset asset = helmFacet.getHelmDataAccess().findAsset(tx, bucket, path);
+    Asset asset = helmDataAccess.findAsset(tx, bucket, path);
     if (asset == null) {
       return false;
     } else {
@@ -135,7 +151,7 @@ public class HelmHostedFacetImpl
 
     Asset asset = createChartAsset(assetPath, tx, bucket, chartContent.get());
 
-    return helmFacet.getHelmDataAccess().saveAsset(tx, asset, chartContent, payload);
+    return helmDataAccess.saveAsset(tx, asset, chartContent, payload);
   }
 
   private Asset createChartAsset(final String assetPath,
@@ -144,7 +160,7 @@ public class HelmHostedFacetImpl
                                  final InputStream inputStream) throws IOException
   {
     HelmAttributes chart;
-    chart = helmFacet.getHelmAttributeParser().getAttributesFromInputStream(inputStream);
+    chart = helmAttributeParser.getAttributesFromInputStream(inputStream);
 
     return helmFacet.findOrCreateAssetWithComponent(assetPath, tx, bucket, chart);
   }

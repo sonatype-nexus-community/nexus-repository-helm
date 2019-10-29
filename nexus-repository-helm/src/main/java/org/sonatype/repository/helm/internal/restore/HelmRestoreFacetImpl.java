@@ -15,6 +15,7 @@ package org.sonatype.repository.helm.internal.restore;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sonatype.nexus.common.collect.AttributesMap;
@@ -31,6 +32,7 @@ import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.HelmRestoreFacet;
+import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
@@ -45,6 +47,14 @@ public class HelmRestoreFacetImpl
 {
   private HelmFacet helmFacet;
 
+  private final HelmAttributeParser helmAttributeParser;
+
+  @Inject
+  public HelmRestoreFacetImpl(final HelmAttributeParser helmAttributeParser)
+  {
+    this.helmAttributeParser = helmAttributeParser;
+  }
+
   @Override
   protected void doInit(final Configuration configuration) throws Exception {
     super.doInit(configuration);
@@ -57,7 +67,7 @@ public class HelmRestoreFacetImpl
     StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(getRepository());
     HelmAttributes attributes =
-        helmFacet.getHelmAttributeParser().getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
+        helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
 
     Asset asset;
     if (componentRequired(path)) {
@@ -92,6 +102,6 @@ public class HelmRestoreFacetImpl
 
   @Override
   public HelmAttributes extractComponentAttributesFromArchive(final InputStream is) throws IOException {
-    return helmFacet.getHelmAttributeParser().getAttributesFromInputStream(is);
+    return helmAttributeParser.getAttributesFromInputStream(is);
   }
 }

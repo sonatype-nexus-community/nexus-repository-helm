@@ -22,7 +22,6 @@ import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
-import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -43,32 +42,13 @@ public class HelmFacetImpl
 
   private final HelmAssetAttributePopulator helmAssetAttributePopulator;
 
-  private final HelmAttributeParser helmAttributeParser;
-
   @Inject
   public HelmFacetImpl(
       final HelmDataAccess helmDataAccess,
-      final HelmAssetAttributePopulator helmAssetAttributePopulator,
-      final HelmAttributeParser helmAttributeParser)
+      final HelmAssetAttributePopulator helmAssetAttributePopulator)
   {
     this.helmDataAccess = checkNotNull(helmDataAccess);
     this.helmAssetAttributePopulator = checkNotNull(helmAssetAttributePopulator);
-    this.helmAttributeParser = checkNotNull(helmAttributeParser);
-  }
-
-  @Override
-  public HelmDataAccess getHelmDataAccess() {
-    return helmDataAccess;
-  }
-
-  @Override
-  public HelmAssetAttributePopulator getHelmAssetAttributePopulator() {
-    return helmAssetAttributePopulator;
-  }
-
-  @Override
-  public HelmAttributeParser getHelmAttributeParser() {
-    return helmAttributeParser;
   }
 
   @Override
@@ -78,7 +58,7 @@ public class HelmFacetImpl
       final Bucket bucket,
       final HelmAttributes chart)
   {
-    Asset asset = getHelmDataAccess().findAsset(tx, bucket, assetPath);
+    Asset asset = helmDataAccess.findAsset(tx, bucket, assetPath);
     if (asset == null) {
       Component component = findOrCreateComponent(tx, bucket, chart);
       asset = tx.createAsset(bucket, component);
@@ -86,7 +66,7 @@ public class HelmFacetImpl
       asset.formatAttributes().set(P_ASSET_KIND, HELM_PACKAGE.name());
     }
 
-    getHelmAssetAttributePopulator().populate(asset.formatAttributes(), chart);
+    helmAssetAttributePopulator.populate(asset.formatAttributes(), chart);
 
     return asset;
   }
@@ -98,15 +78,14 @@ public class HelmFacetImpl
       final Bucket bucket,
       final HelmAttributes chart)
   {
-
-    Asset asset = getHelmDataAccess().findAsset(tx, bucket, assetPath);
+    Asset asset = helmDataAccess.findAsset(tx, bucket, assetPath);
     if (asset == null) {
       asset = tx.createAsset(bucket, getRepository().getFormat());
       asset.name(assetPath);
       asset.formatAttributes().set(P_ASSET_KIND, HELM_PACKAGE.name());
     }
 
-    getHelmAssetAttributePopulator().populate(asset.formatAttributes(), chart);
+    helmAssetAttributePopulator.populate(asset.formatAttributes(), chart);
 
     return asset;
   }
@@ -117,7 +96,7 @@ public class HelmFacetImpl
       final Bucket bucket,
       final HelmAttributes chart)
   {
-    Component component = getHelmDataAccess().findComponent(tx, getRepository(), chart.getName(), chart.getVersion());
+    Component component = helmDataAccess.findComponent(tx, getRepository(), chart.getName(), chart.getVersion());
     if (component == null) {
       component = tx.createComponent(bucket, getRepository().getFormat())
           .name(chart.getName())
