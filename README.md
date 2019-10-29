@@ -56,11 +56,11 @@ In the examples below, substitute `0.0.12` with the current version of the helm 
 
 #### Build with Docker
 
-`docker build -t nexus-repository-helm:0.0.12 .`
+    docker build -t nexus-repository-helm .
 
 #### Run as a Docker container
 
-`docker run -d -p 8081:8081 --name nexus nexus-repository-helm:0.0.12` 
+    docker run -d -p 8081:8081 --name nexus-repository-helm nexus-repository-helm
 
 For further information like how to persist volumes check out [the GitHub repo for our official image](https://github.com/sonatype/docker-nexus3).
 
@@ -71,10 +71,10 @@ The application will now be available from your browser at http://localhost:8081
   (/nexus-data/admin.password) in order to login to Nexus. The command below will open a bash shell 
   in the container named `nexus`:
 
-      docker exec -it nexus /bin/bash
+      docker exec -it nexus-repository-helm /bin/bash
       $ cat /nexus-data/admin.password 
       
-  Once logged into the application UI as `admin` using the generated password, you may also want to 
+  Once logged into the application UI as `admin` using the generated password, you should also 
   turn on "Enable anonymous access" when prompted by the setup wizard.     
 
 ## Using Helm With Nexus Repository Manager 3
