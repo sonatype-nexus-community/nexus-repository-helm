@@ -67,11 +67,11 @@ public class HelmRestoreBlobStrategy
   }
 
   @Override
-  protected boolean canAttemptRestore(@Nonnull final HelmRestoreBlobData HelmRestoreBlobData) {
-    Repository repository = getRepository(HelmRestoreBlobData);
-    Optional<HelmRestoreFacet> rRestoreFacetFacet = repository.optionalFacet(HelmRestoreFacet.class);
+  protected boolean canAttemptRestore(@Nonnull final HelmRestoreBlobData helmRestoreBlobData) {
+    Repository repository = getRepository(helmRestoreBlobData);
+    Optional<HelmRestoreFacet> helmRestoreFacetFacet = repository.optionalFacet(HelmRestoreFacet.class);
 
-    if (!rRestoreFacetFacet.isPresent()) {
+    if (!helmRestoreFacetFacet.isPresent()) {
       log.warn("Skipping as Helm Restore Facet not found on repository: {}", repository.getName());
       return false;
     }
