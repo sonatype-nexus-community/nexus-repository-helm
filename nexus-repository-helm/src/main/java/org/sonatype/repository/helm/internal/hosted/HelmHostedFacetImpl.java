@@ -73,7 +73,7 @@ public class HelmHostedFacetImpl
   protected void doInit(final Configuration configuration) throws Exception {
     super.doInit(configuration);
     getRepository().facet(StorageFacet.class).registerWritePolicySelector(new HelmHostedWritePolicySelector());
-    this.helmFacet = facet(HelmFacet.class);
+    helmFacet = facet(HelmFacet.class);
   }
 
   @Nullable

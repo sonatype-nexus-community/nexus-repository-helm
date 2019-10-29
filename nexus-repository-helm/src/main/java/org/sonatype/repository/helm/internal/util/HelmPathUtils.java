@@ -41,6 +41,11 @@ public class HelmPathUtils
   }
 
   /**
+   * Supported package extension.
+   */
+  public static final String TGZ_EXTENSION = ".tgz";
+
+  /**
    * Utility method encapsulating getting a particular token by name from a matcher, including preconditions.
    */
   private String match(final TokenMatcher.State state, final String name) {

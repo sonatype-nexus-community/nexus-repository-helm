@@ -36,6 +36,7 @@ import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
+import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
 
 /**
  * @since 1.1.next
@@ -91,7 +92,7 @@ public class HelmRestoreFacetImpl
 
   @Override
   public boolean componentRequired(final String name) {
-    return name.endsWith(".tgz");
+    return name.endsWith(TGZ_EXTENSION);
   }
 
   @Override
