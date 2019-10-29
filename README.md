@@ -69,7 +69,7 @@ The application will now be available from your browser at http://localhost:8081
 * As of Nexus Repository Manager Version 3.17, the default admin password is randomly generated.
   If running in a Docker container, you will need to view the generated password file 
   (/nexus-data/admin.password) in order to login to Nexus. The command below will open a bash shell 
-  in the container named `nexus`:
+  in the container named `nexus-repository-helm`:
 
       docker exec -it nexus-repository-helm /bin/bash
       $ cat /nexus-data/admin.password 
