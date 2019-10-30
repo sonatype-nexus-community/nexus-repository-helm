@@ -26,12 +26,11 @@ import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
-import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
 
 /**
  * {@link HelmFacet} implementation.
  *
- * @since 1.1.next
+ * @since 1.0.next
  */
 @Named
 public class HelmFacetImpl
@@ -54,6 +53,7 @@ public class HelmFacetImpl
   @Override
   public Asset findOrCreateAssetWithComponent(
       final String assetPath,
+      final AssetKind assetKind,
       final StorageTx tx,
       final Bucket bucket,
       final HelmAttributes chart)
@@ -63,7 +63,7 @@ public class HelmFacetImpl
       Component component = findOrCreateComponent(tx, bucket, chart);
       asset = tx.createAsset(bucket, component);
       asset.name(assetPath);
-      asset.formatAttributes().set(P_ASSET_KIND, HELM_PACKAGE.name());
+      asset.formatAttributes().set(P_ASSET_KIND, assetKind.name());
     }
 
     helmAssetAttributePopulator.populate(asset.formatAttributes(), chart);
@@ -74,6 +74,7 @@ public class HelmFacetImpl
   @Override
   public Asset findOrCreateAssetWithAttributes(
       final String assetPath,
+      final AssetKind assetKind,
       final StorageTx tx,
       final Bucket bucket,
       final HelmAttributes chart)
@@ -82,7 +83,7 @@ public class HelmFacetImpl
     if (asset == null) {
       asset = tx.createAsset(bucket, getRepository().getFormat());
       asset.name(assetPath);
-      asset.formatAttributes().set(P_ASSET_KIND, HELM_PACKAGE.name());
+      asset.formatAttributes().set(P_ASSET_KIND, assetKind.name());
     }
 
     helmAssetAttributePopulator.populate(asset.formatAttributes(), chart);

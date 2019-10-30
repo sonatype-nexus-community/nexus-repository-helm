@@ -50,7 +50,7 @@ import static org.sonatype.nexus.common.hash.HashAlgorithm.SHA1;
 import static org.sonatype.nexus.common.hash.HashAlgorithm.SHA256;
 
 /**
- * @since 1.1.next
+ * @since 1.0.next
  */
 public class HelmRestoreBlobStrategyTest
     extends TestSupport

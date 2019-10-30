@@ -17,9 +17,10 @@ import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.storage.StorageTx;
+import org.sonatype.repository.helm.internal.AssetKind;
 
 /**
- * @since 1.1.next
+ * @since 1.0.next
  */
 @Facet.Exposed
 public interface HelmFacet
@@ -27,12 +28,14 @@ public interface HelmFacet
 {
   Asset findOrCreateAssetWithComponent(
       final String assetPath,
+      final AssetKind assetKind,
       final StorageTx tx,
       final Bucket bucket,
       final HelmAttributes chart);
 
   Asset findOrCreateAssetWithAttributes(
       final String assetPath,
+      final AssetKind assetKind,
       final StorageTx tx,
       final Bucket bucket,
       final HelmAttributes chart);

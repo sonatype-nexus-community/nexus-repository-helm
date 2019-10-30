@@ -16,7 +16,7 @@ import org.sonatype.nexus.blobstore.restore.RestoreBlobData;
 import org.sonatype.nexus.blobstore.restore.RestoreBlobDataSupport;
 
 /**
- * @since 1.1.next
+ * @since 1.0.next
  */
 class HelmRestoreBlobData extends RestoreBlobDataSupport
 {

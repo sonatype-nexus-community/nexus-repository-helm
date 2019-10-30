@@ -159,9 +159,7 @@ public class HelmHostedFacetImpl
                                  final Bucket bucket,
                                  final InputStream inputStream) throws IOException
   {
-    HelmAttributes chart;
-    chart = helmAttributeParser.getAttributesFromInputStream(inputStream);
-
-    return helmFacet.findOrCreateAssetWithComponent(assetPath, tx, bucket, chart);
+    HelmAttributes chart = helmAttributeParser.getAttributesFromInputStream(inputStream);
+    return helmFacet.findOrCreateAssetWithComponent(assetPath, HELM_PACKAGE, tx, bucket, chart);
   }
 }

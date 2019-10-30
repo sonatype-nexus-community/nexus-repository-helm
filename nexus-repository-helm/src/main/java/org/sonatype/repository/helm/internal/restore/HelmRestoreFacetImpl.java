@@ -32,6 +32,7 @@ import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.HelmRestoreFacet;
+import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
@@ -39,7 +40,7 @@ import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_
 import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
 
 /**
- * @since 1.1.next
+ * @since 1.0.next
  */
 @Named
 public class HelmRestoreFacetImpl
@@ -72,10 +73,10 @@ public class HelmRestoreFacetImpl
 
     Asset asset;
     if (componentRequired(path)) {
-      asset = helmFacet.findOrCreateAssetWithComponent(path, tx, bucket, attributes);
+      asset = helmFacet.findOrCreateAssetWithComponent(path, AssetKind.HELM_PACKAGE, tx, bucket, attributes);
     }
     else {
-      asset = helmFacet.findOrCreateAssetWithAttributes(path, tx, bucket, attributes);
+      asset = helmFacet.findOrCreateAssetWithAttributes(path, AssetKind.HELM_PACKAGE ,tx, bucket, attributes);
     }
 
     tx.attachBlob(asset, assetBlob);

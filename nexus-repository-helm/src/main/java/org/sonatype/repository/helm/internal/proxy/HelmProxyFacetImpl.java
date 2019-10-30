@@ -25,7 +25,6 @@ import org.sonatype.nexus.repository.proxy.ProxyFacet;
 import org.sonatype.nexus.repository.proxy.ProxyFacetSupport;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.Bucket;
-import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
@@ -37,15 +36,15 @@ import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.transaction.UnitOfWork;
-import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.repository.helm.HelmFacet;
+import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
 import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
 
 /**
@@ -65,18 +64,27 @@ public class HelmProxyFacetImpl
 
   private final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter;
 
+  private HelmFacet helmFacet;
+
   private static final String INDEX_YAML = "index.yaml";
 
   @Inject
   public HelmProxyFacetImpl(final HelmPathUtils helmPathUtils,
                             final HelmDataAccess helmDataAccess,
                             final HelmAttributeParser helmAttributeParser,
-                            final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter)
+                            final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter,
+                            final HelmFacet helmFacet)
   {
     this.helmPathUtils = checkNotNull(helmPathUtils);
     this.helmDataAccess = checkNotNull(helmDataAccess);
     this.helmAttributeParser = checkNotNull(helmAttributeParser);
     this.indexYamlAbsoluteUrlRewriter = checkNotNull(indexYamlAbsoluteUrlRewriter);
+  }
+
+  @Override
+  protected void doInit(final Configuration configuration) throws Exception {
+    super.doInit(configuration);
+    helmFacet = facet(HelmFacet.class);
   }
 
   // HACK: Workaround for known CGLIB issue, forces an Import-Package for org.sonatype.nexus.repository.config
@@ -87,7 +95,7 @@ public class HelmProxyFacetImpl
 
   @Nullable
   @Override
-  protected Content getCachedContent(final Context context) throws IOException {
+  protected Content getCachedContent(final Context context) {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     switch (assetKind) {
       case HELM_INDEX:
@@ -131,13 +139,8 @@ public class HelmProxyFacetImpl
   {
     StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(getRepository());
-
-    Asset asset = helmDataAccess.findAsset(tx, bucket, assetPath);
-    if (asset == null) {
-      asset = tx.createAsset(bucket, getRepository().getFormat());
-      asset.name(assetPath);
-      asset.formatAttributes().set(P_ASSET_KIND, assetKind.name());
-    }
+    Asset asset =
+        helmFacet.findOrCreateAssetWithAttributes(assetPath, assetKind, tx, bucket, new HelmAttributes());
 
     return helmDataAccess.saveAsset(tx, asset, metadataContent, payload);
   }
@@ -161,25 +164,8 @@ public class HelmProxyFacetImpl
   {
     StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(getRepository());
+    Asset asset = helmFacet.findOrCreateAssetWithComponent(fileName, assetKind, tx, bucket, helmAttributes);
 
-    Component component = helmDataAccess.findComponent(tx,
-        getRepository(),
-        helmAttributes.getName(),
-        helmAttributes.getVersion());
-
-    if (component == null) {
-      component = tx.createComponent(bucket, getRepository().getFormat())
-          .name(helmAttributes.getName())
-          .version(helmAttributes.getVersion());
-    }
-    tx.saveComponent(component);
-
-    Asset asset = helmDataAccess.findAsset(tx, bucket, fileName);
-    if (asset == null) {
-      asset = tx.createAsset(bucket, component);
-      asset.name(fileName);
-      asset.formatAttributes().set(P_ASSET_KIND, assetKind.name());
-    }
     return helmDataAccess.saveAsset(tx, asset, componentContent, payload);
   }
 
@@ -199,7 +185,6 @@ public class HelmProxyFacetImpl
 
   @Override
   protected void indicateVerified(final Context context, final Content content, final CacheInfo cacheInfo)
-      throws IOException
   {
     setCacheInfo(content, cacheInfo);
   }
