@@ -164,6 +164,7 @@ public class HelmRestoreBlobIT
     testHelper.assertComponentInRepository(hostedRepository, MONGO_PKG_NAME);
     testHelper.assertComponentInRepository(proxyRepository, MONGO_PKG_NAME);
 
+    System.out.println("REPOOO " + hostedRepository);
     testHelper.assertAssetMatchesBlob(hostedRepository, MONGO_PATH_FULL_728_TARGZ);
     testHelper.assertAssetMatchesBlob(proxyRepository, MONGO_PATH_FULL_728_TARGZ);
 

@@ -30,6 +30,7 @@ import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.thread.io.StreamCopier;
+import org.sonatype.repository.helm.HelmFacet;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.yaml.snakeyaml.DumperOptions;
@@ -39,8 +40,6 @@ import org.yaml.snakeyaml.events.CollectionEndEvent;
 import org.yaml.snakeyaml.events.CollectionStartEvent;
 import org.yaml.snakeyaml.events.Event;
 import org.yaml.snakeyaml.events.ScalarEvent;
-
-import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
 
 /**
  * Removes absolute URL entries from index.yaml
@@ -119,6 +118,6 @@ public class IndexYamlAbsoluteUrlRewriter
   }
 
   private TempBlob createTempBlob(final InputStream is) {
-    return storageFacet.createTempBlob(is, HASH_ALGORITHMS);
+    return storageFacet.createTempBlob(is, HelmFacet.HASH_ALGORITHMS);
   }
 }

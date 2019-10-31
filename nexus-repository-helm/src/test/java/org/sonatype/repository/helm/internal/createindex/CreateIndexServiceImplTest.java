@@ -29,11 +29,12 @@ import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.transaction.TransactionModule;
 import org.sonatype.nexus.transaction.UnitOfWork;
+import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlBuilder;
-import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import org.fest.util.Lists;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +61,7 @@ public class CreateIndexServiceImplTest
   private IndexYamlBuilder indexYamlBuilder;
 
   @Mock
-  private HelmDataAccess helmDataAccess;
+  private HelmFacet helmFacet;
 
   @Mock
   private Repository repository;
@@ -84,7 +85,7 @@ public class CreateIndexServiceImplTest
   EntityId entityId;
 
   @Mock
-  Iterable<Asset> assets;
+  List<Asset> assets;
 
   @Mock
   Iterator<Asset> assetIterator;
@@ -111,7 +112,7 @@ public class CreateIndexServiceImplTest
     shaMap.put("sha256", "12345");
 
     when(assetAttributes.get("checksum", Map.class)).thenReturn(shaMap);
-    when(helmDataAccess.browseComponentAssets(storageTx, bucket)).thenReturn(list);
+    when(helmFacet.getAllAssets()).thenReturn(list);
     when(indexYamlBuilder.build(anyObject(), anyObject())).thenReturn(tempBlob);
 
     TempBlob result = underTest.buildIndexYaml(repository);
@@ -124,7 +125,7 @@ public class CreateIndexServiceImplTest
     when(assets.iterator()).thenReturn(assetIterator);
     when(assetIterator.next()).thenReturn(asset);
     when(asset.componentId()).thenReturn(null);
-    when(helmDataAccess.browseComponentAssets(storageTx, bucket)).thenReturn(assets);
+    when(helmFacet.getAllAssets()).thenReturn(assets);
     when(indexYamlBuilder.build(anyObject(), anyObject())).thenReturn(tempBlob);
 
     TempBlob result = underTest.buildIndexYaml(repository);
@@ -136,7 +137,7 @@ public class CreateIndexServiceImplTest
     underTest = Guice.createInjector(new TransactionModule(), new AbstractModule() {
       @Override
       protected void configure() {
-        bind(HelmDataAccess.class).toInstance(helmDataAccess);
+        bind(HelmFacet.class).toInstance(helmFacet);
         bind(IndexYamlBuilder.class).toInstance(indexYamlBuilder);
       }
     }).getInstance(CreateIndexServiceImpl.class);
@@ -145,5 +146,6 @@ public class CreateIndexServiceImplTest
   private void setupMocks() {
     when(storageTx.findBucket(repository)).thenReturn(bucket);
     when(repository.facet(StorageFacet.class)).thenReturn(storageFacet);
+    when(repository.facet(HelmFacet.class)).thenReturn(helmFacet);
   }
 }

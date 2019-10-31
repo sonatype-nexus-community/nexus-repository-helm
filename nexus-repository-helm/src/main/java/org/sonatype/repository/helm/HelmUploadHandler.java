@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
-import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
 import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
 
 /**
@@ -78,9 +77,10 @@ public class HelmUploadHandler
   public UploadResponse handle(Repository repository, ComponentUpload upload) throws IOException {
     HelmHostedFacet facet = repository.facet(HelmHostedFacet.class);
     StorageFacet storageFacet = repository.facet(StorageFacet.class);
+    HelmFacet helmFacet = repository.facet(HelmFacet.class);
 
     PartPayload payload = upload.getAssetUploads().get(0).getPayload();
-    try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HASH_ALGORITHMS)) {
+    try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HelmFacet.HASH_ALGORITHMS)) {
       HelmAttributes attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get());
 
       String name = attributesFromInputStream.getName();

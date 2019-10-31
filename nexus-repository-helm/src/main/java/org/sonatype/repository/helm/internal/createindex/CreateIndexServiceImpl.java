@@ -26,14 +26,12 @@ import org.sonatype.nexus.common.collect.NestedAttributesMap;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.StorageFacet;
-import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
-import org.sonatype.nexus.transaction.UnitOfWork;
+import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.metadata.ChartEntry;
 import org.sonatype.repository.helm.internal.metadata.ChartIndex;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlBuilder;
-import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import org.joda.time.DateTime;
 
@@ -59,14 +57,10 @@ public class CreateIndexServiceImpl
 {
   private final static String API_VERSION = "1.0";
 
-  private HelmDataAccess helmDataAccess;
-
   private IndexYamlBuilder indexYamlBuilder;
 
   @Inject
-  public CreateIndexServiceImpl(final HelmDataAccess helmDataAccess,
-                                final IndexYamlBuilder indexYamlBuilder) {
-    this.helmDataAccess = checkNotNull(helmDataAccess);
+  public CreateIndexServiceImpl(final IndexYamlBuilder indexYamlBuilder) {
     this.indexYamlBuilder = checkNotNull(indexYamlBuilder);
   }
 
@@ -74,11 +68,11 @@ public class CreateIndexServiceImpl
   @Nullable
   public TempBlob buildIndexYaml(final Repository repository) {
     StorageFacet storageFacet = repository.facet(StorageFacet.class);
-    StorageTx tx = UnitOfWork.currentTx();
+    HelmFacet helmFacet = repository.facet(HelmFacet.class);
 
     ChartIndex index = new ChartIndex();
 
-    for (Asset asset : helmDataAccess.browseComponentAssets(tx, tx.findBucket(repository))) {
+    for (Asset asset : helmFacet.getAllAssets()) {
       parseAssetIntoChartEntry(index, asset);
     }
 

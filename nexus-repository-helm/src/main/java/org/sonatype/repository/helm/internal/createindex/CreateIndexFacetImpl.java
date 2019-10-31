@@ -23,6 +23,7 @@ import org.sonatype.nexus.common.event.EventManager;
 import org.sonatype.nexus.common.stateguard.Guarded;
 import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.Repository;
+import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.manager.RepositoryCreatedEvent;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.AssetCreatedEvent;
@@ -35,15 +36,15 @@ import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
+import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
-import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.common.stateguard.StateGuardLifecycleSupport.State.STARTED;
-import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_INDEX;
 
 /**
@@ -60,7 +61,7 @@ public class CreateIndexFacetImpl
 
   private CreateIndexService createIndexService;
 
-  private final HelmDataAccess helmDataAccess;
+  private HelmFacet helmFacet;
 
   private final long interval;
 
@@ -74,15 +75,20 @@ public class CreateIndexFacetImpl
   private final AtomicBoolean eventFired = new AtomicBoolean(false);
 
   @Inject
-  public CreateIndexFacetImpl(final EventManager eventManager,
-                              final CreateIndexService createIndexService,
-                              final HelmDataAccess helmDataAccess,
-                              @Named("${nexus.helm.createrepo.interval:-1000}") final long interval)
+  public CreateIndexFacetImpl(
+      final EventManager eventManager,
+      final CreateIndexService createIndexService,
+      @Named("${nexus.helm.createrepo.interval:-1000}") final long interval)
   {
     this.eventManager = checkNotNull(eventManager);
     this.createIndexService = checkNotNull(createIndexService);
-    this.helmDataAccess = checkNotNull(helmDataAccess);
     this.interval = interval;
+  }
+
+  @Override
+  protected void doInit(final Configuration configuration) throws Exception {
+    super.doInit(configuration);
+    helmFacet = facet(HelmFacet.class);
   }
 
   @Subscribe
@@ -116,14 +122,14 @@ public class CreateIndexFacetImpl
   }
 
   private void maybeInvalidateIndex(final AssetEvent event) {
-     if(matchesRepository(event) && isEventRelevant(event)) {
-       invalidateIndex();
-     }
+    if (matchesRepository(event) && isEventRelevant(event)) {
+      invalidateIndex();
+    }
   }
 
   @Subscribe
   public void on(final HelmIndexInvalidationEvent event) {
-    if(shouldProcess(event)) {
+    if (shouldProcess(event)) {
       acceptingEvents.set(false);
       maybeWait(event);
 
@@ -148,26 +154,18 @@ public class CreateIndexFacetImpl
   protected void updateIndexYaml(final TempBlob indexYaml) {
     if (indexYaml == null) {
       deleteIndexYaml();
-    } else {
+    }
+    else {
       createIndexYaml(indexYaml);
     }
   }
 
   private void createIndexYaml(final TempBlob indexYaml) {
     // TODO: Likely this can all be pulled out into some sort of common facet, or use Hosted.upload?
-    StorageTx tx = UnitOfWork.currentTx();
-    Repository repository = getRepository();
-    Bucket bucket = tx.findBucket(repository);
-
-    Asset asset = helmDataAccess.findAsset(tx, bucket, INDEX_YAML);
-    if (asset == null) {
-      asset = tx.createAsset(bucket, repository.getFormat());
-      asset.name(INDEX_YAML);
-      asset.formatAttributes().set(P_ASSET_KIND, HELM_INDEX.name());
-    }
+    Asset asset = helmFacet.findOrCreateAsset(INDEX_YAML, HELM_INDEX, new HelmAttributes(), false);
 
     try {
-      helmDataAccess.saveAsset(tx, asset, indexYaml, TGZ_CONTENT_TYPE, null);
+      helmFacet.saveAsset(asset, indexYaml, TGZ_CONTENT_TYPE, null);
     }
     catch (IOException ex) {
       log.warn("Could not rebuild index.yaml", ex);
@@ -180,7 +178,8 @@ public class CreateIndexFacetImpl
     boolean result = hosted.delete(INDEX_YAML);
     if (result) {
       log.info("Deleted index.yaml because of empty asset list");
-    } else {
+    }
+    else {
       log.warn("Unable to delete index.yaml asset");
     }
   }
