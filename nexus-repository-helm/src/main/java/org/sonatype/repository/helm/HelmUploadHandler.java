@@ -29,7 +29,6 @@ import org.sonatype.nexus.repository.view.PartPayload;
 import org.sonatype.nexus.rest.ValidationErrorsException;
 import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
-import org.sonatype.repository.helm.internal.metadata.HelmAttributes;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import javax.inject.Inject;
@@ -41,6 +40,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
+import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
 
 /**
  * Support helm upload for web page
@@ -94,9 +94,7 @@ public class HelmUploadHandler
         throw new ValidationErrorsException("Metadata is missing the version attribute");
       }
 
-      String extension = "tgz";
-
-      String path = name + "-" + version + "." + extension;
+      String path = name + "-" + version + "." + TGZ_EXTENSION;
 
       ensurePermitted(repository.getName(), HelmFormat.NAME, path, Collections.emptyMap());
       return TransactionalStoreBlob.operation.withDb(storageFacet.txSupplier()).throwing(IOException.class)
