@@ -26,6 +26,7 @@ import org.sonatype.nexus.repository.cache.CacheControllerHolder.CacheType;
 public enum AssetKind
 {
   HELM_INDEX(CacheControllerHolder.METADATA),
+  HELM_PROVENANCE(CacheControllerHolder.CONTENT),
   HELM_PACKAGE(CacheControllerHolder.CONTENT);
 
   private final CacheType cacheType;

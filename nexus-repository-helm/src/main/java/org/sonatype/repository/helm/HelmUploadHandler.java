@@ -27,6 +27,7 @@ import org.sonatype.nexus.repository.upload.UploadHandlerSupport;
 import org.sonatype.nexus.repository.upload.UploadResponse;
 import org.sonatype.nexus.repository.view.PartPayload;
 import org.sonatype.nexus.rest.ValidationErrorsException;
+import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
@@ -37,9 +38,11 @@ import javax.inject.Singleton;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
+import static org.sonatype.repository.helm.internal.util.HelmPathUtils.PROVENANCE_EXTENSION;
 import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
 
 /**
@@ -73,15 +76,31 @@ public class HelmUploadHandler
     this.helmPackageParser = helmPackageParser;
   }
 
-
   @Override
   public UploadResponse handle(Repository repository, ComponentUpload upload) throws IOException {
     HelmHostedFacet facet = repository.facet(HelmHostedFacet.class);
     StorageFacet storageFacet = repository.facet(StorageFacet.class);
 
     PartPayload payload = upload.getAssetUploads().get(0).getPayload();
+
+    String extension = Optional
+        .ofNullable(payload.getName())
+        .map(name -> name.substring(name.lastIndexOf(".")))
+        .orElse(StringUtils.EMPTY);
+
     try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HASH_ALGORITHMS)) {
-      HelmAttributes attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get());
+      HelmAttributes attributesFromInputStream;
+      AssetKind assetKind;
+
+      if (extension.equals(PROVENANCE_EXTENSION)) {
+        attributesFromInputStream = helmPackageParser.getAttributesProvenanceFromInputStream(tempBlob.get());
+        assetKind = AssetKind.HELM_PROVENANCE;
+      } else if (extension.equals(TGZ_EXTENSION)) {
+        attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get());
+        assetKind = AssetKind.HELM_PACKAGE;
+      } else {
+        throw new IllegalArgumentException("Unsupported extension: " + extension);
+      }
 
       String name = attributesFromInputStream.getName();
       String version = attributesFromInputStream.getVersion();
@@ -94,11 +113,11 @@ public class HelmUploadHandler
         throw new ValidationErrorsException("Metadata is missing the version attribute");
       }
 
-      String path = name + "-" + version + "." + TGZ_EXTENSION;
+      String path = String.format("%s-%s%s", name, version, extension);
 
       ensurePermitted(repository.getName(), HelmFormat.NAME, path, Collections.emptyMap());
       return TransactionalStoreBlob.operation.withDb(storageFacet.txSupplier()).throwing(IOException.class)
-          .call(() -> new UploadResponse(facet.upload(path, tempBlob, payload)));
+          .call(() -> new UploadResponse(facet.upload(path, tempBlob, payload, assetKind)));
     }
   }
 
