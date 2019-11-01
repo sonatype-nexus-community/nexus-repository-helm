@@ -77,11 +77,10 @@ public class HelmUploadHandler
 
     PartPayload payload = upload.getAssetUploads().get(0).getPayload();
 
-    String extension = Optional
+    String fileName = Optional
         .ofNullable(payload.getName())
-        .map(name -> name.substring(name.lastIndexOf(".")))
         .orElse(StringUtils.EMPTY);
-    AssetKind assetKind = HelmPathUtils.getAssetKind(extension);
+    AssetKind assetKind = HelmPathUtils.getAssetKindByFileName(fileName);
 
     return TransactionalStoreBlob.operation
         .withDb(storageFacet.txSupplier()).throwing(IOException.class)

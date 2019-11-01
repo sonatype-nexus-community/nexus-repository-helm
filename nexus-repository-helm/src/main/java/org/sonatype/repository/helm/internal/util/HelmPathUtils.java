@@ -49,25 +49,23 @@ public class HelmPathUtils
   /**
    * Supported provenance extension.
    */
-  public static final String PROVENANCE_EXTENSION = ".prov";
+  public static final String PROVENANCE_EXTENSION = String.format("%s%s", TGZ_EXTENSION, ".prov");
 
-
-  public static AssetKind getAssetKind(String extension) {
-    if (extension.equals(TGZ_EXTENSION)) {
-      return AssetKind.HELM_PACKAGE;
-    } else if (extension.equals(PROVENANCE_EXTENSION)) {
+  public static AssetKind getAssetKindByFileName(String fileName) {
+    if (fileName.endsWith(PROVENANCE_EXTENSION)) {
       return AssetKind.HELM_PROVENANCE;
-    } else {
-      throw new IllegalArgumentException("Unsupported extension: " + extension);
+    } else if (fileName.endsWith(TGZ_EXTENSION)) {
+      return AssetKind.HELM_PACKAGE;
     }
+    throw new IllegalArgumentException("Unsupported extension: " + fileName);
   }
 
-  public static String getExtension(AssetKind assetKind) {
+  public static String buildPath(String name, String version, AssetKind assetKind) {
     switch (assetKind) {
       case HELM_PROVENANCE:
-        return PROVENANCE_EXTENSION;
+        return String.format("%s-%s%s", name, version, PROVENANCE_EXTENSION);
       case HELM_PACKAGE:
-        return TGZ_EXTENSION;
+        return String.format("%s-%s%s", name, version, TGZ_EXTENSION);
       default:
         throw new IllegalArgumentException("Unsupported asset kind: " + assetKind);
     }

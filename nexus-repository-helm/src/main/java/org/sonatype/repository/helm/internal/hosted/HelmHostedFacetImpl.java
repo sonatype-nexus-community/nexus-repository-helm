@@ -111,7 +111,7 @@ public class HelmHostedFacetImpl
         throw new ValidationErrorsException("Metadata is missing the version attribute");
       }
 
-      String path = String.format("%s-%s%s", name, version, HelmPathUtils.getExtension(assetKind));
+      String path = HelmPathUtils.buildPath(name, version, assetKind);
 
       StorageTx tx = UnitOfWork.currentTx();
       Bucket bucket = tx.findBucket(getRepository());
