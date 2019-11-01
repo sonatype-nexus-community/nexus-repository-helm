@@ -30,7 +30,7 @@ import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.thread.io.StreamCopier;
-import org.sonatype.repository.helm.HelmFacet;
+import org.sonatype.repository.helm.internal.HelmFormat;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.yaml.snakeyaml.DumperOptions;
@@ -118,6 +118,6 @@ public class IndexYamlAbsoluteUrlRewriter
   }
 
   private TempBlob createTempBlob(final InputStream is) {
-    return storageFacet.createTempBlob(is, HelmFacet.HASH_ALGORITHMS);
+    return storageFacet.createTempBlob(is, HelmFormat.HASH_ALGORITHMS);
   }
 }

@@ -80,7 +80,7 @@ public class HelmUploadHandler
     HelmFacet helmFacet = repository.facet(HelmFacet.class);
 
     PartPayload payload = upload.getAssetUploads().get(0).getPayload();
-    try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HelmFacet.HASH_ALGORITHMS)) {
+    try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HelmFormat.HASH_ALGORITHMS)) {
       HelmAttributes attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get());
 
       String name = attributesFromInputStream.getName();

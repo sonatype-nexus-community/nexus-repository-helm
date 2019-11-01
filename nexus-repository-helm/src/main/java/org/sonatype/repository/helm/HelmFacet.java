@@ -21,21 +21,14 @@ import javax.annotation.Nullable;
 
 import org.sonatype.nexus.blobstore.api.Blob;
 import org.sonatype.nexus.common.collect.AttributesMap;
-import org.sonatype.nexus.common.hash.HashAlgorithm;
 import org.sonatype.nexus.repository.Facet;
 import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.Component;
-import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.repository.helm.internal.AssetKind;
 
 import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableList;
-
-import static org.sonatype.nexus.common.hash.HashAlgorithm.SHA1;
-import static org.sonatype.nexus.common.hash.HashAlgorithm.SHA256;
 
 /**
  * @since 1.0.next
@@ -44,8 +37,6 @@ import static org.sonatype.nexus.common.hash.HashAlgorithm.SHA256;
 public interface HelmFacet
     extends Facet
 {
-  List<HashAlgorithm> HASH_ALGORITHMS = ImmutableList.of(SHA1, SHA256);
-
   List<Asset> getAllAssets();
 
   Optional<Asset> findAsset(final String assetName);
@@ -67,7 +58,7 @@ public interface HelmFacet
   Content saveAsset(
       final Asset asset,
       final Supplier<InputStream> contentSupplier,
-      final String contentType,
+      @Nullable final String contentType,
       @Nullable final AttributesMap contentAttributes) throws IOException;
 
   Content toContent(final Asset asset, final Blob blob);

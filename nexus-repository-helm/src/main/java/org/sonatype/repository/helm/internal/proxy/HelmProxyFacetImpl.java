@@ -40,6 +40,7 @@ import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
+import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
@@ -119,7 +120,7 @@ public class HelmProxyFacetImpl
 
   private Content putMetadata(final String path, final Content content, final AssetKind assetKind) throws IOException {
     StorageFacet storageFacet = facet(StorageFacet.class);
-    try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HelmFacet.HASH_ALGORITHMS)) {
+    try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HelmFormat.HASH_ALGORITHMS)) {
       try (TempBlob newTempBlob = indexYamlAbsoluteUrlRewriter.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, getRepository()) ) {
         return saveMetadataAsAsset(path, newTempBlob, content, assetKind);
       }
@@ -144,7 +145,7 @@ public class HelmProxyFacetImpl
                                final String fileName,
                                final AssetKind assetKind) throws IOException {
     StorageFacet storageFacet = facet(StorageFacet.class);
-    try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HelmFacet.HASH_ALGORITHMS)) {
+    try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HelmFormat.HASH_ALGORITHMS)) {
       HelmAttributes helmAttributes = helmAttributeParser.getAttributesFromInputStream(tempBlob.get());
       return doCreateOrSaveComponent(helmAttributes, fileName, tempBlob, content, assetKind);
     }

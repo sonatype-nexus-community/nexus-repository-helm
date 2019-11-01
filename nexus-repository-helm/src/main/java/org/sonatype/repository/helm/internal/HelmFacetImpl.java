@@ -79,8 +79,11 @@ public class HelmFacetImpl
   {
     Optional<Asset> assetOpt = findAsset(assetPath);
     Asset asset = assetOpt.orElseGet(() ->
-        isComponentRequired ? createAsset(assetPath, assetKind, (StorageTx tx, Bucket bucket) -> tx.createAsset(bucket, findOrCreateComponent(helmAttributes)))
-                            : createAsset(assetPath, assetKind, (StorageTx tx, Bucket bucket) -> tx.createAsset(bucket, getRepository().getFormat())));
+        isComponentRequired
+            ? createAsset(assetPath, assetKind,
+                  (StorageTx tx, Bucket bucket) -> tx.createAsset(bucket, findOrCreateComponent(helmAttributes)))
+            : createAsset(assetPath, assetKind,
+                  (StorageTx tx, Bucket bucket) -> tx.createAsset(bucket, getRepository().getFormat())));
     helmAssetAttributePopulator.populate(asset.formatAttributes(), helmAttributes);
 
     return asset;
@@ -110,7 +113,7 @@ public class HelmFacetImpl
     StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(getRepository());
     Asset asset = tx.findAssetWithProperty(P_NAME, assetName, bucket);
-    return asset != null ? Optional.of(asset) : Optional.empty();
+    return Optional.ofNullable(asset);
   }
 
   @Override
@@ -197,7 +200,7 @@ public class HelmFacetImpl
     Content.applyToAsset(asset, Content.maintainLastModified(asset, contentAttributes));
     StorageTx tx = UnitOfWork.currentTx();
     AssetBlob assetBlob = tx.setBlob(
-        asset, asset.name(), contentSupplier, HASH_ALGORITHMS, null, contentType, false
+        asset, asset.name(), contentSupplier, HelmFormat.HASH_ALGORITHMS, null, contentType, false
     );
     asset.markAsDownloaded();
     tx.saveAsset(asset);
@@ -211,7 +214,7 @@ public class HelmFacetImpl
    */
   public Content toContent(final Asset asset, final Blob blob) {
     Content content = new Content(new BlobPayload(blob, asset.requireContentType()));
-    Content.extractFromAsset(asset, HASH_ALGORITHMS, content.getAttributes());
+    Content.extractFromAsset(asset, HelmFormat.HASH_ALGORITHMS, content.getAttributes());
     return content;
   }
 }

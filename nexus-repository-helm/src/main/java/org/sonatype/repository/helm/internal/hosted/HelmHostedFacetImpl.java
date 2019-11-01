@@ -23,7 +23,6 @@ import javax.inject.Named;
 import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
@@ -36,6 +35,7 @@ import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
+import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import com.google.common.base.Supplier;
@@ -103,7 +103,7 @@ public class HelmHostedFacetImpl
       throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
     }
 
-    try (TempBlob tempBlob = facet(StorageFacet.class).createTempBlob(payload, HelmFacet.HASH_ALGORITHMS)) {
+    try (TempBlob tempBlob = facet(StorageFacet.class).createTempBlob(payload, HelmFormat.HASH_ALGORITHMS)) {
       storeChart(path, tempBlob, payload);
     }
   }
