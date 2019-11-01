@@ -17,6 +17,7 @@ import javax.inject.Singleton;
 
 import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
+import org.sonatype.repository.helm.internal.AssetKind;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -49,6 +50,28 @@ public class HelmPathUtils
    * Supported provenance extension.
    */
   public static final String PROVENANCE_EXTENSION = ".prov";
+
+
+  public static AssetKind getAssetKind(String extension) {
+    if (extension.equals(TGZ_EXTENSION)) {
+      return AssetKind.HELM_PACKAGE;
+    } else if (extension.equals(PROVENANCE_EXTENSION)) {
+      return AssetKind.HELM_PROVENANCE;
+    } else {
+      throw new IllegalArgumentException("Unsupported extension: " + extension);
+    }
+  }
+
+  public static String getExtension(AssetKind assetKind) {
+    switch (assetKind) {
+      case HELM_PROVENANCE:
+        return PROVENANCE_EXTENSION;
+      case HELM_PACKAGE:
+        return TGZ_EXTENSION;
+      default:
+        throw new IllegalArgumentException("Unsupported asset kind: " + assetKind);
+    }
+  }
 
   /**
    * Utility method encapsulating getting a particular token by name from a matcher, including preconditions.

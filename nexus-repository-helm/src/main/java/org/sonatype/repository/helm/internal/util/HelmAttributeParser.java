@@ -21,7 +21,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.sonatype.nexus.rest.ValidationErrorsException;
 import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.repository.helm.internal.AssetKind;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.repository.helm.internal.database.HelmProperties.APP_VERSION;
@@ -52,7 +54,17 @@ public class HelmAttributeParser
     this.provenanceParser = checkNotNull(provenanceParser);
   }
 
-  public HelmAttributes getAttributesProvenanceFromInputStream(final InputStream inputStream) throws IOException {
+  public HelmAttributes getHelmAttributes(final InputStream inputStream, final AssetKind assetKind) throws IOException {
+    if (assetKind == AssetKind.HELM_PROVENANCE) {
+      return getProvenanceAttribute(inputStream);
+    } else if (assetKind == AssetKind.HELM_PACKAGE) {
+      return getAttributesFromInputStream(inputStream);
+    } else {
+      throw new ValidationErrorsException("Unsupported assetKind: " + assetKind);
+    }
+  }
+
+  public HelmAttributes getProvenanceAttribute(final InputStream inputStream) throws IOException {
     return provenanceParser.parse(inputStream);
   }
 

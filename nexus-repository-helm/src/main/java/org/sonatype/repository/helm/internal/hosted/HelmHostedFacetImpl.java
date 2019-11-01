@@ -31,16 +31,18 @@ import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
+import org.sonatype.nexus.rest.ValidationErrorsException;
 import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmDataAccess;
+import org.sonatype.repository.helm.internal.util.HelmPathUtils;
+
+import org.apache.commons.lang3.StringUtils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
-import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE;
 import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
 
 /**
@@ -95,34 +97,28 @@ public class HelmHostedFacetImpl
 
   @Override
   @TransactionalStoreBlob
-  public void upload(final String path,
-                     final Payload payload,
-                     final AssetKind assetKind) throws IOException
-  {
+  public Asset upload(final Payload payload, final AssetKind assetKind) throws IOException {
     try (TempBlob tempBlob = facet(StorageFacet.class).createTempBlob(payload, HASH_ALGORITHMS)) {
-      upload(path, tempBlob, payload, assetKind);
-    }
-  }
+      HelmAttributes attributes = helmAttributeParser.getHelmAttributes(tempBlob.get(), assetKind);
+      String name = attributes.getName();
+      String version = attributes.getVersion();
 
-  @Override
-  public Asset upload(String path, TempBlob tempBlob, Payload payload, AssetKind assetKind) throws IOException {
-    if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
-      throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
-    }
-    checkNotNull(path);
-    checkNotNull(tempBlob);
+      if (StringUtils.isBlank(name)) {
+        throw new ValidationErrorsException("Metadata is missing the name attribute");
+      }
 
-    StorageTx tx = UnitOfWork.currentTx();
-    Bucket bucket = tx.findBucket(getRepository());
-    InputStream inputStream = tempBlob.get();
-    HelmAttributes attributes =
-        assetKind == HELM_PROVENANCE ?
-            helmAttributeParser.getAttributesProvenanceFromInputStream(inputStream) :
-            helmAttributeParser.getAttributesFromInputStream(inputStream);
-    final Asset asset =
-        helmFacet.findOrCreateAssetWithComponent(path, assetKind, tx, bucket, attributes);
-    helmDataAccess.saveAsset(tx, asset, tempBlob, payload);
-    return asset;
+      if (StringUtils.isBlank(version)) {
+        throw new ValidationErrorsException("Metadata is missing the version attribute");
+      }
+
+      String path = String.format("%s-%s%s", name, version, HelmPathUtils.getExtension(assetKind));
+
+      StorageTx tx = UnitOfWork.currentTx();
+      Bucket bucket = tx.findBucket(getRepository());
+      final Asset asset = helmFacet.findOrCreateAssetWithComponent(path, assetKind, tx, bucket, attributes);
+      helmDataAccess.saveAsset(tx, asset, tempBlob, payload);
+      return asset;
+    }
   }
 
   @Override

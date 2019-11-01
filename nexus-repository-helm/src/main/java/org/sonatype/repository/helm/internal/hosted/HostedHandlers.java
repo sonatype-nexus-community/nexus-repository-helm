@@ -61,10 +61,8 @@ public class HostedHandlers
   };
 
   final Handler upload = context -> {
-    State state = context.getAttributes().require(TokenMatcher.State.class);
-    String path = helmPathUtils.buildAssetPath(state);
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
-    context.getRepository().facet(HelmHostedFacet.class).upload(path, context.getRequest().getPayload(), assetKind);
+    context.getRepository().facet(HelmHostedFacet.class).upload(context.getRequest().getPayload(), assetKind);
     return ok();
   };
 
