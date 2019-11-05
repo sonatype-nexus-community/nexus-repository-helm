@@ -32,7 +32,7 @@ public interface HelmRestoreFacet extends Facet
 
   boolean componentRequired(final String name);
 
-  Query getComponentQuery(final HelmAttributes attributes);
+  Query getComponentQuery(final AttributesMapAdapter attributes);
 
-  HelmAttributes extractComponentAttributesFromArchive(final InputStream is) throws IOException;
+  AttributesMapAdapter extractComponentAttributesFromArchive(final InputStream is) throws IOException;
 }

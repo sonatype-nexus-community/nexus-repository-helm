@@ -85,7 +85,7 @@ public class CreateIndexServiceImplTest
   EntityId entityId;
 
   @Mock
-  List<Asset> assets;
+  Iterable<Asset> assets;
 
   @Mock
   Iterator<Asset> assetIterator;
@@ -104,7 +104,6 @@ public class CreateIndexServiceImplTest
 
   @Test
   public void testBuildIndexYaml() throws Exception {
-    List<Asset> list = Arrays.asList(asset);
     when(asset.formatAttributes()).thenReturn(formatAttributes);
     when(asset.attributes()).thenReturn(assetAttributes);
     when(asset.componentId()).thenReturn(entityId);
@@ -112,7 +111,7 @@ public class CreateIndexServiceImplTest
     shaMap.put("sha256", "12345");
 
     when(assetAttributes.get("checksum", Map.class)).thenReturn(shaMap);
-    when(helmFacet.getAllAssets()).thenReturn(list);
+    when(helmFacet.getAllAssets()).thenReturn(assetIterator);
     when(indexYamlBuilder.build(anyObject(), anyObject())).thenReturn(tempBlob);
 
     TempBlob result = underTest.buildIndexYaml(repository);
@@ -125,7 +124,7 @@ public class CreateIndexServiceImplTest
     when(assets.iterator()).thenReturn(assetIterator);
     when(assetIterator.next()).thenReturn(asset);
     when(asset.componentId()).thenReturn(null);
-    when(helmFacet.getAllAssets()).thenReturn(assets);
+    when(helmFacet.getAllAssets()).thenReturn(assetIterator);
     when(indexYamlBuilder.build(anyObject(), anyObject())).thenReturn(tempBlob);
 
     TempBlob result = underTest.buildIndexYaml(repository);

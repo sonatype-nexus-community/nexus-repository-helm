@@ -12,7 +12,6 @@
  */
 package org.sonatype.repository.helm.internal.createindex;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -22,21 +21,17 @@ import org.sonatype.nexus.common.event.EventAware.Asynchronous;
 import org.sonatype.nexus.common.event.EventManager;
 import org.sonatype.nexus.common.stateguard.Guarded;
 import org.sonatype.nexus.repository.FacetSupport;
-import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.manager.RepositoryCreatedEvent;
-import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.AssetCreatedEvent;
 import org.sonatype.nexus.repository.storage.AssetDeletedEvent;
 import org.sonatype.nexus.repository.storage.AssetEvent;
 import org.sonatype.nexus.repository.storage.AssetUpdatedEvent;
-import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.StorageFacet;
-import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
-import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.repository.helm.AttributesMapAdapter;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
 
@@ -161,15 +156,7 @@ public class CreateIndexFacetImpl
   }
 
   private void createIndexYaml(final TempBlob indexYaml) {
-    // TODO: Likely this can all be pulled out into some sort of common facet, or use Hosted.upload?
-    Asset asset = helmFacet.findOrCreateAsset(INDEX_YAML, HELM_INDEX, new HelmAttributes(), false);
-
-    try {
-      helmFacet.saveAsset(asset, indexYaml, TGZ_CONTENT_TYPE, null);
-    }
-    catch (IOException ex) {
-      log.warn("Could not rebuild index.yaml", ex);
-    }
+    helmFacet.findOrCreateAsset(INDEX_YAML, new AttributesMapAdapter(HELM_INDEX), indexYaml, TGZ_CONTENT_TYPE);
   }
 
   private void deleteIndexYaml() {

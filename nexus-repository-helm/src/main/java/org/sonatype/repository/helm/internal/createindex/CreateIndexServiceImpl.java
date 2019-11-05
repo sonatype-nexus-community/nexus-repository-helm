@@ -13,6 +13,7 @@
 package org.sonatype.repository.helm.internal.createindex;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +73,9 @@ public class CreateIndexServiceImpl
 
     ChartIndex index = new ChartIndex();
 
-    for (Asset asset : helmFacet.getAllAssets()) {
+    Iterator<Asset> it = helmFacet.getAllAssets();
+    while (it.hasNext()) {
+      Asset asset = it.next();
       parseAssetIntoChartEntry(index, asset);
     }
 
@@ -85,25 +88,25 @@ public class CreateIndexServiceImpl
     NestedAttributesMap formatAttributes = asset.formatAttributes();
     NestedAttributesMap assetAttributes = asset.attributes();
     ChartEntry chartEntry = new ChartEntry();
-    chartEntry.setName(formatAttributes.get(NAME, String.class));
-    chartEntry.setVersion(formatAttributes.get(VERSION, String.class));
-    chartEntry.setDescription(formatAttributes.get(DESCRIPTION, String.class));
-    chartEntry.setIcon(formatAttributes.get(ICON, String.class));
+    chartEntry.setName(formatAttributes.get(NAME.getPropertyName(), String.class));
+    chartEntry.setVersion(formatAttributes.get(VERSION.getPropertyName(), String.class));
+    chartEntry.setDescription(formatAttributes.get(DESCRIPTION.getPropertyName(), String.class));
+    chartEntry.setIcon(formatAttributes.get(ICON.getPropertyName(), String.class));
     chartEntry.setCreated(asset.blobCreated());
-    chartEntry.setAppVersion(formatAttributes.get(APP_VERSION, String.class));
-    chartEntry.setMaintainers(formatAttributes.get(MAINTAINERS, List.class));
+    chartEntry.setAppVersion(formatAttributes.get(APP_VERSION.getPropertyName(), String.class));
+    chartEntry.setMaintainers(formatAttributes.get(MAINTAINERS.getPropertyName(), List.class));
     chartEntry.setDigest(assetAttributes.get("checksum", Map.class)
         .get("sha256").toString());
     createListOfRelativeUrls(formatAttributes, chartEntry);
-    chartEntry.setSources(formatAttributes.get(SOURCES, List.class));
+    chartEntry.setSources(formatAttributes.get(SOURCES.getPropertyName(), List.class));
     index.addEntry(chartEntry);
   }
 
   private void createListOfRelativeUrls(final NestedAttributesMap formatAttributes, final ChartEntry chartEntry) {
     List<String> urls = new ArrayList<>();
     urls.add(String.format("%s-%s.tgz",
-        formatAttributes.get(NAME, String.class),
-        formatAttributes.get(VERSION, String.class)));
+        formatAttributes.get(NAME.getPropertyName(), String.class),
+        formatAttributes.get(VERSION.getPropertyName(), String.class)));
     chartEntry.setUrls(urls);
   }
 }

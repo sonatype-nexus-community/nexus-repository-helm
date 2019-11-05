@@ -12,23 +12,19 @@
  */
 package org.sonatype.repository.helm;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 import org.sonatype.nexus.blobstore.api.Blob;
 import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.repository.Facet;
 import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
-import org.sonatype.repository.helm.internal.AssetKind;
 
 import com.google.common.base.Supplier;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @since 1.0.next
@@ -37,29 +33,17 @@ import com.google.common.base.Supplier;
 public interface HelmFacet
     extends Facet
 {
-  List<Asset> getAllAssets();
+  Iterator<Asset> getAllAssets();
 
   Optional<Asset> findAsset(final String assetName);
 
-  Asset findOrCreateAsset(
+  Optional<Pair<String, AttributesMap>> parsePayload(Payload payload);
+
+  Pair<Asset, Content> findOrCreateAsset(
       final String assetPath,
-      final AssetKind assetKind,
-      final HelmAttributes helmAttributes,
-      final boolean isComponentRequired);
-
-  Component findOrCreateComponent(
-      final HelmAttributes chart);
-
-  Content saveAsset(
-      final Asset asset,
+      final AttributesMapAdapter helmAttributes,
       final Supplier<InputStream> contentSupplier,
-      final Payload payload) throws IOException;
-
-  Content saveAsset(
-      final Asset asset,
-      final Supplier<InputStream> contentSupplier,
-      @Nullable final String contentType,
-      @Nullable final AttributesMap contentAttributes) throws IOException;
+      final String contentType);
 
   Content toContent(final Asset asset, final Blob blob);
 }

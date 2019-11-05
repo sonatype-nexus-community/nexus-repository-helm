@@ -15,7 +15,8 @@ package org.sonatype.repository.helm.internal.util;
 import java.io.InputStream;
 
 import org.sonatype.goodies.testsupport.TestSupport;
-import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.repository.helm.AttributesMapAdapter;
+import org.sonatype.repository.helm.internal.AssetKind;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,7 @@ public class HelmAttributeParserTest
   @Test
   public void testGetAttributesFromChart() throws Exception {
     InputStream chart = getClass().getResourceAsStream("mongodb-0.4.9.tgz");
-    HelmAttributes result = underTest.getAttributesFromInputStream(chart);
+    AttributesMapAdapter result = underTest.getAttributesFromInputStream(AssetKind.HELM_PACKAGE, chart);
 
     assertThat(result.getName(), is(notNullValue()));
     assertThat(result.getVersion(), is(notNullValue()));

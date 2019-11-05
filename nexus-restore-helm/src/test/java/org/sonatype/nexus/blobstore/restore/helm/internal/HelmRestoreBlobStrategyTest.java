@@ -29,8 +29,8 @@ import org.sonatype.nexus.repository.manager.RepositoryManager;
 import org.sonatype.nexus.repository.storage.AssetBlob;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.StorageTx;
+import org.sonatype.repository.helm.AttributesMapAdapter;
 import org.sonatype.repository.helm.HelmRestoreFacet;
-import org.sonatype.repository.helm.HelmAttributes;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -177,6 +177,6 @@ public class HelmRestoreBlobStrategyTest
   public void testComponentQuery() throws IOException
   {
     restoreBlobStrategy.getComponentQuery(helmRestoreBlobData);
-    verify(helmRestoreFacet, times(1)).getComponentQuery(any(HelmAttributes.class));
+    verify(helmRestoreFacet, times(1)).getComponentQuery(any(AttributesMapAdapter.class));
   }
 }

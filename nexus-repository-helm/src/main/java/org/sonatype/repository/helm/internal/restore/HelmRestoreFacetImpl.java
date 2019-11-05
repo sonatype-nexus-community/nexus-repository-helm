@@ -28,11 +28,13 @@ import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.transaction.UnitOfWork;
-import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.HelmRestoreFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
+import org.sonatype.repository.helm.AttributesMapAdapter;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
@@ -65,14 +67,15 @@ public class HelmRestoreFacetImpl
   @Override
   @TransactionalTouchBlob
   public void restore(final AssetBlob assetBlob, final String path) throws IOException {
-    HelmAttributes attributes =
-        helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
+    AttributesMapAdapter attributes =
+        helmAttributeParser.getAttributesFromInputStream(AssetKind.HELM_PACKAGE, assetBlob.getBlob().getInputStream());
 
     StorageTx tx = UnitOfWork.currentTx();
-    Asset asset = helmFacet.findOrCreateAsset(path, AssetKind.HELM_PACKAGE, attributes, componentRequired(path));
-    tx.attachBlob(asset, assetBlob);
-    Content.applyToAsset(asset, Content.maintainLastModified(asset, new AttributesMap()));
-    tx.saveAsset(asset);
+    Pair<Asset, Content>
+        asset = helmFacet.findOrCreateAsset(path, attributes, () -> assetBlob.getBlob().getInputStream(), assetBlob.getContentType());
+    tx.attachBlob(asset.getLeft(), assetBlob);
+    Content.applyToAsset(asset.getLeft(), Content.maintainLastModified(asset.getLeft(), new AttributesMap()));
+    tx.saveAsset(asset.getLeft());
   }
 
   @Override
@@ -88,13 +91,13 @@ public class HelmRestoreFacetImpl
   }
 
   @Override
-  public Query getComponentQuery(final HelmAttributes attributes) {
+  public Query getComponentQuery(final AttributesMapAdapter attributes) {
     return Query.builder().where(P_NAME).eq(attributes.getName())
         .and(P_VERSION).eq(attributes.getVersion()).build();
   }
 
   @Override
-  public HelmAttributes extractComponentAttributesFromArchive(final InputStream is) throws IOException {
-    return helmAttributeParser.getAttributesFromInputStream(is);
+  public AttributesMapAdapter extractComponentAttributesFromArchive(final InputStream is) throws IOException {
+    return helmAttributeParser.getAttributesFromInputStream(AssetKind.HELM_PACKAGE, is);
   }
 }

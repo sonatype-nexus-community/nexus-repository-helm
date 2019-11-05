@@ -61,7 +61,7 @@ public class IndexYamlBuilderTest
 
     TempBlob tempBlob = underTest.build(index, storageFacet);
 
-    verify(storageFacet).createTempBlob(captorStorage.capture(), HelmFormat.HASH_ALGORITHMS);
+    verify(storageFacet).createTempBlob(captorStorage.capture(), eq(HelmFormat.HASH_ALGORITHMS));
     verify(yamlParser).write(any(OutputStream.class), captor.capture());
 
     assertEquals(index, captor.getValue());

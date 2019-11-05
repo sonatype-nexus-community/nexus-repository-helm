@@ -27,6 +27,7 @@ import org.sonatype.nexus.repository.upload.UploadHandlerSupport;
 import org.sonatype.nexus.repository.upload.UploadResponse;
 import org.sonatype.nexus.repository.view.PartPayload;
 import org.sonatype.nexus.rest.ValidationErrorsException;
+import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
@@ -77,11 +78,11 @@ public class HelmUploadHandler
   public UploadResponse handle(Repository repository, ComponentUpload upload) throws IOException {
     HelmHostedFacet facet = repository.facet(HelmHostedFacet.class);
     StorageFacet storageFacet = repository.facet(StorageFacet.class);
-    HelmFacet helmFacet = repository.facet(HelmFacet.class);
 
     PartPayload payload = upload.getAssetUploads().get(0).getPayload();
     try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HelmFormat.HASH_ALGORITHMS)) {
-      HelmAttributes attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get());
+      AttributesMapAdapter
+          attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(AssetKind.HELM_PACKAGE, tempBlob.get());
 
       String name = attributesFromInputStream.getName();
       String version = attributesFromInputStream.getVersion();
