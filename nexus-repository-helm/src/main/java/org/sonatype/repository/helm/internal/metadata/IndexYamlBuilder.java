@@ -21,7 +21,7 @@ import javax.inject.Named;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.thread.io.StreamCopier;
-import org.sonatype.repository.helm.internal.util.HelmDataAccess;
+import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.util.YamlParser;
 
 
@@ -49,6 +49,6 @@ public class IndexYamlBuilder
   }
 
   private TempBlob createTempBlob(final InputStream inputStream, final StorageFacet storageFacet) {
-    return storageFacet.createTempBlob(inputStream, HelmDataAccess.HASH_ALGORITHMS);
+    return storageFacet.createTempBlob(inputStream, HelmFormat.HASH_ALGORITHMS);
   }
 }

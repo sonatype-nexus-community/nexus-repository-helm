@@ -41,11 +41,10 @@ import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
-import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
+import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 
 /**
  * Helm {@link ProxyFacet} implementation.
@@ -58,8 +57,6 @@ public class HelmProxyFacetImpl
 {
   private final HelmPathUtils helmPathUtils;
 
-  private final HelmDataAccess helmDataAccess;
-
   private final HelmAttributeParser helmAttributeParser;
 
   private final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter;
@@ -70,13 +67,11 @@ public class HelmProxyFacetImpl
 
   @Inject
   public HelmProxyFacetImpl(final HelmPathUtils helmPathUtils,
-                            final HelmDataAccess helmDataAccess,
                             final HelmAttributeParser helmAttributeParser,
                             final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter,
                             final HelmFacet helmFacet)
   {
     this.helmPathUtils = checkNotNull(helmPathUtils);
-    this.helmDataAccess = checkNotNull(helmDataAccess);
     this.helmAttributeParser = checkNotNull(helmAttributeParser);
     this.indexYamlAbsoluteUrlRewriter = checkNotNull(indexYamlAbsoluteUrlRewriter);
   }
@@ -142,7 +137,7 @@ public class HelmProxyFacetImpl
     Asset asset =
         helmFacet.findOrCreateAssetWithAttributes(assetPath, assetKind, tx, bucket, new HelmAttributes());
 
-    return helmDataAccess.saveAsset(tx, asset, metadataContent, payload);
+    return helmFacet.saveAsset(tx, asset, metadataContent, payload);
   }
 
   private Content putComponent(final Content content,
@@ -166,21 +161,21 @@ public class HelmProxyFacetImpl
     Bucket bucket = tx.findBucket(getRepository());
     Asset asset = helmFacet.findOrCreateAssetWithComponent(fileName, assetKind, tx, bucket, helmAttributes);
 
-    return helmDataAccess.saveAsset(tx, asset, componentContent, payload);
+    return helmFacet.saveAsset(tx, asset, componentContent, payload);
   }
 
   @TransactionalTouchBlob
   protected Content getAsset(final String name) {
     StorageTx tx = UnitOfWork.currentTx();
 
-    Asset asset = helmDataAccess.findAsset(tx, tx.findBucket(getRepository()), name);
+    Asset asset = helmFacet.findAsset(tx, tx.findBucket(getRepository()), name);
     if (asset == null) {
       return null;
     }
     if (asset.markAsDownloaded()) {
       tx.saveAsset(asset);
     }
-    return helmDataAccess.toContent(asset, tx.requireBlob(asset.requireBlobRef()));
+    return helmFacet.toContent(asset, tx.requireBlob(asset.requireBlobRef()));
   }
 
   @Override

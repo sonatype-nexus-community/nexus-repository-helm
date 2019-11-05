@@ -35,8 +35,8 @@ import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
+import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
-import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
@@ -60,8 +60,6 @@ public class CreateIndexFacetImpl
 
   private CreateIndexService createIndexService;
 
-  private final HelmDataAccess helmDataAccess;
-
   private final long interval;
 
   private final static String INDEX_YAML = "index.yaml";
@@ -76,12 +74,10 @@ public class CreateIndexFacetImpl
   @Inject
   public CreateIndexFacetImpl(final EventManager eventManager,
                               final CreateIndexService createIndexService,
-                              final HelmDataAccess helmDataAccess,
                               @Named("${nexus.helm.createrepo.interval:-1000}") final long interval)
   {
     this.eventManager = checkNotNull(eventManager);
     this.createIndexService = checkNotNull(createIndexService);
-    this.helmDataAccess = checkNotNull(helmDataAccess);
     this.interval = interval;
   }
 
@@ -158,8 +154,9 @@ public class CreateIndexFacetImpl
     StorageTx tx = UnitOfWork.currentTx();
     Repository repository = getRepository();
     Bucket bucket = tx.findBucket(repository);
+    HelmFacet helmFacet = repository.facet(HelmFacet.class);
 
-    Asset asset = helmDataAccess.findAsset(tx, bucket, INDEX_YAML);
+    Asset asset = helmFacet.findAsset(tx, bucket, INDEX_YAML);
     if (asset == null) {
       asset = tx.createAsset(bucket, repository.getFormat());
       asset.name(INDEX_YAML);
@@ -167,7 +164,7 @@ public class CreateIndexFacetImpl
     }
 
     try {
-      helmDataAccess.saveAsset(tx, asset, indexYaml, TGZ_CONTENT_TYPE, null);
+      helmFacet.saveAsset(tx, asset, indexYaml, TGZ_CONTENT_TYPE, null);
     }
     catch (IOException ex) {
       log.warn("Could not rebuild index.yaml", ex);

@@ -44,13 +44,13 @@ public class HelmAssetAttributePopulatorTest
 
     underTest.populate(nestedAttributesMap, setUpHelmAttributes());
 
-    assertThat(nestedAttributesMap.get(HelmProperties.ICON).toString(), is(equalTo("icon")));
-    assertThat(nestedAttributesMap.get(HelmProperties.DESCRIPTION).toString(), is(equalTo("description")));
-    assertThat(nestedAttributesMap.get(HelmProperties.NAME).toString(), is(equalTo("name")));
-    assertThat(nestedAttributesMap.get(HelmProperties.VERSION).toString(), is(equalTo("1.0.0")));
-    assertThat(nestedAttributesMap.get(HelmProperties.APP_VERSION).toString(), is(equalTo("0.0.1")));
-    assertThat(nestedAttributesMap.get(HelmProperties.MAINTAINERS), is(notNullValue()));
-    assertThat(nestedAttributesMap.get(HelmProperties.SOURCES), is(notNullValue()));
+    assertThat(nestedAttributesMap.get(HelmProperties.ICON.getPropertyName()), is(equalTo("icon")));
+    assertThat(nestedAttributesMap.get(HelmProperties.DESCRIPTION.getPropertyName()), is(equalTo("description")));
+    assertThat(nestedAttributesMap.get(HelmProperties.NAME.getPropertyName()), is(equalTo("name")));
+    assertThat(nestedAttributesMap.get(HelmProperties.VERSION.getPropertyName()), is(equalTo("1.0.0")));
+    assertThat(nestedAttributesMap.get(HelmProperties.APP_VERSION.getPropertyName()), is(equalTo("0.0.1")));
+    assertThat(nestedAttributesMap.get(HelmProperties.MAINTAINERS.getPropertyName()), is(notNullValue()));
+    assertThat(nestedAttributesMap.get(HelmProperties.SOURCES.getPropertyName()), is(notNullValue()));
   }
 
   private HelmAttributes setUpHelmAttributes() {
