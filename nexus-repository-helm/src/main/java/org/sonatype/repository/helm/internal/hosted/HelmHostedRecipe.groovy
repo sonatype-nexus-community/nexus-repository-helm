@@ -173,7 +173,7 @@ class HelmHostedRecipe
   static Matcher provenanceMethodMatcher(final String... httpMethods) {
     LogicMatchers.and(
         new ActionMatcher(httpMethods),
-        tokenMatcherForExtensionAndName('prov'),
+        tokenMatcherForExtensionAndName('tgz.prov'),
         new Matcher() {
           @Override
           boolean matches(final Context context) {

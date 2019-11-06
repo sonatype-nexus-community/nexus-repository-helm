@@ -12,34 +12,34 @@
  */
 package org.sonatype.repository.helm;
 
-import org.apache.commons.lang3.StringUtils;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.rest.UploadDefinitionExtension;
 import org.sonatype.nexus.repository.security.ContentPermissionChecker;
 import org.sonatype.nexus.repository.security.VariableResolverAdapter;
+import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.TempBlob;
-import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.repository.upload.ComponentUpload;
 import org.sonatype.nexus.repository.upload.UploadDefinition;
 import org.sonatype.nexus.repository.upload.UploadHandlerSupport;
 import org.sonatype.nexus.repository.upload.UploadResponse;
 import org.sonatype.nexus.repository.view.PartPayload;
 import org.sonatype.nexus.rest.ValidationErrorsException;
+import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 
 import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
 import static org.sonatype.repository.helm.internal.util.HelmPathUtils.PROVENANCE_EXTENSION;
@@ -83,9 +83,7 @@ public class HelmUploadHandler
 
     PartPayload payload = upload.getAssetUploads().get(0).getPayload();
 
-    String fileName = Optional
-        .ofNullable(payload.getName())
-        .orElse(StringUtils.EMPTY);
+    String fileName = payload.getName() != null ? payload.getName() : StringUtils.EMPTY;
 
     try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HASH_ALGORITHMS)) {
       HelmAttributes attributesFromInputStream;
@@ -101,7 +99,7 @@ public class HelmUploadHandler
         assetKind = AssetKind.HELM_PACKAGE;
         extension = TGZ_EXTENSION;
       } else {
-        throw new IllegalArgumentException("Unsupported extension. Extension must be .tgz or .tgz.prov ");
+        throw new IllegalArgumentException("Unsupported extension. Extension must be .tgz or .tgz.prov");
       }
 
       String name = attributesFromInputStream.getName();
@@ -118,11 +116,16 @@ public class HelmUploadHandler
       String path = String.format("%s-%s%s", name, version, extension);
 
       ensurePermitted(repository.getName(), HelmFormat.NAME, path, Collections.emptyMap());
-      return TransactionalStoreBlob.operation.withDb(storageFacet.txSupplier()).throwing(IOException.class)
-          .call(() -> new UploadResponse(facet.upload(path, tempBlob, payload, assetKind)));
+      try {
+        UnitOfWork.begin(storageFacet.txSupplier());
+        Asset asset = facet.upload(path, tempBlob, payload, assetKind);
+        return new UploadResponse(asset);
+      }
+      finally {
+        UnitOfWork.end();
+      }
     }
   }
-
 
   @Override
   public UploadDefinition getDefinition() {

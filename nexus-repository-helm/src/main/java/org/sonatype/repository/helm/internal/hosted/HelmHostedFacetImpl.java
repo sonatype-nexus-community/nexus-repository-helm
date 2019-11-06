@@ -94,7 +94,6 @@ public class HelmHostedFacetImpl
   }
 
   @Override
-  @TransactionalStoreBlob
   public void upload(final String path,
                      final Payload payload,
                      final AssetKind assetKind) throws IOException
@@ -105,6 +104,7 @@ public class HelmHostedFacetImpl
   }
 
   @Override
+  @TransactionalStoreBlob
   public Asset upload(String path, TempBlob tempBlob, Payload payload, AssetKind assetKind) throws IOException {
     if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
       throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
@@ -116,9 +116,9 @@ public class HelmHostedFacetImpl
     Bucket bucket = tx.findBucket(getRepository());
     InputStream inputStream = tempBlob.get();
     HelmAttributes attributes =
-        assetKind == HELM_PROVENANCE ?
-            helmAttributeParser.getAttributesProvenanceFromInputStream(inputStream) :
-            helmAttributeParser.getAttributesFromInputStream(inputStream);
+        assetKind == HELM_PROVENANCE
+            ? helmAttributeParser.getAttributesProvenanceFromInputStream(inputStream)
+            : helmAttributeParser.getAttributesFromInputStream(inputStream);
     final Asset asset =
         helmFacet.findOrCreateAssetWithComponent(path, assetKind, tx, bucket, attributes);
     helmDataAccess.saveAsset(tx, asset, tempBlob, payload);
