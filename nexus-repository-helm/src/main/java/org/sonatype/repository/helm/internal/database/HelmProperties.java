@@ -15,8 +15,6 @@ package org.sonatype.repository.helm.internal.database;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
-
 /**
  * Database property names for Helm asset attributes
  *
@@ -33,8 +31,7 @@ public enum HelmProperties
   MAINTAINERS("maintainers"),
   NAME("name"),
   SOURCES("sources"),
-  VERSION("version"),
-  ASSET_KIND(P_ASSET_KIND);
+  VERSION("version");
 
   private String propertyName;
 

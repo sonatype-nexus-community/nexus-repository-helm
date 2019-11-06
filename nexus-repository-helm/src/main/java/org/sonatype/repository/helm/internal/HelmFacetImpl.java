@@ -31,15 +31,16 @@ import org.sonatype.nexus.repository.storage.Query;
 import org.sonatype.nexus.repository.storage.Query.Builder;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.view.Content;
+import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.view.payloads.BlobPayload;
-import org.sonatype.nexus.transaction.UnitOfWork;
-import org.sonatype.repository.helm.AttributesMapAdapter;
+import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 
 import com.google.common.base.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.singletonList;
+import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
 import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_COMPONENT;
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
@@ -57,48 +58,42 @@ public class HelmFacetImpl
 {
   @Override
   public Asset findOrCreateAsset(
+      final StorageTx tx,
       final String assetPath,
-      final AttributesMapAdapter helmAttributes)
+      final AssetKind assetKind,
+      final HelmAttributes helmAttributes)
   {
-    Optional<Asset> assetOpt = findAsset(assetPath);
+    Optional<Asset> assetOpt = findAsset(tx, assetPath);
     return assetOpt.orElseGet(() ->
-        createAsset(assetPath, helmAttributes, helmAttributes.getAssetKind()));
-  }
-
-  @Override
-  public Content findOrCreateAssetWithBlob(
-      final String assetPath,
-      final AttributesMapAdapter helmAttributes,
-      final Supplier<InputStream> contentSupplier)
-  {
-    Asset asset = findOrCreateAsset(assetPath, helmAttributes);
-    return saveAsset(asset, contentSupplier, helmAttributes.getContentType(), helmAttributes.getContentAttributes());
+        createAsset(tx, assetPath, helmAttributes, assetKind));
   }
 
   private Asset createAsset(
+      final StorageTx tx,
       final String assetPath,
-      final AttributesMapAdapter helmAttributes,
+      final HelmAttributes helmAttributes,
       final AssetKind assetKind)
   {
     checkNotNull(assetKind);
 
-    StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(getRepository());
     Asset asset = assetKind == AssetKind.HELM_PACKAGE
-        ? tx.createAsset(bucket, findOrCreateComponent(helmAttributes.getName(), helmAttributes.getVersion()))
+        ? tx.createAsset(bucket, findOrCreateComponent(tx, bucket, helmAttributes.getName(), helmAttributes.getVersion()))
         : tx.createAsset(bucket, getRepository().getFormat());
+    asset.formatAttributes().set(P_ASSET_KIND, assetKind.name());
     helmAttributes.populate(asset.formatAttributes());
     asset.name(assetPath);
     tx.saveAsset(asset);
     return asset;
   }
 
-  private Component findOrCreateComponent(final String name, final String version)
+  private Component findOrCreateComponent(final StorageTx tx,
+                                          final Bucket bucket,
+                                          final String name,
+                                          final String version)
   {
-    Optional<Component> componentOpt = findComponent(name, version);
+    Optional<Component> componentOpt = findComponent(tx, name, version);
     if (!componentOpt.isPresent()) {
-      StorageTx tx = UnitOfWork.currentTx();
-      Bucket bucket = tx.findBucket(getRepository());
       Component component = tx.createComponent(bucket, getRepository().getFormat())
           .name(name)
           .version(version);
@@ -113,9 +108,8 @@ public class HelmFacetImpl
    *
    * @return found Optional<component> or Optional.empty if not found
    */
-  private Optional<Component> findComponent(final String name, final String version)
+  private Optional<Component> findComponent(final StorageTx tx, final String name, final String version)
   {
-    StorageTx tx = UnitOfWork.currentTx();
     Query query = builder()
         .where(P_NAME).eq(name)
         .and(P_VERSION).eq(version)
@@ -130,14 +124,12 @@ public class HelmFacetImpl
    * @return found assets or null if not found
    */
   @Nullable
-  public Iterable<Asset> browseComponentAssets()
+  public Iterable<Asset> browseComponentAssets(final StorageTx tx)
   {
     Builder builder = builder()
         .where(P_COMPONENT).isNotNull();
 
     Query query = builder.build();
-
-    StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(getRepository());
     return tx.browseAssets(query, bucket);
   }
@@ -148,29 +140,33 @@ public class HelmFacetImpl
    * @return found Optional<Asset> or Optional.empty if not found
    */
   @Override
-  public Optional<Asset> findAsset(final String assetName) {
-    StorageTx tx = UnitOfWork.currentTx();
+  public Optional<Asset> findAsset(final StorageTx tx, final String assetName) {
     Bucket bucket = tx.findBucket(getRepository());
     Asset asset = tx.findAssetWithProperty(P_NAME, assetName, bucket);
     return Optional.ofNullable(asset);
   }
 
-  /**browseComponentAssets
+  /**
    * Save an asset and create blob.
    *
    * @return blob content
    */
-  private Content saveAsset(final Asset asset,
-                           final Supplier<InputStream> contentSupplier,
-                           final String contentType,
-                           final AttributesMap contentAttributes)
+  @Override
+  public Content saveAsset(final StorageTx tx,
+                            final Asset asset,
+                            final Supplier<InputStream> contentSupplier,
+                            final Payload payload)
   {
-    try
-    {
-      StorageTx tx = UnitOfWork.currentTx();
+    try {
+      String contentType = null;
+      AttributesMap contentAttributes = null;
+      if (payload instanceof Content) {
+        contentAttributes = ((Content) payload).getAttributes();
+        contentType = payload.getContentType();
+      }
       return saveAsset(tx, asset, contentSupplier, contentType, contentAttributes);
     }
-    catch (IOException ex){
+    catch (IOException ex) {
       log.warn("Could not set blob {}", ex);
       return null;
     }
@@ -181,7 +177,8 @@ public class HelmFacetImpl
    *
    * @return blob content
    */
-  private Content saveAsset(final StorageTx tx,
+  @Override
+  public Content saveAsset(final StorageTx tx,
                            final Asset asset,
                            final Supplier<InputStream> contentSupplier,
                            @Nullable final String contentType,

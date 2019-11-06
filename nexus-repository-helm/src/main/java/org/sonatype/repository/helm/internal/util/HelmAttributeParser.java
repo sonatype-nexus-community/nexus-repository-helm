@@ -12,15 +12,14 @@
  */
 package org.sonatype.repository.helm.internal.util;
 
-import org.sonatype.repository.helm.AttributesMapAdapter;
-import org.sonatype.repository.helm.internal.AssetKind;
+import java.io.IOException;
+import java.io.InputStream;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.IOException;
-import java.io.InputStream;
+
+import org.sonatype.repository.helm.HelmAttributes;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,9 +41,9 @@ public class HelmAttributeParser
 
   }
 
-  public AttributesMapAdapter getAttributesFromInputStream(final InputStream inputStream, @Nullable final AssetKind assetKind) throws IOException {
+  public HelmAttributes getAttributesFromInputStream(final InputStream inputStream) throws IOException {
     try (InputStream is = tgzParser.getChartFromInputStream(inputStream)) {
-      return new AttributesMapAdapter(assetKind, yamlParser.load(is));
+      return new HelmAttributes(yamlParser.load(is));
     }
   }
 }

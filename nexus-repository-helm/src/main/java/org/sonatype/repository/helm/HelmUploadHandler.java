@@ -12,7 +12,13 @@
  */
 package org.sonatype.repository.helm;
 
-import org.apache.commons.lang3.StringUtils;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.rest.UploadDefinitionExtension;
@@ -31,13 +37,7 @@ import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 
 import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
@@ -81,7 +81,7 @@ public class HelmUploadHandler
 
     PartPayload payload = upload.getAssetUploads().get(0).getPayload();
     try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HASH_ALGORITHMS)) {
-      AttributesMapAdapter attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get(), null);
+      HelmAttributes attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get());
 
       String name = attributesFromInputStream.getName();
       String version = attributesFromInputStream.getVersion();

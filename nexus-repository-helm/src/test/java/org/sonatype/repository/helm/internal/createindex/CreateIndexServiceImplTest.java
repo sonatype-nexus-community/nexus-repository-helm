@@ -111,7 +111,7 @@ public class CreateIndexServiceImplTest
     shaMap.put("sha256", "12345");
 
     when(assetAttributes.get("checksum", Map.class)).thenReturn(shaMap);
-    when(helmFacet.browseComponentAssets()).thenReturn(list);
+    when(helmFacet.browseComponentAssets(storageTx)).thenReturn(list);
     when(indexYamlBuilder.build(anyObject(), anyObject())).thenReturn(tempBlob);
 
     TempBlob result = underTest.buildIndexYaml(repository);
@@ -124,7 +124,7 @@ public class CreateIndexServiceImplTest
     when(assets.iterator()).thenReturn(assetIterator);
     when(assetIterator.next()).thenReturn(asset);
     when(asset.componentId()).thenReturn(null);
-    when(helmFacet.browseComponentAssets()).thenReturn(assets);
+    when(helmFacet.browseComponentAssets(storageTx)).thenReturn(assets);
     when(indexYamlBuilder.build(anyObject(), anyObject())).thenReturn(tempBlob);
 
     TempBlob result = underTest.buildIndexYaml(repository);

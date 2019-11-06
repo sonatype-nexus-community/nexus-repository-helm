@@ -23,7 +23,7 @@ import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.manager.RepositoryManager;
 import org.sonatype.nexus.repository.storage.AssetBlob;
 import org.sonatype.nexus.repository.storage.Query;
-import org.sonatype.repository.helm.AttributesMapAdapter;
+import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmRestoreFacet;
 import org.sonatype.repository.helm.internal.HelmFormat;
 
@@ -116,7 +116,7 @@ public class HelmRestoreBlobStrategy
   protected Query getComponentQuery(final HelmRestoreBlobData data) throws IOException {
     HelmRestoreFacet facet = getRestoreFacet(data);
     RestoreBlobData blobData = data.getBlobData();
-    AttributesMapAdapter attributes = facet.extractComponentAttributesFromArchive(blobData.getBlob().getInputStream());
+    HelmAttributes attributes = facet.extractComponentAttributesFromArchive(blobData.getBlob().getInputStream());
     return facet.getComponentQuery(attributes);
   }
 

@@ -18,7 +18,7 @@ import org.sonatype.nexus.repository.Repository
 import org.sonatype.nexus.repository.config.Configuration
 import org.sonatype.nexus.testsuite.testsupport.fixtures.ConfigurationRecipes
 
-import groovy.transform.CompileStatic;
+import groovy.transform.CompileStatic
 
 /**
  * Factory for Helm {@link Repository} {@link Configuration}

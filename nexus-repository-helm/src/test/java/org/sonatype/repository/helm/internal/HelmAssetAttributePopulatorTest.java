@@ -12,14 +12,15 @@
  */
 package org.sonatype.repository.helm.internal;
 
-import org.junit.Test;
-import org.sonatype.goodies.testsupport.TestSupport;
-import org.sonatype.nexus.common.collect.NestedAttributesMap;
-import org.sonatype.repository.helm.AttributesMapAdapter;
-import org.sonatype.repository.helm.internal.database.HelmProperties;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.sonatype.goodies.testsupport.TestSupport;
+import org.sonatype.nexus.common.collect.NestedAttributesMap;
+import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.repository.helm.internal.database.HelmProperties;
+
+import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -36,7 +37,6 @@ public class HelmAssetAttributePopulatorTest
 
     setUpHelmAttributes().populate(nestedAttributesMap);
 
-    assertThat(nestedAttributesMap.get(HelmProperties.ASSET_KIND.getPropertyName()), is(equalTo(AssetKind.HELM_PACKAGE.name())));
     assertThat(nestedAttributesMap.get(HelmProperties.ICON.getPropertyName()), is(equalTo("icon")));
     assertThat(nestedAttributesMap.get(HelmProperties.DESCRIPTION.getPropertyName()), is(equalTo("description")));
     assertThat(nestedAttributesMap.get(HelmProperties.NAME.getPropertyName()), is(equalTo("name")));
@@ -46,9 +46,8 @@ public class HelmAssetAttributePopulatorTest
     assertThat(nestedAttributesMap.get(HelmProperties.SOURCES.getPropertyName()), is(notNullValue()));
   }
 
-  private AttributesMapAdapter setUpHelmAttributes() {
+  private HelmAttributes setUpHelmAttributes() {
     Map<String, Object> properties = new HashMap<>();
-    properties.put(HelmProperties.ASSET_KIND.getPropertyName(), AssetKind.HELM_PACKAGE);
     properties.put(HelmProperties.DESCRIPTION.getPropertyName(), "description");
     properties.put(HelmProperties.ICON.getPropertyName(), "icon");
     properties.put(HelmProperties.NAME.getPropertyName(), "name");
@@ -57,6 +56,6 @@ public class HelmAssetAttributePopulatorTest
     properties.put(HelmProperties.SOURCES.getPropertyName(), HelmListTestHelper.getSourcesList());
     properties.put(HelmProperties.MAINTAINERS.getPropertyName(), HelmListTestHelper.getMaintainersList());
 
-    return new AttributesMapAdapter(null, properties);
+    return new HelmAttributes(properties);
   }
 }

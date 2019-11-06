@@ -12,6 +12,12 @@
  */
 package org.sonatype.repository.helm.internal.restore;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.config.Configuration;
@@ -22,16 +28,11 @@ import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.transaction.UnitOfWork;
-import org.sonatype.repository.helm.AttributesMapAdapter;
+import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.HelmRestoreFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.io.InputStream;
 
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
@@ -64,11 +65,11 @@ public class HelmRestoreFacetImpl
   @Override
   @TransactionalTouchBlob
   public void restore(final AssetBlob assetBlob, final String path) throws IOException {
-    AttributesMapAdapter attributes = componentRequired(path)
-        ? helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream(), AssetKind.HELM_PACKAGE)
-        : helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream(), AssetKind.HELM_INDEX);
-    Asset asset = helmFacet.findOrCreateAsset(path, attributes);
     StorageTx tx = UnitOfWork.currentTx();
+    HelmAttributes attributes = helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
+    Asset asset = componentRequired(path)
+        ? helmFacet.findOrCreateAsset(tx, path, AssetKind.HELM_PACKAGE, attributes)
+        : helmFacet.findOrCreateAsset(tx, path, AssetKind.HELM_INDEX, attributes);
     tx.attachBlob(asset, assetBlob);
     Content.applyToAsset(asset, Content.maintainLastModified(asset, new AttributesMap()));
     tx.saveAsset(asset);
@@ -88,13 +89,13 @@ public class HelmRestoreFacetImpl
   }
 
   @Override
-  public Query getComponentQuery(final AttributesMapAdapter attributes) {
+  public Query getComponentQuery(final HelmAttributes attributes) {
     return Query.builder().where(P_NAME).eq(attributes.getName())
         .and(P_VERSION).eq(attributes.getVersion()).build();
   }
 
   @Override
-  public AttributesMapAdapter extractComponentAttributesFromArchive(final InputStream is) throws IOException {
-    return helmAttributeParser.getAttributesFromInputStream(is, null);
+  public HelmAttributes extractComponentAttributesFromArchive(final InputStream is) throws IOException {
+    return helmAttributeParser.getAttributesFromInputStream(is);
   }
 }

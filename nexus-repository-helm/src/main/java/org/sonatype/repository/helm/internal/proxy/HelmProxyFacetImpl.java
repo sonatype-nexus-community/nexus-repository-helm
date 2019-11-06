@@ -12,6 +12,16 @@
  */
 package org.sonatype.repository.helm.internal.proxy;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.repository.cache.CacheInfo;
 import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.proxy.ProxyFacet;
@@ -28,20 +38,12 @@ import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.transaction.UnitOfWork;
-import org.sonatype.repository.helm.AttributesMapAdapter;
+import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
@@ -131,9 +133,10 @@ public class HelmProxyFacetImpl
                                         final Payload payload,
                                         final AssetKind assetKind)
   {
-    AttributesMapAdapter chart = new AttributesMapAdapter(assetKind, Collections.emptyMap());
-    chart.addAdditionalContent(payload);
-    return helmFacet.findOrCreateAssetWithBlob(assetPath, chart, metadataContent);
+    StorageTx tx = UnitOfWork.currentTx();
+    HelmAttributes chart = new HelmAttributes(Collections.emptyMap());
+    Asset asset = helmFacet.findOrCreateAsset(tx, assetPath, assetKind, chart);
+    return helmFacet.saveAsset(tx, asset, metadataContent, payload);
   }
 
   private Content putComponent(final Content content,
@@ -141,25 +144,30 @@ public class HelmProxyFacetImpl
                                final AssetKind assetKind) throws IOException {
     StorageFacet storageFacet = facet(StorageFacet.class);
     try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
-      AttributesMapAdapter helmAttributes = helmAttributeParser.getAttributesFromInputStream(tempBlob.get(), assetKind);
-      helmAttributes.addAdditionalContent(content);
-      return doCreateOrSaveComponent(helmAttributes, fileName, tempBlob);
+      HelmAttributes helmAttributes = helmAttributeParser.getAttributesFromInputStream(tempBlob.get());
+      return doCreateOrSaveComponent(helmAttributes, fileName, assetKind, tempBlob, content.getContentType(), content.getAttributes());
     }
   }
 
   @TransactionalStoreBlob
-  protected Content doCreateOrSaveComponent(final AttributesMapAdapter helmAttributes,
-                                            final String fileName,
-                                            final TempBlob componentContent)
+  protected Content doCreateOrSaveComponent(
+      final HelmAttributes helmAttributes,
+      final String fileName,
+      final AssetKind assetKind,
+      final TempBlob componentContent,
+      final String contentType,
+      final AttributesMap contentAttributes) throws IOException
   {
-    return helmFacet.findOrCreateAssetWithBlob(fileName, helmAttributes, componentContent);
+    StorageTx tx = UnitOfWork.currentTx();
+    Asset asset = helmFacet.findOrCreateAsset(tx, fileName, assetKind, helmAttributes);
+    return helmFacet.saveAsset(tx, asset, componentContent, contentType, contentAttributes);
   }
 
   @TransactionalTouchBlob
   protected Content getAsset(final String name) {
     StorageTx tx = UnitOfWork.currentTx();
 
-    Optional<Asset> assetOpt = helmFacet.findAsset(name);
+    Optional<Asset> assetOpt = helmFacet.findAsset(tx, name);
     if (!assetOpt.isPresent()) {
       return null;
     }
