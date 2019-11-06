@@ -21,7 +21,6 @@ import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.view.Content;
 
 import com.google.common.base.Supplier;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @since 1.0.next
@@ -38,7 +37,7 @@ public interface HelmFacet
       final String assetPath,
       final AttributesMapAdapter helmAttributes);
 
-  Pair<Asset, Content> findOrCreateAssetWithBlob(
+  Content findOrCreateAssetWithBlob(
       final String assetPath,
       final AttributesMapAdapter helmAttributes,
       final Supplier<InputStream> contentSupplier);

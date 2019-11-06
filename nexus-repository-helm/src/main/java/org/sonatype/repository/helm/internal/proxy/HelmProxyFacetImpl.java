@@ -134,7 +134,7 @@ public class HelmProxyFacetImpl
   {
     AttributesMapAdapter chart = new AttributesMapAdapter(assetKind, Collections.emptyMap());
     chart.addAdditionalContent(payload);
-    return helmFacet.findOrCreateAssetWithBlob(assetPath, chart, metadataContent).getRight();
+    return helmFacet.findOrCreateAssetWithBlob(assetPath, chart, metadataContent);
   }
 
   private Content putComponent(final Content content,
@@ -153,7 +153,7 @@ public class HelmProxyFacetImpl
                                             final String fileName,
                                             final TempBlob componentContent)
   {
-    return helmFacet.findOrCreateAssetWithBlob(fileName, helmAttributes, componentContent).getRight();
+    return helmFacet.findOrCreateAssetWithBlob(fileName, helmAttributes, componentContent);
   }
 
   @TransactionalTouchBlob

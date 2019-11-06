@@ -12,8 +12,14 @@
  */
 package org.sonatype.repository.helm.internal;
 
-import com.google.common.base.Supplier;
-import org.apache.commons.lang3.tuple.Pair;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import javax.annotation.Nullable;
+import javax.inject.Named;
+
 import org.sonatype.nexus.blobstore.api.Blob;
 import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.repository.FacetSupport;
@@ -30,12 +36,7 @@ import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.AttributesMapAdapter;
 import org.sonatype.repository.helm.HelmFacet;
 
-import javax.annotation.Nullable;
-import javax.inject.Named;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Optional;
-import java.util.stream.StreamSupport;
+import com.google.common.base.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.singletonList;
@@ -65,15 +66,13 @@ public class HelmFacetImpl
   }
 
   @Override
-  public Pair<Asset, Content> findOrCreateAssetWithBlob(
+  public Content findOrCreateAssetWithBlob(
       final String assetPath,
       final AttributesMapAdapter helmAttributes,
       final Supplier<InputStream> contentSupplier)
   {
     Asset asset = findOrCreateAsset(assetPath, helmAttributes);
-    Content content = saveAsset(asset, contentSupplier, helmAttributes.getContentType(), helmAttributes.getContentAttributes());
-
-    return Pair.of(asset, content);
+    return saveAsset(asset, contentSupplier, helmAttributes.getContentType(), helmAttributes.getContentAttributes());
   }
 
   private Asset createAsset(

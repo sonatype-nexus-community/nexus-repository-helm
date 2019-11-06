@@ -133,6 +133,6 @@ public class HelmHostedFacetImpl
   {
     AttributesMapAdapter chart = helmAttributeParser.getAttributesFromInputStream(chartContent.get(), HELM_PACKAGE);
     chart.addAdditionalContent(payload);
-    return helmFacet.findOrCreateAssetWithBlob(assetPath, chart, chartContent).getLeft();
+    return helmFacet.findOrCreateAssetWithBlob(assetPath, chart, chartContent).getAttributes().get(Asset.class);
   }
 }
