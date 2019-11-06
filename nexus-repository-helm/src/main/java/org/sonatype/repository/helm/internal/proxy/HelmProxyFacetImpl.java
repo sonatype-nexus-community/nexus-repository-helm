@@ -68,8 +68,7 @@ public class HelmProxyFacetImpl
   @Inject
   public HelmProxyFacetImpl(final HelmPathUtils helmPathUtils,
                             final HelmAttributeParser helmAttributeParser,
-                            final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter,
-                            final HelmFacet helmFacet)
+                            final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter)
   {
     this.helmPathUtils = checkNotNull(helmPathUtils);
     this.helmAttributeParser = checkNotNull(helmAttributeParser);

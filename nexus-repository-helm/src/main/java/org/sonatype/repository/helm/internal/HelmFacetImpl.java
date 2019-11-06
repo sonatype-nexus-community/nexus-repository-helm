@@ -85,7 +85,7 @@ public class HelmFacetImpl
     StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(getRepository());
     Asset asset = assetKind == AssetKind.HELM_PACKAGE
-        ? tx.createAsset(bucket, findOrCreateComponent(helmAttributes))
+        ? tx.createAsset(bucket, findOrCreateComponent(helmAttributes.getName(), helmAttributes.getVersion()))
         : tx.createAsset(bucket, getRepository().getFormat());
     helmAttributes.populate(asset.formatAttributes());
     asset.name(assetPath);
@@ -93,15 +93,15 @@ public class HelmFacetImpl
     return asset;
   }
 
-  private Component findOrCreateComponent(final AttributesMapAdapter chart)
+  private Component findOrCreateComponent(final String name, final String version)
   {
-    Optional<Component> componentOpt = findComponent(chart.getName(), chart.getVersion());
+    Optional<Component> componentOpt = findComponent(name, version);
     if (!componentOpt.isPresent()) {
       StorageTx tx = UnitOfWork.currentTx();
       Bucket bucket = tx.findBucket(getRepository());
       Component component = tx.createComponent(bucket, getRepository().getFormat())
-          .name(chart.getName())
-          .version(chart.getVersion());
+          .name(name)
+          .version(version);
       tx.saveComponent(component);
       return component;
     }
@@ -113,8 +113,7 @@ public class HelmFacetImpl
    *
    * @return found Optional<component> or Optional.empty if not found
    */
-  private Optional<Component> findComponent(final String name,
-                                 final String version)
+  private Optional<Component> findComponent(final String name, final String version)
   {
     StorageTx tx = UnitOfWork.currentTx();
     Query query = builder()
