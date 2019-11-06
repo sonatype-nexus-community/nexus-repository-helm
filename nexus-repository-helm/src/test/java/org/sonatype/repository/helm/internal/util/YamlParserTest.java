@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sonatype.goodies.testsupport.TestSupport;
 import org.sonatype.repository.helm.internal.HelmListTestHelper;
 import org.sonatype.repository.helm.internal.metadata.ChartEntry;
@@ -74,7 +75,7 @@ public class YamlParserTest
     underTest.write(os, createChartIndex());
 
     assertThat(os, is(notNullValue()));
-    assertEquals(os.toString(), expectedResult);
+    assertEquals(StringUtils.normalizeSpace(os.toString()), StringUtils.normalizeSpace(expectedResult));
   }
 
   private List<String> getKeywords() {

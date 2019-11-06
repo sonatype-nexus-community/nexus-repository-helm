@@ -75,7 +75,7 @@ public class CreateIndexServiceImpl
 
     ChartIndex index = new ChartIndex();
 
-    for (Asset asset : helmFacet.browseComponentAssets(tx, tx.findBucket(repository))) {
+    for (Asset asset : helmFacet.browseComponentAssets()) {
       parseAssetIntoChartEntry(index, asset);
     }
 

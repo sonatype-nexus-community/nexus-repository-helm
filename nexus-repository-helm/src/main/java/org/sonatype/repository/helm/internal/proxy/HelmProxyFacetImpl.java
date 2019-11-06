@@ -12,19 +12,11 @@
  */
 package org.sonatype.repository.helm.internal.proxy;
 
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.sonatype.nexus.repository.cache.CacheInfo;
 import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.proxy.ProxyFacet;
 import org.sonatype.nexus.repository.proxy.ProxyFacetSupport;
 import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
@@ -36,12 +28,20 @@ import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.transaction.UnitOfWork;
-import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.repository.helm.AttributesMapAdapter;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
@@ -130,14 +130,11 @@ public class HelmProxyFacetImpl
   protected Content saveMetadataAsAsset(final String assetPath,
                                         final TempBlob metadataContent,
                                         final Payload payload,
-                                        final AssetKind assetKind) throws IOException
+                                        final AssetKind assetKind)
   {
-    StorageTx tx = UnitOfWork.currentTx();
-    Bucket bucket = tx.findBucket(getRepository());
-    Asset asset =
-        helmFacet.findOrCreateAssetWithAttributes(assetPath, assetKind, tx, bucket, new HelmAttributes());
-
-    return helmFacet.saveAsset(tx, asset, metadataContent, payload);
+    AttributesMapAdapter chart = new AttributesMapAdapter(assetKind, Collections.emptyMap());
+    chart.addAdditionalContent(payload);
+    return helmFacet.findOrCreateAssetWithBlob(assetPath, chart, metadataContent).getRight();
   }
 
   private Content putComponent(final Content content,
@@ -145,33 +142,30 @@ public class HelmProxyFacetImpl
                                final AssetKind assetKind) throws IOException {
     StorageFacet storageFacet = facet(StorageFacet.class);
     try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
-      HelmAttributes helmAttributes = helmAttributeParser.getAttributesFromInputStream(tempBlob.get());
-      return doCreateOrSaveComponent(helmAttributes, fileName, tempBlob, content, assetKind);
+      AttributesMapAdapter helmAttributes = helmAttributeParser.getAttributesFromInputStream(tempBlob.get(), assetKind);
+      helmAttributes.addAdditionalContent(content);
+      return doCreateOrSaveComponent(helmAttributes, fileName, tempBlob);
     }
   }
 
   @TransactionalStoreBlob
-  protected Content doCreateOrSaveComponent(final HelmAttributes helmAttributes,
+  protected Content doCreateOrSaveComponent(final AttributesMapAdapter helmAttributes,
                                             final String fileName,
-                                            final TempBlob componentContent,
-                                            final Payload payload,
-                                            final AssetKind assetKind) throws IOException
+                                            final TempBlob componentContent)
   {
-    StorageTx tx = UnitOfWork.currentTx();
-    Bucket bucket = tx.findBucket(getRepository());
-    Asset asset = helmFacet.findOrCreateAssetWithComponent(fileName, assetKind, tx, bucket, helmAttributes);
-
-    return helmFacet.saveAsset(tx, asset, componentContent, payload);
+    return helmFacet.findOrCreateAssetWithBlob(fileName, helmAttributes, componentContent).getRight();
   }
 
   @TransactionalTouchBlob
   protected Content getAsset(final String name) {
     StorageTx tx = UnitOfWork.currentTx();
 
-    Asset asset = helmFacet.findAsset(tx, tx.findBucket(getRepository()), name);
-    if (asset == null) {
+    Optional<Asset> assetOpt = helmFacet.findAsset(name);
+    if (!assetOpt.isPresent()) {
       return null;
     }
+
+    Asset asset = assetOpt.get();
     if (asset.markAsDownloaded()) {
       tx.saveAsset(asset);
     }

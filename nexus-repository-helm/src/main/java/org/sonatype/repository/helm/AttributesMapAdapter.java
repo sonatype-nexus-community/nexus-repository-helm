@@ -12,14 +12,17 @@
  */
 package org.sonatype.repository.helm;
 
+import org.sonatype.nexus.common.collect.AttributesMap;
+import org.sonatype.nexus.common.collect.NestedAttributesMap;
+import org.sonatype.nexus.repository.view.Content;
+import org.sonatype.nexus.repository.view.Payload;
+import org.sonatype.repository.helm.internal.AssetKind;
+import org.sonatype.repository.helm.internal.database.HelmProperties;
+
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-
-import org.sonatype.nexus.common.collect.AttributesMap;
-import org.sonatype.nexus.common.collect.NestedAttributesMap;
-import org.sonatype.repository.helm.internal.AssetKind;
-import org.sonatype.repository.helm.internal.database.HelmProperties;
+import java.util.Optional;
 
 /**
  * @since 1.0.next
@@ -27,46 +30,47 @@ import org.sonatype.repository.helm.internal.database.HelmProperties;
 public class AttributesMapAdapter
 {
   private Map<HelmProperties, Object> attributesEnumMap;
+  private AttributesMap contentAttributes = null;
+  private String contentType = null;
 
-  public AttributesMapAdapter(AssetKind assetKind) {
+  public AttributesMapAdapter(final AssetKind assetKind, final Map<String, Object> attributesMap) {
     attributesEnumMap = new EnumMap<>(HelmProperties.class);
-    attributesEnumMap.put(HelmProperties.ASSET_KIND, assetKind);
-  }
-
-  public AttributesMapAdapter(AssetKind assetKind, AttributesMap attributesMap)
-  {
-    attributesEnumMap = new EnumMap<>(HelmProperties.class);
-    attributesEnumMap.put(HelmProperties.ASSET_KIND, assetKind);
-
-    attributesMap.forEach(entry -> {
-      HelmProperties property = HelmProperties.findByPropertyName(entry.getKey())
-          .orElseThrow(() -> new IllegalArgumentException(entry.getKey() + " in AttributeMap"));
-      attributesEnumMap.put(property, entry.getValue());
+    attributesMap.forEach((key, value) -> {
+      Optional<HelmProperties> propertyOpt = HelmProperties.findByPropertyName(key);
+      if (value != null && propertyOpt.isPresent()) {
+        attributesEnumMap.put(propertyOpt.get(), value);
+      }
     });
-  }
 
-  public Map<HelmProperties, Object> getAttributesEnumMap() {
-    return attributesEnumMap;
-  }
-
-  //public NestedAttributesMap toAttributeMap() {
-  //  return new NestedAttributesMap(P_ATTRIBUTES, toAttributeMap(new NestedAttributesMap()).backing());
-  //}
-
-  public NestedAttributesMap toAttributeMap(NestedAttributesMap attributesMap) {
-    if (getAssetKind() == AssetKind.HELM_INDEX){
-      return null;
+    if (assetKind != null) {
+      attributesEnumMap.put(HelmProperties.ASSET_KIND, assetKind);
     }
+  }
+
+  public void addAdditionalContent(Payload payload) {
+    if (payload instanceof Content) {
+      contentAttributes = ((Content) payload).getAttributes();
+      contentType = payload.getContentType();
+    }
+  }
+
+  public void populate(final NestedAttributesMap attributesMap) {
     attributesEnumMap.forEach((helmProperties, o) -> {
       if (helmProperties == HelmProperties.ASSET_KIND){
-        //attributesMap.set(helmProperties.getPropertyName(), getAssetKind().getCacheType());
+        attributesMap.set(helmProperties.getPropertyName(), getAssetKind().name());
       }
       else {
         attributesMap.set(helmProperties.getPropertyName(), o);
       }
     });
+  }
 
-    return attributesMap;
+  public AttributesMap getContentAttributes() {
+    return contentAttributes;
+  }
+
+  public String getContentType() {
+    return contentType;
   }
 
   public AssetKind getAssetKind() {
@@ -81,8 +85,8 @@ public class AttributesMapAdapter
     return getValue(HelmProperties.VERSION, String.class);
   }
 
-  private String getValue(HelmProperties property){
-    return getValue(property, String.class);
+  public String getAppVersion() {
+    return getValue(HelmProperties.APP_VERSION, String.class);
   }
 
   public String getDescription() {

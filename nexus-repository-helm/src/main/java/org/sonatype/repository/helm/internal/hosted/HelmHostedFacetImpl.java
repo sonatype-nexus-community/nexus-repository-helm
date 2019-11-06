@@ -12,17 +12,10 @@
  */
 package org.sonatype.repository.helm.internal.hosted;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.base.Supplier;
 import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
@@ -32,12 +25,17 @@ import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.transaction.UnitOfWork;
-import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.repository.helm.AttributesMapAdapter;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
-import com.google.common.base.Supplier;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
@@ -77,10 +75,11 @@ public class HelmHostedFacetImpl
     checkNotNull(path);
     StorageTx tx = UnitOfWork.currentTx();
 
-    Asset asset = helmFacet.findAsset(tx, tx.findBucket(getRepository()), path);
-    if (asset == null) {
+    Optional<Asset> assetOpt = helmFacet.findAsset(path);
+    if (!assetOpt.isPresent()) {
       return null;
     }
+    Asset asset = assetOpt.get();
     if (asset.markAsDownloaded()) {
       tx.saveAsset(asset);
     }
@@ -109,13 +108,7 @@ public class HelmHostedFacetImpl
   public Asset upload(String path, TempBlob tempBlob,Payload payload) throws IOException {
     checkNotNull(path);
     checkNotNull(tempBlob);
-
-    StorageTx tx = UnitOfWork.currentTx();
-    Bucket bucket = tx.findBucket(getRepository());
-
-    Asset asset = createChartAsset(path, tx, bucket, tempBlob.get());
-    helmFacet.saveAsset(tx, asset, tempBlob, payload);
-    return asset;
+    return storeChart(path, tempBlob, payload);
   }
 
   @Override
@@ -123,37 +116,23 @@ public class HelmHostedFacetImpl
   public boolean delete(final String path) {
     checkNotNull(path);
 
-    StorageTx tx = UnitOfWork.currentTx();
-    Bucket bucket = tx.findBucket(getRepository());
-
-    Asset asset = helmFacet.findAsset(tx, bucket, path);
-    if (asset == null) {
+    Optional<Asset> asset = helmFacet.findAsset(path);
+    if (!asset.isPresent()) {
       return false;
     } else {
-      tx.deleteAsset(asset);
+      StorageTx tx = UnitOfWork.currentTx();
+      tx.deleteAsset(asset.get());
       return true;
     }
   }
 
   @TransactionalStoreBlob
-  protected Content storeChart(final String assetPath,
+  protected Asset storeChart(final String assetPath,
                              final Supplier<InputStream> chartContent,
                              final Payload payload) throws IOException
   {
-    StorageTx tx = UnitOfWork.currentTx();
-    Bucket bucket = tx.findBucket(getRepository());
-
-    Asset asset = createChartAsset(assetPath, tx, bucket, chartContent.get());
-
-    return helmFacet.saveAsset(tx, asset, chartContent, payload);
-  }
-
-  private Asset createChartAsset(final String assetPath,
-                                 final StorageTx tx,
-                                 final Bucket bucket,
-                                 final InputStream inputStream) throws IOException
-  {
-    HelmAttributes chart = helmAttributeParser.getAttributesFromInputStream(inputStream);
-    return helmFacet.findOrCreateAssetWithComponent(assetPath, HELM_PACKAGE, tx, bucket, chart);
+    AttributesMapAdapter chart = helmAttributeParser.getAttributesFromInputStream(chartContent.get(), HELM_PACKAGE);
+    chart.addAdditionalContent(payload);
+    return helmFacet.findOrCreateAssetWithBlob(assetPath, chart, chartContent).getLeft();
   }
 }

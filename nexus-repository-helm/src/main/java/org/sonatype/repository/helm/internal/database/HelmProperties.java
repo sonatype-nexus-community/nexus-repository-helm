@@ -29,7 +29,6 @@ public enum HelmProperties
   HOME("home"),
   ICON("icon"),
   APP_VERSION("appVersion"),
-  API_VERSION("apiVersion"),
   KEYWORDS("keywords"),
   MAINTAINERS("maintainers"),
   NAME("name"),

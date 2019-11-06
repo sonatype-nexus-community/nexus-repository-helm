@@ -12,15 +12,14 @@
  */
 package org.sonatype.repository.helm.internal;
 
-import java.util.HashMap;
-
+import org.junit.Test;
 import org.sonatype.goodies.testsupport.TestSupport;
 import org.sonatype.nexus.common.collect.NestedAttributesMap;
+import org.sonatype.repository.helm.AttributesMapAdapter;
 import org.sonatype.repository.helm.internal.database.HelmProperties;
-import org.sonatype.repository.helm.HelmAttributes;
 
-import org.junit.Before;
-import org.junit.Test;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -31,19 +30,13 @@ import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_
 public class HelmAssetAttributePopulatorTest
     extends TestSupport
 {
-  private HelmAssetAttributePopulator underTest;
-
-  @Before
-  public void setUp() throws Exception {
-    underTest = new HelmAssetAttributePopulator();
-  }
-
   @Test
   public void testPopulateNestedAttributesMapFromHelmAttributes() throws Exception {
     NestedAttributesMap nestedAttributesMap = new NestedAttributesMap(P_ATTRIBUTES, new HashMap<>());
 
-    underTest.populate(nestedAttributesMap, setUpHelmAttributes());
+    setUpHelmAttributes().populate(nestedAttributesMap);
 
+    assertThat(nestedAttributesMap.get(HelmProperties.ASSET_KIND.getPropertyName()), is(equalTo(AssetKind.HELM_PACKAGE.name())));
     assertThat(nestedAttributesMap.get(HelmProperties.ICON.getPropertyName()), is(equalTo("icon")));
     assertThat(nestedAttributesMap.get(HelmProperties.DESCRIPTION.getPropertyName()), is(equalTo("description")));
     assertThat(nestedAttributesMap.get(HelmProperties.NAME.getPropertyName()), is(equalTo("name")));
@@ -53,17 +46,17 @@ public class HelmAssetAttributePopulatorTest
     assertThat(nestedAttributesMap.get(HelmProperties.SOURCES.getPropertyName()), is(notNullValue()));
   }
 
-  private HelmAttributes setUpHelmAttributes() {
-    HelmAttributes helmAttributes = new HelmAttributes();
+  private AttributesMapAdapter setUpHelmAttributes() {
+    Map<String, Object> properties = new HashMap<>();
+    properties.put(HelmProperties.ASSET_KIND.getPropertyName(), AssetKind.HELM_PACKAGE);
+    properties.put(HelmProperties.DESCRIPTION.getPropertyName(), "description");
+    properties.put(HelmProperties.ICON.getPropertyName(), "icon");
+    properties.put(HelmProperties.NAME.getPropertyName(), "name");
+    properties.put(HelmProperties.VERSION.getPropertyName(), "1.0.0");
+    properties.put(HelmProperties.APP_VERSION.getPropertyName(), "0.0.1");
+    properties.put(HelmProperties.SOURCES.getPropertyName(), HelmListTestHelper.getSourcesList());
+    properties.put(HelmProperties.MAINTAINERS.getPropertyName(), HelmListTestHelper.getMaintainersList());
 
-    helmAttributes.setIcon("icon");
-    helmAttributes.setDescription("description");
-    helmAttributes.setName("name");
-    helmAttributes.setVersion("1.0.0");
-    helmAttributes.setAppVersion("0.0.1");
-    helmAttributes.setSources(HelmListTestHelper.getSourcesList());
-    helmAttributes.setMaintainers(HelmListTestHelper.getMaintainersList());
-
-    return helmAttributes;
+    return new AttributesMapAdapter(null, properties);
   }
 }

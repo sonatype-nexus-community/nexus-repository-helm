@@ -13,6 +13,7 @@
 package org.sonatype.repository.helm.internal.createindex;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -156,11 +157,15 @@ public class CreateIndexFacetImpl
     Bucket bucket = tx.findBucket(repository);
     HelmFacet helmFacet = repository.facet(HelmFacet.class);
 
-    Asset asset = helmFacet.findAsset(tx, bucket, INDEX_YAML);
-    if (asset == null) {
+    Optional<Asset> assetOpt = helmFacet.findAsset(INDEX_YAML);
+    Asset asset;
+    if (!assetOpt.isPresent()) {
       asset = tx.createAsset(bucket, repository.getFormat());
       asset.name(INDEX_YAML);
       asset.formatAttributes().set(P_ASSET_KIND, HELM_INDEX.name());
+    }
+    else {
+      asset = assetOpt.get();
     }
 
     try {

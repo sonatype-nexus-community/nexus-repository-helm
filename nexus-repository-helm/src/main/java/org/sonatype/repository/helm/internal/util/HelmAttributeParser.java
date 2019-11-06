@@ -12,25 +12,17 @@
  */
 package org.sonatype.repository.helm.internal.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
+import org.sonatype.repository.helm.AttributesMapAdapter;
+import org.sonatype.repository.helm.internal.AssetKind;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import org.sonatype.repository.helm.HelmAttributes;
+import java.io.IOException;
+import java.io.InputStream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.sonatype.repository.helm.internal.database.HelmProperties.APP_VERSION;
-import static org.sonatype.repository.helm.internal.database.HelmProperties.DESCRIPTION;
-import static org.sonatype.repository.helm.internal.database.HelmProperties.ICON;
-import static org.sonatype.repository.helm.internal.database.HelmProperties.MAINTAINERS;
-import static org.sonatype.repository.helm.internal.database.HelmProperties.NAME;
-import static org.sonatype.repository.helm.internal.database.HelmProperties.SOURCES;
-import static org.sonatype.repository.helm.internal.database.HelmProperties.VERSION;
 
 /**
  * @since 0.0.2
@@ -50,29 +42,9 @@ public class HelmAttributeParser
 
   }
 
-  public HelmAttributes getAttributesFromInputStream(final InputStream inputStream) throws IOException {
+  public AttributesMapAdapter getAttributesFromInputStream(final InputStream inputStream, @Nullable final AssetKind assetKind) throws IOException {
     try (InputStream is = tgzParser.getChartFromInputStream(inputStream)) {
-      Map<String, Object> attributes = yamlParser.load(is);
-      HelmAttributes helmAttributes = new HelmAttributes();
-      helmAttributes.setName(attributes.get(NAME.getPropertyName()).toString());
-      helmAttributes.setVersion(attributes.get(VERSION.getPropertyName()).toString());
-      if (null != attributes.get(DESCRIPTION.getPropertyName())) {
-        helmAttributes.setDescription(attributes.get(DESCRIPTION.getPropertyName()).toString());
-      }
-      if (null != attributes.get(ICON.getPropertyName())) {
-        helmAttributes.setIcon(attributes.get(ICON.getPropertyName()).toString());
-      }
-      if (null != attributes.get(MAINTAINERS.getPropertyName())) {
-        helmAttributes.setMaintainers((List<Map<String, String>>)attributes.get(MAINTAINERS.getPropertyName()));
-      }
-      if (null != attributes.get(SOURCES.getPropertyName())) {
-        helmAttributes.setSources((List<String>)attributes.get(SOURCES.getPropertyName()));
-      }
-      if (null != attributes.get(APP_VERSION.getPropertyName())) {
-        helmAttributes.setAppVersion(attributes.get(APP_VERSION.getPropertyName()).toString());
-      }
-
-      return helmAttributes;
+      return new AttributesMapAdapter(assetKind, yamlParser.load(is));
     }
   }
 }

@@ -81,7 +81,7 @@ public class HelmUploadHandler
 
     PartPayload payload = upload.getAssetUploads().get(0).getPayload();
     try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HASH_ALGORITHMS)) {
-      HelmAttributes attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get());
+      AttributesMapAdapter attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get(), null);
 
       String name = attributesFromInputStream.getName();
       String version = attributesFromInputStream.getVersion();
