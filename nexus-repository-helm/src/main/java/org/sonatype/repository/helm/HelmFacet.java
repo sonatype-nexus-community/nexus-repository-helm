@@ -12,19 +12,16 @@
  */
 package org.sonatype.repository.helm;
 
-import com.google.common.base.Supplier;
-import org.apache.commons.lang3.tuple.Pair;
-import org.sonatype.nexus.blobstore.api.Blob;
-import org.sonatype.nexus.common.collect.AttributesMap;
-import org.sonatype.nexus.repository.Facet;
-import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.StorageTx;
-import org.sonatype.nexus.repository.view.Content;
-
-import javax.annotation.Nullable;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
+
+import org.sonatype.nexus.blobstore.api.Blob;
+import org.sonatype.nexus.repository.Facet;
+import org.sonatype.nexus.repository.storage.Asset;
+import org.sonatype.nexus.repository.view.Content;
+
+import com.google.common.base.Supplier;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @since 1.0.next
@@ -45,12 +42,6 @@ public interface HelmFacet
       final String assetPath,
       final AttributesMapAdapter helmAttributes,
       final Supplier<InputStream> contentSupplier);
-
-  Content saveAsset(final StorageTx tx,
-                    final Asset asset,
-                    final Supplier<InputStream> contentSupplier,
-                    @Nullable final String contentType,
-                    @Nullable final AttributesMap contentAttributes) throws IOException;
 
   Content toContent(final Asset asset, final Blob blob);
 }

@@ -12,17 +12,17 @@
  */
 package org.sonatype.repository.helm;
 
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.common.collect.NestedAttributesMap;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.database.HelmProperties;
-
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * @since 1.0.next
@@ -47,7 +47,7 @@ public class AttributesMapAdapter
     }
   }
 
-  public void addAdditionalContent(Payload payload) {
+  public void addAdditionalContent(final Payload payload) {
     if (payload instanceof Content) {
       contentAttributes = ((Content) payload).getAttributes();
       contentType = payload.getContentType();
@@ -69,8 +69,16 @@ public class AttributesMapAdapter
     return contentAttributes;
   }
 
+  public void setContentAttributes(AttributesMap contentAttributes) {
+    this.contentAttributes = contentAttributes;
+  }
+
   public String getContentType() {
     return contentType;
+  }
+
+  public void setContentType(String contentType) {
+    this.contentType = contentType;
   }
 
   public AssetKind getAssetKind() {

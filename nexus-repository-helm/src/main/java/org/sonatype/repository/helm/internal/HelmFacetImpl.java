@@ -183,7 +183,7 @@ public class HelmFacetImpl
    *
    * @return blob content
    */
-  public Content saveAsset(final StorageTx tx,
+  private Content saveAsset(final StorageTx tx,
                            final Asset asset,
                            final Supplier<InputStream> contentSupplier,
                            @Nullable final String contentType,
