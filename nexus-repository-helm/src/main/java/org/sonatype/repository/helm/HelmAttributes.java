@@ -27,6 +27,10 @@ public class HelmAttributes
 {
   private Map<HelmProperties, Object> attributesEnumMap;
 
+  public HelmAttributes() {
+    attributesEnumMap = new EnumMap<>(HelmProperties.class);
+  }
+
   public HelmAttributes(final Map<String, Object> attributesMap) {
     attributesEnumMap = new EnumMap<>(HelmProperties.class);
     attributesMap.forEach((key, value) -> {
@@ -70,6 +74,26 @@ public class HelmAttributes
 
   public List<String> getSources() {
     return getValue(HelmProperties.SOURCES, List.class);
+  }
+
+  public void setName(final String name) {
+    attributesEnumMap.put(HelmProperties.NAME, name);
+  }
+
+  public void setDescription(final String description) {
+    attributesEnumMap.put(HelmProperties.DESCRIPTION, description);
+  }
+
+  public void setVersion(final String version) {
+    attributesEnumMap.put(HelmProperties.VERSION, version);
+  }
+
+  public void setIcon(final String icon) {
+    attributesEnumMap.put(HelmProperties.ICON, icon);
+  }
+
+  public void setAppVersion(final String appVersion) {
+    attributesEnumMap.put(HelmProperties.APP_VERSION, appVersion);
   }
 
   private <T> T getValue(HelmProperties property, Class<T> tClass){

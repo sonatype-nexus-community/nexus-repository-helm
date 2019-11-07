@@ -46,6 +46,8 @@ public class IndexYamlAbsoluteUrlRewriterTest
 
   private static final String INDEX_YAML_NO_ABSOLUTE_URLS = "indexWithRelativeUrls.yaml";
 
+  private static final String INDEX_YAML_WITH_CUSTOM_URL = "index.yaml";
+
   private static final String INDEX_YAML_URL_NODE = "url";
 
   private static final String HTTP = "http://";
@@ -67,6 +69,14 @@ public class IndexYamlAbsoluteUrlRewriterTest
   public void setUp() throws Exception {
     setupRepositoryMock();
     this.underTest = new IndexYamlAbsoluteUrlRewriter();
+  }
+
+  @Test
+  public void checkCustomUrls() throws Exception {
+    setupIndexMock(INDEX_YAML_WITH_CUSTOM_URL);
+    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository);
+    assertThat(newTempBlob.get(), is(instanceOf(InputStream.class)));
+    checkThatAbsoluteUrlRemoved(newTempBlob.get());
   }
 
   @Test

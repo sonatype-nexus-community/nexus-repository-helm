@@ -32,13 +32,19 @@ public class HelmAttributeParser
 {
   private TgzParser tgzParser;
   private YamlParser yamlParser;
+  private ProvenanceParser provenanceParser;
 
   @Inject
   public HelmAttributeParser(final TgzParser tgzParser,
-                             final YamlParser yamlParser) {
+                             final YamlParser yamlParser,
+                             final ProvenanceParser provenanceParser) {
     this.tgzParser = checkNotNull(tgzParser);
     this.yamlParser = checkNotNull(yamlParser);
+    this.provenanceParser = checkNotNull(provenanceParser);
+  }
 
+  public HelmAttributes getAttributesProvenanceFromInputStream(final InputStream inputStream) throws IOException {
+    return provenanceParser.parse(inputStream);
   }
 
   public HelmAttributes getAttributesFromInputStream(final InputStream inputStream) throws IOException {

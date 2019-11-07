@@ -41,6 +41,7 @@ import org.sonatype.repository.helm.internal.createindex.CreateIndexFacetImpl
 import static org.sonatype.nexus.repository.http.HttpMethods.DELETE
 import static org.sonatype.nexus.repository.http.HttpMethods.PUT
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE
+import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE
 
 /**
  * Helm Hosted Recipe
@@ -103,18 +104,20 @@ class HelmHostedRecipe
           .create())
     }
 
-    builder.route(new Route.Builder().matcher(chartUploadMatcher())
-        .handler(timingHandler)
-        .handler(securityHandler)
-        .handler(formatHighAvailabilitySupportHandler)
-        .handler(exceptionHandler)
-        .handler(handlerContributor)
-        .handler(conditionalRequestHandler)
-        .handler(partialFetchHandler)
-        .handler(contentHeadersHandler)
-        .handler(unitOfWorkHandler)
-        .handler(hostedHandlers.upload)
-        .create())
+    [chartUploadMatcher(), provenanceUploadMatcher()].each {matcher ->
+      builder.route(new Route.Builder().matcher(matcher)
+          .handler(timingHandler)
+          .handler(securityHandler)
+          .handler(formatHighAvailabilitySupportHandler)
+          .handler(exceptionHandler)
+          .handler(handlerContributor)
+          .handler(conditionalRequestHandler)
+          .handler(partialFetchHandler)
+          .handler(contentHeadersHandler)
+          .handler(unitOfWorkHandler)
+          .handler(hostedHandlers.upload)
+          .create())
+    }
 
     builder.route(new Route.Builder().matcher(chartDeleteMatcher())
         .handler(timingHandler)
@@ -145,6 +148,10 @@ class HelmHostedRecipe
     chartMethodMatcher(PUT)
   }
 
+  static Matcher provenanceUploadMatcher() {
+    provenanceMethodMatcher(PUT)
+  }
+
   static Matcher chartDeleteMatcher() {
     chartMethodMatcher(DELETE)
   }
@@ -157,6 +164,20 @@ class HelmHostedRecipe
           @Override
           boolean matches(final Context context) {
             context.attributes.set(AssetKind.class, HELM_PACKAGE)
+            return true
+          }
+        }
+    )
+  }
+
+  static Matcher provenanceMethodMatcher(final String... httpMethods) {
+    LogicMatchers.and(
+        new ActionMatcher(httpMethods),
+        tokenMatcherForExtensionAndName('tgz.prov'),
+        new Matcher() {
+          @Override
+          boolean matches(final Context context) {
+            context.attributes.set(AssetKind.class, HELM_PROVENANCE)
             return true
           }
         }

@@ -24,22 +24,24 @@ import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.rest.UploadDefinitionExtension;
 import org.sonatype.nexus.repository.security.ContentPermissionChecker;
 import org.sonatype.nexus.repository.security.VariableResolverAdapter;
+import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.TempBlob;
-import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.repository.upload.ComponentUpload;
 import org.sonatype.nexus.repository.upload.UploadDefinition;
 import org.sonatype.nexus.repository.upload.UploadHandlerSupport;
 import org.sonatype.nexus.repository.upload.UploadResponse;
 import org.sonatype.nexus.repository.view.PartPayload;
 import org.sonatype.nexus.rest.ValidationErrorsException;
+import org.sonatype.nexus.transaction.UnitOfWork;
+import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import org.apache.commons.lang3.StringUtils;
 
-import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
+import static org.sonatype.repository.helm.internal.util.HelmPathUtils.PROVENANCE_EXTENSION;
 import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
 
 /**
@@ -73,15 +75,31 @@ public class HelmUploadHandler
     this.helmPackageParser = helmPackageParser;
   }
 
-
   @Override
   public UploadResponse handle(Repository repository, ComponentUpload upload) throws IOException {
     HelmHostedFacet facet = repository.facet(HelmHostedFacet.class);
     StorageFacet storageFacet = repository.facet(StorageFacet.class);
 
     PartPayload payload = upload.getAssetUploads().get(0).getPayload();
-    try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HASH_ALGORITHMS)) {
-      HelmAttributes attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get());
+
+    String fileName = payload.getName() != null ? payload.getName() : StringUtils.EMPTY;
+
+    try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HelmFormat.HASH_ALGORITHMS)) {
+      HelmAttributes attributesFromInputStream;
+      AssetKind assetKind;
+      String extension;
+
+      if (fileName.endsWith(PROVENANCE_EXTENSION)) {
+        attributesFromInputStream = helmPackageParser.getAttributesProvenanceFromInputStream(tempBlob.get());
+        assetKind = AssetKind.HELM_PROVENANCE;
+        extension = PROVENANCE_EXTENSION;
+      } else if (fileName.endsWith(TGZ_EXTENSION)) {
+        attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get());
+        assetKind = AssetKind.HELM_PACKAGE;
+        extension = TGZ_EXTENSION;
+      } else {
+        throw new IllegalArgumentException("Unsupported extension. Extension must be .tgz or .tgz.prov");
+      }
 
       String name = attributesFromInputStream.getName();
       String version = attributesFromInputStream.getVersion();
@@ -94,14 +112,19 @@ public class HelmUploadHandler
         throw new ValidationErrorsException("Metadata is missing the version attribute");
       }
 
-      String path = name + "-" + version + "." + TGZ_EXTENSION;
+      String path = String.format("%s-%s%s", name, version, extension);
 
       ensurePermitted(repository.getName(), HelmFormat.NAME, path, Collections.emptyMap());
-      return TransactionalStoreBlob.operation.withDb(storageFacet.txSupplier()).throwing(IOException.class)
-          .call(() -> new UploadResponse(facet.upload(path, tempBlob, payload)));
+      try {
+        UnitOfWork.begin(storageFacet.txSupplier());
+        Asset asset = facet.upload(path, tempBlob, payload, assetKind);
+        return new UploadResponse(asset);
+      }
+      finally {
+        UnitOfWork.end();
+      }
     }
   }
-
 
   @Override
   public UploadDefinition getDefinition() {
