@@ -35,12 +35,12 @@ import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
-import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE;
+import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 
 /**
  * {@link HelmHostedFacetImpl implementation}
@@ -94,7 +94,7 @@ public class HelmHostedFacetImpl
                      final Payload payload,
                      final AssetKind assetKind) throws IOException
   {
-    try (TempBlob tempBlob = facet(StorageFacet.class).createTempBlob(payload, HelmFormat.HASH_ALGORITHMS)) {
+    try (TempBlob tempBlob = facet(StorageFacet.class).createTempBlob(payload, HASH_ALGORITHMS)) {
       upload(path, tempBlob, payload, assetKind);
     }
   }

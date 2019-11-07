@@ -45,6 +45,7 @@ import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_COMPONE
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
 import static org.sonatype.nexus.repository.storage.Query.builder;
+import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 
 /**
  * {@link HelmFacet} implementation.
@@ -186,7 +187,7 @@ public class HelmFacetImpl
   {
     Content.applyToAsset(asset, Content.maintainLastModified(asset, contentAttributes));
     AssetBlob assetBlob = tx.setBlob(
-        asset, asset.name(), contentSupplier, HelmFormat.HASH_ALGORITHMS, null, contentType, false
+        asset, asset.name(), contentSupplier, HASH_ALGORITHMS, null, contentType, false
     );
     asset.markAsDownloaded();
     tx.saveAsset(asset);
@@ -200,7 +201,7 @@ public class HelmFacetImpl
    */
   public Content toContent(final Asset asset, final Blob blob) {
     Content content = new Content(new BlobPayload(blob, asset.requireContentType()));
-    Content.extractFromAsset(asset, HelmFormat.HASH_ALGORITHMS, content.getAttributes());
+    Content.extractFromAsset(asset, HASH_ALGORITHMS, content.getAttributes());
     return content;
   }
 }

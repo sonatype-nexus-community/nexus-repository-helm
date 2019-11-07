@@ -18,7 +18,6 @@ import java.io.OutputStream;
 import org.sonatype.goodies.testsupport.TestSupport;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.TempBlob;
-import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.util.YamlParser;
 
 import org.junit.Before;
@@ -31,6 +30,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 
 public class IndexYamlBuilderTest
     extends TestSupport
@@ -61,7 +61,7 @@ public class IndexYamlBuilderTest
 
     TempBlob tempBlob = underTest.build(index, storageFacet);
 
-    verify(storageFacet).createTempBlob(captorStorage.capture(), eq(HelmFormat.HASH_ALGORITHMS));
+    verify(storageFacet).createTempBlob(captorStorage.capture(), eq(HASH_ALGORITHMS));
     verify(yamlParser).write(any(OutputStream.class), captor.capture());
 
     assertEquals(index, captor.getValue());
@@ -76,6 +76,6 @@ public class IndexYamlBuilderTest
   }
 
   private void initializeStorageFacet() {
-    when(storageFacet.createTempBlob(any(InputStream.class), eq(HelmFormat.HASH_ALGORITHMS))).thenReturn(tempBlob);
+    when(storageFacet.createTempBlob(any(InputStream.class), eq(HASH_ALGORITHMS))).thenReturn(tempBlob);
   }
 }
