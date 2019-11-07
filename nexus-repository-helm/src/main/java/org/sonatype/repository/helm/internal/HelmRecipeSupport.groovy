@@ -100,7 +100,7 @@ abstract class HelmRecipeSupport
   HandlerContributor handlerContributor
 
   @Inject
-  Provider<SingleAssetComponentMaintenance> componentMaintenanceFacet
+  Provider<HelmComponentMaintenanceFacet> componentMaintenanceFacet
 
   @Inject
   Provider<HttpClientFacet> httpClientFacet

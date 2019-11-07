@@ -38,10 +38,9 @@ import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
-import com.google.common.base.Supplier;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
+import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE;
 import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
 
 /**
@@ -99,27 +98,29 @@ public class HelmHostedFacetImpl
                      final Payload payload,
                      final AssetKind assetKind) throws IOException
   {
-    checkNotNull(path);
-    checkNotNull(payload);
-
-    if (assetKind != HELM_PACKAGE) {
-      throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
-    }
-
     try (TempBlob tempBlob = facet(StorageFacet.class).createTempBlob(payload, HASH_ALGORITHMS)) {
-      storeChart(path, tempBlob, payload);
+      upload(path, tempBlob, payload, assetKind);
     }
   }
 
   @Override
-  public Asset upload(String path, TempBlob tempBlob,Payload payload) throws IOException {
+  @TransactionalStoreBlob
+  public Asset upload(String path, TempBlob tempBlob, Payload payload, AssetKind assetKind) throws IOException {
+    if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
+      throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
+    }
     checkNotNull(path);
     checkNotNull(tempBlob);
 
     StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(getRepository());
-
-    Asset asset = createChartAsset(path, tx, bucket, tempBlob.get());
+    InputStream inputStream = tempBlob.get();
+    HelmAttributes attributes =
+        assetKind == HELM_PROVENANCE
+            ? helmAttributeParser.getAttributesProvenanceFromInputStream(inputStream)
+            : helmAttributeParser.getAttributesFromInputStream(inputStream);
+    final Asset asset =
+        helmFacet.findOrCreateAssetWithComponent(path, assetKind, tx, bucket, attributes);
     helmDataAccess.saveAsset(tx, asset, tempBlob, payload);
     return asset;
   }
@@ -139,27 +140,5 @@ public class HelmHostedFacetImpl
       tx.deleteAsset(asset);
       return true;
     }
-  }
-
-  @TransactionalStoreBlob
-  protected Content storeChart(final String assetPath,
-                             final Supplier<InputStream> chartContent,
-                             final Payload payload) throws IOException
-  {
-    StorageTx tx = UnitOfWork.currentTx();
-    Bucket bucket = tx.findBucket(getRepository());
-
-    Asset asset = createChartAsset(assetPath, tx, bucket, chartContent.get());
-
-    return helmDataAccess.saveAsset(tx, asset, chartContent, payload);
-  }
-
-  private Asset createChartAsset(final String assetPath,
-                                 final StorageTx tx,
-                                 final Bucket bucket,
-                                 final InputStream inputStream) throws IOException
-  {
-    HelmAttributes chart = helmAttributeParser.getAttributesFromInputStream(inputStream);
-    return helmFacet.findOrCreateAssetWithComponent(assetPath, HELM_PACKAGE, tx, bucket, chart);
   }
 }

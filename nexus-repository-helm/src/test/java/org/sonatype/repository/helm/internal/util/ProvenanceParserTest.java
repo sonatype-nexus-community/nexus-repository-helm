@@ -20,39 +20,29 @@ import org.sonatype.repository.helm.HelmAttributes;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.core.Is.is;
 
-public class HelmAttributeParserTest
+public class ProvenanceParserTest
     extends TestSupport
 {
-  private YamlParser yamlParser;
-
-  private TgzParser tgzParser;
-
   private ProvenanceParser provenanceParser;
 
-  private HelmAttributeParser underTest;
-
   @Before
-  public void setUp() throws Exception {
-    yamlParser = new YamlParser();
-    tgzParser = new TgzParser();
-    provenanceParser = new ProvenanceParser();
-    underTest = new HelmAttributeParser(tgzParser, yamlParser, provenanceParser);
+  public void setUp() {
+    this.provenanceParser = new ProvenanceParser();
   }
 
   @Test
-  public void testGetAttributesFromChart() throws Exception {
-    InputStream chart = getClass().getResourceAsStream("mongodb-0.4.9.tgz");
-    HelmAttributes result = underTest.getAttributesFromInputStream(chart);
+  public void parseProv() throws Exception {
+    InputStream is = getClass().getResourceAsStream("mysql-1.4.0.tgz.prov");
+    HelmAttributes attributes = provenanceParser.parse(is);
 
-    assertThat(result.getName(), is(notNullValue()));
-    assertThat(result.getVersion(), is(notNullValue()));
-    assertThat(result.getDescription(), is(notNullValue()));
-    assertThat(result.getIcon(), is(notNullValue()));
-    assertThat(result.getMaintainers(), is(notNullValue()));
-    assertThat(result.getSources(), is(notNullValue()));
+    assertThat(attributes.getName(), is(equalTo("mysql")));
+    assertThat(attributes.getDescription(), is(equalTo("Fast, reliable, scalable, and easy to use open-source relational database system.")));
+    assertThat(attributes.getVersion(), is(equalTo("1.4.0")));
+    assertThat(attributes.getIcon(), is(equalTo("https://www.mysql.com/common/logos/logo-mysql-170x115.png")));
+    assertThat(attributes.getAppVersion(), is(equalTo("5.7.27")));
   }
 }
