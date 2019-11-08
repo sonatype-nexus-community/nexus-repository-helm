@@ -83,7 +83,6 @@ public class HelmRestoreFacetImpl
   }
 
   @Override
-  @Deprecated
   public boolean componentRequired(final String name) {
     return name.endsWith(TGZ_EXTENSION);
   }
