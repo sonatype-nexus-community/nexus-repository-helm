@@ -154,22 +154,22 @@ public class HelmFacetImpl
    * @return blob content
    */
   @Override
+  @Nullable
   public Content saveAsset(final StorageTx tx,
                             final Asset asset,
                             final Supplier<InputStream> contentSupplier,
                             final Payload payload)
   {
     try {
-      String contentType = null;
-      AttributesMap contentAttributes = null;
       if (payload instanceof Content) {
-        contentAttributes = ((Content) payload).getAttributes();
-        contentType = payload.getContentType();
+        AttributesMap contentAttributes = ((Content) payload).getAttributes();
+        String contentType = payload.getContentType();
+        return saveAsset(tx, asset, contentSupplier, contentType, contentAttributes);
       }
-      return saveAsset(tx, asset, contentSupplier, contentType, contentAttributes);
+      return saveAsset(tx, asset, contentSupplier, null, null);
     }
     catch (IOException ex) {
-      log.warn("Could not set blob {}", ex);
+      log.warn("Could not set blob {}", ex.getMessage(), ex);
       return null;
     }
   }

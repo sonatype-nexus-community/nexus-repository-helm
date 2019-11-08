@@ -159,7 +159,7 @@ public class CreateIndexFacetImpl
       helmFacet.saveAsset(tx, asset, indexYaml, TGZ_CONTENT_TYPE, null);
     }
     catch (IOException ex) {
-      log.warn("Could not set blob {}", ex);
+      log.warn("Could not set blob {}", ex.getMessage(), ex);
     }
   }
 
