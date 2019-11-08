@@ -25,7 +25,7 @@ import org.sonatype.repository.helm.internal.database.HelmProperties;
  */
 public class HelmAttributes
 {
-  private Map<HelmProperties, Object> attributesEnumMap;
+  private final Map<HelmProperties, Object> attributesEnumMap;
 
   public HelmAttributes() {
     attributesEnumMap = new EnumMap<>(HelmProperties.class);
