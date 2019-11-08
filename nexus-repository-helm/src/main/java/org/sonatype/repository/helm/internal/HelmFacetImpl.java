@@ -23,6 +23,7 @@ import javax.inject.Named;
 import org.sonatype.nexus.blobstore.api.Blob;
 import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.repository.FacetSupport;
+import org.sonatype.nexus.repository.cache.CacheControllerHolder;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.AssetBlob;
 import org.sonatype.nexus.repository.storage.Bucket;
@@ -78,9 +79,9 @@ public class HelmFacetImpl
     checkNotNull(assetKind);
 
     Bucket bucket = tx.findBucket(getRepository());
-    Asset asset = assetKind == AssetKind.HELM_PACKAGE
-        ? tx.createAsset(bucket, findOrCreateComponent(tx, bucket, helmAttributes.getName(), helmAttributes.getVersion()))
-        : tx.createAsset(bucket, getRepository().getFormat());
+    Asset asset = CacheControllerHolder.METADATA.equals(assetKind.getCacheType())
+        ? tx.createAsset(bucket, getRepository().getFormat())
+        : tx.createAsset(bucket, findOrCreateComponent(tx, bucket, helmAttributes.getName(), helmAttributes.getVersion()));
     asset.formatAttributes().set(P_ASSET_KIND, assetKind.name());
     helmAttributes.populate(asset.formatAttributes());
     asset.name(assetPath);
