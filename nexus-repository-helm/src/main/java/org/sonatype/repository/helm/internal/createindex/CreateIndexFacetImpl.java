@@ -13,6 +13,7 @@
 package org.sonatype.repository.helm.internal.createindex;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -29,21 +30,20 @@ import org.sonatype.nexus.repository.storage.AssetCreatedEvent;
 import org.sonatype.nexus.repository.storage.AssetDeletedEvent;
 import org.sonatype.nexus.repository.storage.AssetEvent;
 import org.sonatype.nexus.repository.storage.AssetUpdatedEvent;
-import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
+import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
-import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.common.stateguard.StateGuardLifecycleSupport.State.STARTED;
-import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_INDEX;
 
 /**
@@ -60,8 +60,6 @@ public class CreateIndexFacetImpl
 
   private CreateIndexService createIndexService;
 
-  private final HelmDataAccess helmDataAccess;
-
   private final long interval;
 
   private final static String INDEX_YAML = "index.yaml";
@@ -76,12 +74,10 @@ public class CreateIndexFacetImpl
   @Inject
   public CreateIndexFacetImpl(final EventManager eventManager,
                               final CreateIndexService createIndexService,
-                              final HelmDataAccess helmDataAccess,
                               @Named("${nexus.helm.createrepo.interval:-1000}") final long interval)
   {
     this.eventManager = checkNotNull(eventManager);
     this.createIndexService = checkNotNull(createIndexService);
-    this.helmDataAccess = checkNotNull(helmDataAccess);
     this.interval = interval;
   }
 
@@ -154,23 +150,16 @@ public class CreateIndexFacetImpl
   }
 
   private void createIndexYaml(final TempBlob indexYaml) {
-    // TODO: Likely this can all be pulled out into some sort of common facet, or use Hosted.upload?
-    StorageTx tx = UnitOfWork.currentTx();
     Repository repository = getRepository();
-    Bucket bucket = tx.findBucket(repository);
-
-    Asset asset = helmDataAccess.findAsset(tx, bucket, INDEX_YAML);
-    if (asset == null) {
-      asset = tx.createAsset(bucket, repository.getFormat());
-      asset.name(INDEX_YAML);
-      asset.formatAttributes().set(P_ASSET_KIND, HELM_INDEX.name());
-    }
-
+    HelmFacet helmFacet = repository.facet(HelmFacet.class);
+    StorageTx tx = UnitOfWork.currentTx();
+    HelmAttributes attributes = new HelmAttributes(Collections.emptyMap());
+    Asset asset = helmFacet.findOrCreateAsset(tx, INDEX_YAML, HELM_INDEX, attributes);
     try {
-      helmDataAccess.saveAsset(tx, asset, indexYaml, TGZ_CONTENT_TYPE, null);
+      helmFacet.saveAsset(tx, asset, indexYaml, TGZ_CONTENT_TYPE, null);
     }
     catch (IOException ex) {
-      log.warn("Could not rebuild index.yaml", ex);
+      log.warn("Could not set blob {}", ex.getMessage(), ex);
     }
   }
 

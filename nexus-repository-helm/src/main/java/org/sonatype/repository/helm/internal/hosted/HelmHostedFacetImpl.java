@@ -14,6 +14,7 @@ package org.sonatype.repository.helm.internal.hosted;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -22,7 +23,6 @@ import javax.inject.Named;
 import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
@@ -36,12 +36,11 @@ import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
-import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE;
-import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
+import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 
 /**
  * {@link HelmHostedFacetImpl implementation}
@@ -53,18 +52,14 @@ public class HelmHostedFacetImpl
     extends FacetSupport
     implements HelmHostedFacet
 {
-  private final HelmDataAccess helmDataAccess;
-
   private final HelmAttributeParser helmAttributeParser;
 
   private HelmFacet helmFacet;
 
   @Inject
   public HelmHostedFacetImpl(
-      final HelmDataAccess helmDataAccess,
       final HelmAttributeParser helmAttributeParser)
   {
-    this.helmDataAccess = helmDataAccess;
     this.helmAttributeParser = helmAttributeParser;
   }
 
@@ -82,15 +77,16 @@ public class HelmHostedFacetImpl
     checkNotNull(path);
     StorageTx tx = UnitOfWork.currentTx();
 
-    Asset asset = helmDataAccess.findAsset(tx, tx.findBucket(getRepository()), path);
-    if (asset == null) {
+    Optional<Asset> assetOpt = helmFacet.findAsset(tx, path);
+    if (!assetOpt.isPresent()) {
       return null;
     }
+    Asset asset = assetOpt.get();
     if (asset.markAsDownloaded()) {
       tx.saveAsset(asset);
     }
 
-    return helmDataAccess.toContent(asset, tx.requireBlob(asset.requireBlobRef()));
+    return helmFacet.toContent(asset, tx.requireBlob(asset.requireBlobRef()));
   }
 
   @Override
@@ -113,15 +109,14 @@ public class HelmHostedFacetImpl
     checkNotNull(tempBlob);
 
     StorageTx tx = UnitOfWork.currentTx();
-    Bucket bucket = tx.findBucket(getRepository());
     InputStream inputStream = tempBlob.get();
     HelmAttributes attributes =
         assetKind == HELM_PROVENANCE
             ? helmAttributeParser.getAttributesProvenanceFromInputStream(inputStream)
             : helmAttributeParser.getAttributesFromInputStream(inputStream);
     final Asset asset =
-        helmFacet.findOrCreateAssetWithComponent(path, assetKind, tx, bucket, attributes);
-    helmDataAccess.saveAsset(tx, asset, tempBlob, payload);
+        helmFacet.findOrCreateAsset(tx, path, assetKind, attributes);
+    helmFacet.saveAsset(tx, asset, tempBlob, payload);
     return asset;
   }
 
@@ -131,13 +126,11 @@ public class HelmHostedFacetImpl
     checkNotNull(path);
 
     StorageTx tx = UnitOfWork.currentTx();
-    Bucket bucket = tx.findBucket(getRepository());
-
-    Asset asset = helmDataAccess.findAsset(tx, bucket, path);
-    if (asset == null) {
+    Optional<Asset> asset = helmFacet.findAsset(tx, path);
+    if (!asset.isPresent()) {
       return false;
     } else {
-      tx.deleteAsset(asset);
+      tx.deleteAsset(asset.get());
       return true;
     }
   }

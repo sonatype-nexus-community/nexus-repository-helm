@@ -12,26 +12,40 @@
  */
 package org.sonatype.repository.helm.internal.database;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * Database property names for Helm asset attributes
  *
  * @since 0.0.2
  */
-public interface HelmProperties
+public enum HelmProperties
 {
-  String NAME = "name";
+  DESCRIPTION("description"),
+  ENGINE("engine"),
+  HOME("home"),
+  ICON("icon"),
+  APP_VERSION("appVersion"),
+  KEYWORDS("keywords"),
+  MAINTAINERS("maintainers"),
+  NAME("name"),
+  SOURCES("sources"),
+  VERSION("version");
 
-  String DESCRIPTION = "description";
+  private String propertyName;
 
-  String VERSION = "version";
+  HelmProperties(final String type) {
+    this.propertyName = type;
+  }
 
-  String SOURCES = "sources";
+  public String getPropertyName() {
+    return propertyName;
+  }
 
-  String ICON = "icon";
-
-  String MAINTAINERS = "maintainers";
-
-  String APP_VERSION = "appVersion";
-
-  String ATTRIBUTES_HELM_ASSET_KIND = "attributes.helm.asset_kind";
+  public static Optional<HelmProperties> findByPropertyName(String propertyName) {
+    return Arrays.stream(HelmProperties.values())
+        .filter(properties -> propertyName.equals(properties.getPropertyName()))
+        .findAny();
+  }
 }

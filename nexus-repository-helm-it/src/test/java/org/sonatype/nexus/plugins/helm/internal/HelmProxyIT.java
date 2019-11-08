@@ -12,19 +12,18 @@
  */
 package org.sonatype.nexus.plugins.helm.internal;
 
-import org.sonatype.goodies.httpfixture.server.fluent.Server;
-import org.sonatype.nexus.common.app.BaseUrlHolder;
-import org.sonatype.nexus.repository.Repository;
-import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.Component;
-import org.sonatype.nexus.repository.storage.ComponentMaintenance;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
+import org.sonatype.goodies.httpfixture.server.fluent.Server;
+import org.sonatype.nexus.common.app.BaseUrlHolder;
+import org.sonatype.nexus.repository.Repository;
+import org.sonatype.nexus.repository.storage.Asset;
+import org.sonatype.nexus.repository.storage.Component;
+import org.sonatype.nexus.repository.storage.ComponentMaintenance;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;

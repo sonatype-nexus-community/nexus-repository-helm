@@ -124,7 +124,7 @@ public class IndexYamlAbsoluteUrlRewriterTest
     String line;
     while ((line = reader.readLine()) != null) {
       line = line.trim();
-      assertThat(line.substring(0), is(not("!")));
+      assertThat(line, is(not("!")));
     }
     reader.close();
   }

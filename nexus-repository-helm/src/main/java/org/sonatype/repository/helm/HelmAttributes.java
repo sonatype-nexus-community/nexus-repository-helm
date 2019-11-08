@@ -12,105 +12,91 @@
  */
 package org.sonatype.repository.helm;
 
-import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import org.sonatype.nexus.common.collect.NestedAttributesMap;
+import org.sonatype.repository.helm.internal.database.HelmProperties;
 
 /**
- * Object for storing Helm specific attributes from Chart.yaml
- *
- * @since 0.0.1
+ * @since 1.0.next
  */
-public final class HelmAttributes
+public class HelmAttributes
 {
-  private String description;
-  private String engine;
-  private String home;
-  private String icon;
-  private String appVersion;
-  private List<String> keywords;
-  private List<Map<String, String>> maintainers;
-  private String name;
-  private List<String> sources;
-  private String version;
+  private final Map<HelmProperties, Object> attributesEnumMap;
 
-  public String getDescription() {
-    return description;
+  public HelmAttributes() {
+    attributesEnumMap = new EnumMap<>(HelmProperties.class);
   }
 
-  public void setDescription(final String description) {
-    this.description = description;
+  public HelmAttributes(final Map<String, Object> attributesMap) {
+    attributesEnumMap = new EnumMap<>(HelmProperties.class);
+    attributesMap.forEach((key, value) -> {
+      Optional<HelmProperties> propertyOpt = HelmProperties.findByPropertyName(key);
+      if (value != null && propertyOpt.isPresent()) {
+        attributesEnumMap.put(propertyOpt.get(), value);
+      }
+    });
   }
 
-  public String getEngine() {
-    return engine;
-  }
-
-  public void setEngine(final String engine) {
-    this.engine = engine;
-  }
-
-  public String getHome() {
-    return home;
-  }
-
-  public void setHome(final String home) {
-    this.home = home;
-  }
-
-  public String getIcon() {
-    return icon;
-  }
-
-  public void setIcon(final String icon) {
-    this.icon = icon;
-  }
-
-  public List<String> getKeywords() {
-    return keywords;
-  }
-
-  public void setKeywords(final List<String> keywords) {
-    this.keywords = Collections.unmodifiableList(keywords);
-  }
-
-  public List<Map<String, String>> getMaintainers() {
-    return maintainers;
-  }
-
-  public void setMaintainers(final List<Map<String, String>> maintainers) {
-    this.maintainers = Collections.unmodifiableList(maintainers);
+  public void populate(final NestedAttributesMap attributesMap) {
+    attributesEnumMap.forEach((helmProperties, o) -> {
+        attributesMap.set(helmProperties.getPropertyName(), o);
+    });
   }
 
   public String getName() {
-    return name;
-  }
-
-  public void setName(final String name) {
-    this.name = name;
-  }
-
-  public List<String> getSources() {
-    return sources;
-  }
-
-  public void setSources(final List<String> sources) {
-    this.sources = Collections.unmodifiableList(sources);
+    return getValue(HelmProperties.NAME, String.class);
   }
 
   public String getVersion() {
-    return version;
-  }
-
-  public void setVersion(final String version) {
-    this.version = version;
+    return getValue(HelmProperties.VERSION, String.class);
   }
 
   public String getAppVersion() {
-    return appVersion;
+    return getValue(HelmProperties.APP_VERSION, String.class);
+  }
+
+  public String getDescription() {
+    return getValue(HelmProperties.DESCRIPTION, String.class);
+  }
+
+  public String getIcon() {
+    return getValue(HelmProperties.ICON, String.class);
+  }
+
+  public List<Map<String, String>> getMaintainers() {
+
+    return getValue(HelmProperties.MAINTAINERS, List.class);
+  }
+
+  public List<String> getSources() {
+    return getValue(HelmProperties.SOURCES, List.class);
+  }
+
+  public void setName(final String name) {
+    attributesEnumMap.put(HelmProperties.NAME, name);
+  }
+
+  public void setDescription(final String description) {
+    attributesEnumMap.put(HelmProperties.DESCRIPTION, description);
+  }
+
+  public void setVersion(final String version) {
+    attributesEnumMap.put(HelmProperties.VERSION, version);
+  }
+
+  public void setIcon(final String icon) {
+    attributesEnumMap.put(HelmProperties.ICON, icon);
   }
 
   public void setAppVersion(final String appVersion) {
-    this.appVersion = appVersion;
+    attributesEnumMap.put(HelmProperties.APP_VERSION, appVersion);
+  }
+
+  private <T> T getValue(HelmProperties property, Class<T> tClass){
+    return tClass.cast(attributesEnumMap.get(property));
   }
 }

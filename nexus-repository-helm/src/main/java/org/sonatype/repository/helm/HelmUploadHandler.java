@@ -35,13 +35,13 @@ import org.sonatype.nexus.repository.view.PartPayload;
 import org.sonatype.nexus.rest.ValidationErrorsException;
 import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.internal.AssetKind;
-import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import org.apache.commons.lang3.StringUtils;
 
-import static org.sonatype.repository.helm.internal.util.HelmDataAccess.HASH_ALGORITHMS;
+import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
+import static org.sonatype.repository.helm.internal.HelmFormat.NAME;
 import static org.sonatype.repository.helm.internal.util.HelmPathUtils.PROVENANCE_EXTENSION;
 import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
 
@@ -51,7 +51,7 @@ import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTEN
  * @author yinlongfei
  */
 @Singleton
-@Named(HelmFormat.NAME)
+@Named(NAME)
 public class HelmUploadHandler
     extends UploadHandlerSupport
 {
@@ -115,7 +115,7 @@ public class HelmUploadHandler
 
       String path = String.format("%s-%s%s", name, version, extension);
 
-      ensurePermitted(repository.getName(), HelmFormat.NAME, path, Collections.emptyMap());
+      ensurePermitted(repository.getName(), NAME, path, Collections.emptyMap());
       try {
         UnitOfWork.begin(storageFacet.txSupplier());
         Asset asset = facet.upload(path, tempBlob, payload, assetKind);
@@ -130,7 +130,7 @@ public class HelmUploadHandler
   @Override
   public UploadDefinition getDefinition() {
     if (definition == null) {
-      definition = getDefinition(HelmFormat.NAME, false);
+      definition = getDefinition(NAME, false);
     }
     return definition;
   }

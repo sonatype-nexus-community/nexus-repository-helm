@@ -32,19 +32,19 @@ public class ProvenanceParser
     try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
       String line;
       while ((line = bufferedReader.readLine()) != null) {
-        if (line.startsWith(HelmProperties.NAME)) {
+        if (line.startsWith(HelmProperties.NAME.getPropertyName())) {
           attributes.setName(getValue(line));
         }
-        if (line.startsWith(HelmProperties.DESCRIPTION)) {
+        if (line.startsWith(HelmProperties.DESCRIPTION.getPropertyName())) {
           attributes.setDescription(getValue(line));
         }
-        if (line.startsWith(HelmProperties.VERSION)) {
+        if (line.startsWith(HelmProperties.VERSION.getPropertyName())) {
           attributes.setVersion(getValue(line));
         }
-        if (line.startsWith(HelmProperties.ICON)) {
+        if (line.startsWith(HelmProperties.ICON.getPropertyName())) {
           attributes.setIcon(getValue(line));
         }
-        if (line.startsWith(HelmProperties.APP_VERSION)) {
+        if (line.startsWith(HelmProperties.APP_VERSION.getPropertyName())) {
           attributes.setAppVersion(getValue(line));
         }
       }

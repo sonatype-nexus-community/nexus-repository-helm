@@ -23,7 +23,6 @@ import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.AssetBlob;
-import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.Query;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
@@ -67,18 +66,10 @@ public class HelmRestoreFacetImpl
   @TransactionalTouchBlob
   public void restore(final AssetBlob assetBlob, final String path) throws IOException {
     StorageTx tx = UnitOfWork.currentTx();
-    Bucket bucket = tx.findBucket(getRepository());
-    HelmAttributes attributes =
-        helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
-
-    Asset asset;
-    if (componentRequired(path)) {
-      asset = helmFacet.findOrCreateAssetWithComponent(path, AssetKind.HELM_PACKAGE, tx, bucket, attributes);
-    }
-    else {
-      asset = helmFacet.findOrCreateAssetWithAttributes(path, AssetKind.HELM_PACKAGE ,tx, bucket, attributes);
-    }
-
+    HelmAttributes attributes = helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
+    Asset asset = componentRequired(path)
+        ? helmFacet.findOrCreateAsset(tx, path, AssetKind.HELM_PACKAGE, attributes)
+        : helmFacet.findOrCreateAsset(tx, path, AssetKind.HELM_INDEX, attributes);
     tx.attachBlob(asset, assetBlob);
     Content.applyToAsset(asset, Content.maintainLastModified(asset, new AttributesMap()));
     tx.saveAsset(asset);

@@ -30,10 +30,10 @@ import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
+import org.sonatype.repository.helm.HelmFacet;
 import org.sonatype.repository.helm.internal.metadata.ChartEntry;
 import org.sonatype.repository.helm.internal.metadata.ChartIndex;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlBuilder;
-import org.sonatype.repository.helm.internal.util.HelmDataAccess;
 
 import org.joda.time.DateTime;
 
@@ -59,14 +59,10 @@ public class CreateIndexServiceImpl
 {
   private final static String API_VERSION = "1.0";
 
-  private HelmDataAccess helmDataAccess;
-
   private IndexYamlBuilder indexYamlBuilder;
 
   @Inject
-  public CreateIndexServiceImpl(final HelmDataAccess helmDataAccess,
-                                final IndexYamlBuilder indexYamlBuilder) {
-    this.helmDataAccess = checkNotNull(helmDataAccess);
+  public CreateIndexServiceImpl(final IndexYamlBuilder indexYamlBuilder) {
     this.indexYamlBuilder = checkNotNull(indexYamlBuilder);
   }
 
@@ -74,11 +70,12 @@ public class CreateIndexServiceImpl
   @Nullable
   public TempBlob buildIndexYaml(final Repository repository) {
     StorageFacet storageFacet = repository.facet(StorageFacet.class);
+    HelmFacet helmFacet = repository.facet(HelmFacet.class);
     StorageTx tx = UnitOfWork.currentTx();
 
     ChartIndex index = new ChartIndex();
 
-    for (Asset asset : helmDataAccess.browseComponentAssets(tx, tx.findBucket(repository))) {
+    for (Asset asset : helmFacet.browseComponentAssets(tx)) {
       parseAssetIntoChartEntry(index, asset);
     }
 
@@ -91,25 +88,25 @@ public class CreateIndexServiceImpl
     NestedAttributesMap formatAttributes = asset.formatAttributes();
     NestedAttributesMap assetAttributes = asset.attributes();
     ChartEntry chartEntry = new ChartEntry();
-    chartEntry.setName(formatAttributes.get(NAME, String.class));
-    chartEntry.setVersion(formatAttributes.get(VERSION, String.class));
-    chartEntry.setDescription(formatAttributes.get(DESCRIPTION, String.class));
-    chartEntry.setIcon(formatAttributes.get(ICON, String.class));
+    chartEntry.setName(formatAttributes.get(NAME.getPropertyName(), String.class));
+    chartEntry.setVersion(formatAttributes.get(VERSION.getPropertyName(), String.class));
+    chartEntry.setDescription(formatAttributes.get(DESCRIPTION.getPropertyName(), String.class));
+    chartEntry.setIcon(formatAttributes.get(ICON.getPropertyName(), String.class));
     chartEntry.setCreated(asset.blobCreated());
-    chartEntry.setAppVersion(formatAttributes.get(APP_VERSION, String.class));
-    chartEntry.setMaintainers(formatAttributes.get(MAINTAINERS, List.class));
+    chartEntry.setAppVersion(formatAttributes.get(APP_VERSION.getPropertyName(), String.class));
+    chartEntry.setMaintainers(formatAttributes.get(MAINTAINERS.getPropertyName(), List.class));
     chartEntry.setDigest(assetAttributes.get("checksum", Map.class)
         .get("sha256").toString());
     createListOfRelativeUrls(formatAttributes, chartEntry);
-    chartEntry.setSources(formatAttributes.get(SOURCES, List.class));
+    chartEntry.setSources(formatAttributes.get(SOURCES.getPropertyName(), List.class));
     index.addEntry(chartEntry);
   }
 
   private void createListOfRelativeUrls(final NestedAttributesMap formatAttributes, final ChartEntry chartEntry) {
     List<String> urls = new ArrayList<>();
     urls.add(String.format("%s-%s.tgz",
-        formatAttributes.get(NAME, String.class),
-        formatAttributes.get(VERSION, String.class)));
+        formatAttributes.get(NAME.getPropertyName(), String.class),
+        formatAttributes.get(VERSION.getPropertyName(), String.class)));
     chartEntry.setUrls(urls);
   }
 }

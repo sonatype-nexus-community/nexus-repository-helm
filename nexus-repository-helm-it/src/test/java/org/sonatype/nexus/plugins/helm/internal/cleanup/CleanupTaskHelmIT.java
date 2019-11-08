@@ -70,13 +70,13 @@ public class CleanupTaskHelmIT
 
   @Test
   public void cleanupByLastBlobUpdated() throws Exception {
-    assertLastBlobUpdatedComponentsCleanedUp(repository, (long) NAMES.length,
+    assertLastBlobUpdatedComponentsCleanedUp(repository, NAMES.length,
         () -> deployArtifacts(MONGO_PKG_FILE_NAME_728_TGZ), 1L);
   }
 
   @Test
   public void cleanupByLastDownloaded() throws Exception {
-    assertLastDownloadedComponentsCleanedUp(repository, (long) NAMES.length,
+    assertLastDownloadedComponentsCleanedUp(repository, NAMES.length,
         () -> deployArtifacts(MONGO_PKG_FILE_NAME_728_TGZ), 1L);
   }
 
