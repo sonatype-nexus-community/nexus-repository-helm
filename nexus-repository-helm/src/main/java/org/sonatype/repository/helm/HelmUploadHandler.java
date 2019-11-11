@@ -82,12 +82,15 @@ public class HelmUploadHandler
     PartPayload payload = upload.getAssetUploads().get(0).getPayload();
 
     String fileName = payload.getName() != null ? payload.getName() : StringUtils.EMPTY;
+    AssetKind assetKind = AssetKind.getAssetKindByFileName(fileName);
+
+    if (assetKind != AssetKind.HELM_PROVENANCE && assetKind != AssetKind.HELM_PACKAGE) {
+      throw new IllegalArgumentException("Unsupported extension. Extension must be .tgz or .tgz.prov");
+    }
 
     try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HASH_ALGORITHMS)) {
-      AssetKind assetKind = AssetKind.getAssetKindByFileName(fileName);
       HelmAttributes attributesFromInputStream = helmPackageParser.getAttributes(assetKind, tempBlob.get());
       String extension = assetKind.getExtension();
-
       String name = attributesFromInputStream.getName();
       String version = attributesFromInputStream.getVersion();
 
