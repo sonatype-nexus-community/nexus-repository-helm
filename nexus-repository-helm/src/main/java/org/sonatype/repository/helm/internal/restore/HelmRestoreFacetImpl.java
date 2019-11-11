@@ -36,8 +36,6 @@ import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
-import static org.sonatype.repository.helm.internal.util.HelmPathUtils.PROVENANCE_EXTENSION;
-import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
 
 /**
  * @since 1.0.next
@@ -67,14 +65,8 @@ public class HelmRestoreFacetImpl
   @TransactionalTouchBlob
   public void restore(final AssetBlob assetBlob, final String path) throws IOException {
     StorageTx tx = UnitOfWork.currentTx();
-    AssetKind assetKind = getAssetKind(path);
-    HelmAttributes attributes = new HelmAttributes();
-    if (assetKind == AssetKind.HELM_PACKAGE) {
-      attributes = helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
-    }
-    else if (assetKind == AssetKind.HELM_PROVENANCE) {
-      attributes = helmAttributeParser.getAttributesProvenanceFromInputStream(assetBlob.getBlob().getInputStream());
-    }
+    AssetKind assetKind = AssetKind.getAssetKindByFileName(path);
+    HelmAttributes attributes = helmAttributeParser.getAttributes(assetKind, assetBlob.getBlob().getInputStream());
     Asset asset = helmFacet.findOrCreateAsset(tx, path, assetKind, attributes);
     tx.attachBlob(asset, assetBlob);
     Content.applyToAsset(asset, Content.maintainLastModified(asset, new AttributesMap()));
@@ -90,7 +82,7 @@ public class HelmRestoreFacetImpl
 
   @Override
   public boolean componentRequired(final String name) {
-    return getAssetKind(name) != AssetKind.HELM_INDEX;
+    return AssetKind.getAssetKindByFileName(name) != AssetKind.HELM_INDEX;
   }
 
   @Override
@@ -100,17 +92,8 @@ public class HelmRestoreFacetImpl
   }
 
   @Override
-  public HelmAttributes extractComponentAttributesFromArchive(final InputStream is) throws IOException {
-    return helmAttributeParser.getAttributesFromInputStream(is);
-  }
-
-  private AssetKind getAssetKind(final String name) {
-    if (name.endsWith(TGZ_EXTENSION)) {
-      return AssetKind.HELM_PACKAGE;
-    }
-    else if (name.endsWith(PROVENANCE_EXTENSION)) {
-      return AssetKind.HELM_PROVENANCE;
-    }
-    return AssetKind.HELM_INDEX;
+  public HelmAttributes extractComponentAttributesFromArchive(final String blobName, final InputStream is) throws IOException {
+    AssetKind assetKind = AssetKind.getAssetKindByFileName((blobName));
+    return helmAttributeParser.getAttributes(assetKind, is);
   }
 }

@@ -110,10 +110,7 @@ public class HelmHostedFacetImpl
 
     StorageTx tx = UnitOfWork.currentTx();
     InputStream inputStream = tempBlob.get();
-    HelmAttributes attributes =
-        assetKind == HELM_PROVENANCE
-            ? helmAttributeParser.getAttributesProvenanceFromInputStream(inputStream)
-            : helmAttributeParser.getAttributesFromInputStream(inputStream);
+    HelmAttributes attributes = helmAttributeParser.getAttributes(assetKind, inputStream);
     final Asset asset =
         helmFacet.findOrCreateAsset(tx, path, assetKind, attributes);
     helmFacet.saveAsset(tx, asset, tempBlob, payload);

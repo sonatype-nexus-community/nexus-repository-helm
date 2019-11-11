@@ -42,8 +42,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 import static org.sonatype.repository.helm.internal.HelmFormat.NAME;
-import static org.sonatype.repository.helm.internal.util.HelmPathUtils.PROVENANCE_EXTENSION;
-import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
 
 /**
  * Support helm upload for web page
@@ -86,21 +84,9 @@ public class HelmUploadHandler
     String fileName = payload.getName() != null ? payload.getName() : StringUtils.EMPTY;
 
     try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HASH_ALGORITHMS)) {
-      HelmAttributes attributesFromInputStream;
-      AssetKind assetKind;
-      String extension;
-
-      if (fileName.endsWith(PROVENANCE_EXTENSION)) {
-        attributesFromInputStream = helmPackageParser.getAttributesProvenanceFromInputStream(tempBlob.get());
-        assetKind = AssetKind.HELM_PROVENANCE;
-        extension = PROVENANCE_EXTENSION;
-      } else if (fileName.endsWith(TGZ_EXTENSION)) {
-        attributesFromInputStream = helmPackageParser.getAttributesFromInputStream(tempBlob.get());
-        assetKind = AssetKind.HELM_PACKAGE;
-        extension = TGZ_EXTENSION;
-      } else {
-        throw new IllegalArgumentException("Unsupported extension. Extension must be .tgz or .tgz.prov");
-      }
+      AssetKind assetKind = AssetKind.getAssetKindByFileName(fileName);
+      HelmAttributes attributesFromInputStream = helmPackageParser.getAttributes(assetKind, tempBlob.get());
+      String extension = assetKind.getExtension();
 
       String name = attributesFromInputStream.getName();
       String version = attributesFromInputStream.getVersion();

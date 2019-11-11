@@ -144,7 +144,7 @@ public class HelmProxyFacetImpl
                                final AssetKind assetKind) throws IOException {
     StorageFacet storageFacet = facet(StorageFacet.class);
     try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
-      HelmAttributes helmAttributes = helmAttributeParser.getAttributesFromInputStream(tempBlob.get());
+      HelmAttributes helmAttributes = helmAttributeParser.getAttributes(assetKind, tempBlob.get());
       return doCreateOrSaveComponent(helmAttributes, fileName, assetKind, tempBlob, content.getContentType(), content.getAttributes());
     }
   }

@@ -20,6 +20,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.repository.helm.internal.AssetKind;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -43,11 +44,22 @@ public class HelmAttributeParser
     this.provenanceParser = checkNotNull(provenanceParser);
   }
 
-  public HelmAttributes getAttributesProvenanceFromInputStream(final InputStream inputStream) throws IOException {
+  public HelmAttributes getAttributes(final AssetKind assetKind, final InputStream inputStream) throws IOException {
+    switch (assetKind) {
+      case HELM_PACKAGE:
+        return getAttributesFromInputStream(inputStream);
+      case HELM_PROVENANCE:
+        return getAttributesProvenanceFromInputStream(inputStream);
+      default:
+        return new HelmAttributes();
+    }
+  }
+
+  private HelmAttributes getAttributesProvenanceFromInputStream(final InputStream inputStream) throws IOException {
     return provenanceParser.parse(inputStream);
   }
 
-  public HelmAttributes getAttributesFromInputStream(final InputStream inputStream) throws IOException {
+  private HelmAttributes getAttributesFromInputStream(final InputStream inputStream) throws IOException {
     try (InputStream is = tgzParser.getChartFromInputStream(inputStream)) {
       return new HelmAttributes(yamlParser.load(is));
     }

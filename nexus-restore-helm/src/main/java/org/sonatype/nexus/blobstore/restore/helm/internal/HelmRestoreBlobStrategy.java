@@ -117,7 +117,8 @@ public class HelmRestoreBlobStrategy
   protected Query getComponentQuery(final HelmRestoreBlobData data) throws IOException {
     HelmRestoreFacet facet = getRestoreFacet(data);
     RestoreBlobData blobData = data.getBlobData();
-    HelmAttributes attributes = facet.extractComponentAttributesFromArchive(blobData.getBlob().getInputStream());
+    data.getBlobData().getBlobName();
+    HelmAttributes attributes = facet.extractComponentAttributesFromArchive(blobData.getBlobName(), blobData.getBlob().getInputStream());
     return facet.getComponentQuery(attributes);
   }
 
