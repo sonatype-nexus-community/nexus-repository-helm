@@ -36,6 +36,7 @@ import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
+import static org.sonatype.repository.helm.internal.util.HelmPathUtils.PROVENANCE_EXTENSION;
 import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
 
 /**
@@ -66,10 +67,15 @@ public class HelmRestoreFacetImpl
   @TransactionalTouchBlob
   public void restore(final AssetBlob assetBlob, final String path) throws IOException {
     StorageTx tx = UnitOfWork.currentTx();
-    HelmAttributes attributes = helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
-    Asset asset = componentRequired(path)
-        ? helmFacet.findOrCreateAsset(tx, path, AssetKind.HELM_PACKAGE, attributes)
-        : helmFacet.findOrCreateAsset(tx, path, AssetKind.HELM_INDEX, attributes);
+    AssetKind assetKind = getAssetKind(path);
+    HelmAttributes attributes = new HelmAttributes();
+    if (assetKind == AssetKind.HELM_PACKAGE) {
+      attributes = helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
+    }
+    else if (assetKind == AssetKind.HELM_PROVENANCE) {
+      attributes = helmAttributeParser.getAttributesProvenanceFromInputStream(assetBlob.getBlob().getInputStream());
+    }
+    Asset asset = helmFacet.findOrCreateAsset(tx, path, assetKind, attributes);
     tx.attachBlob(asset, assetBlob);
     Content.applyToAsset(asset, Content.maintainLastModified(asset, new AttributesMap()));
     tx.saveAsset(asset);
@@ -84,7 +90,7 @@ public class HelmRestoreFacetImpl
 
   @Override
   public boolean componentRequired(final String name) {
-    return name.endsWith(TGZ_EXTENSION);
+    return getAssetKind(name) != AssetKind.HELM_INDEX;
   }
 
   @Override
@@ -96,5 +102,15 @@ public class HelmRestoreFacetImpl
   @Override
   public HelmAttributes extractComponentAttributesFromArchive(final InputStream is) throws IOException {
     return helmAttributeParser.getAttributesFromInputStream(is);
+  }
+
+  private AssetKind getAssetKind(final String name) {
+    if (name.endsWith(TGZ_EXTENSION)) {
+      return AssetKind.HELM_PACKAGE;
+    }
+    else if (name.endsWith(PROVENANCE_EXTENSION)) {
+      return AssetKind.HELM_PROVENANCE;
+    }
+    return AssetKind.HELM_INDEX;
   }
 }
