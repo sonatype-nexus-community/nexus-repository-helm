@@ -25,7 +25,7 @@ import org.sonatype.nexus.repository.cache.CacheControllerHolder.CacheType;
  */
 public enum AssetKind
 {
-  HELM_INDEX(CacheControllerHolder.METADATA, null),
+  HELM_INDEX(CacheControllerHolder.METADATA, ".yaml"),
   HELM_PROVENANCE(CacheControllerHolder.CONTENT, ".tgz.prov"),
   HELM_PACKAGE(CacheControllerHolder.CONTENT, ".tgz");
 
