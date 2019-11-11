@@ -32,9 +32,9 @@ public enum AssetKind
   private final CacheType cacheType;
   private final String extension;
 
-  AssetKind(final CacheType cacheType, final String extenstion) {
+  AssetKind(final CacheType cacheType, final String extension) {
     this.cacheType = cacheType;
-    this.extension = extenstion;
+    this.extension = extension;
   }
 
   public static AssetKind getAssetKindByFileName(final String name) {
