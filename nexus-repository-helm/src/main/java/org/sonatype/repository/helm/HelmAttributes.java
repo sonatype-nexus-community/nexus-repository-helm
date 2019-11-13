@@ -43,22 +43,20 @@ public class HelmAttributes
   }
 
   private void putInMap(final HelmProperties helmProperties, final Object value) {
-    switch (helmProperties){
-      case MAINTAINERS:
-        // convert map: name: Bitnami
-        //              email: containers@bitnami.com
-        //              name: wbuchwalter
-        //              email: wibuch@microsoft.com
-        // in list: Bitnami : containers@bitnami.com , wbuchwalter : wibuch@microsoft.com
-        List<Map<String, String>> maintainersMap = (List<Map<String, String>>) value;
-        List<String> maintainers = maintainersMap.stream()
-            .map(map -> String.join(" : ", map.values()))
-            .collect(Collectors.toList());
-        attributesEnumMap.put(helmProperties, maintainers);
-        break;
-      default:
-        attributesEnumMap.put(helmProperties, value);
-        break;
+    if (helmProperties == HelmProperties.MAINTAINERS) {
+      // convert map: name: Bitnami
+      //              email: containers@bitnami.com
+      //              name: wbuchwalter
+      //              email: wibuch@microsoft.com
+      // in list: Bitnami : containers@bitnami.com , wbuchwalter : wibuch@microsoft.com
+      List<Map<String, String>> maintainersMap = (List<Map<String, String>>) value;
+      List<String> maintainers = maintainersMap.stream()
+          .map(map -> String.join(" : ", map.values()))
+          .collect(Collectors.toList());
+      attributesEnumMap.put(helmProperties, maintainers);
+    }
+    else {
+      attributesEnumMap.put(helmProperties, value);
     }
   }
 
