@@ -34,5 +34,5 @@ public interface HelmRestoreFacet extends Facet
 
   Query getComponentQuery(final HelmAttributes attributes);
 
-  HelmAttributes extractComponentAttributesFromArchive(final InputStream is) throws IOException;
+  HelmAttributes extractComponentAttributesFromArchive(final String blobName, final InputStream is) throws IOException;
 }

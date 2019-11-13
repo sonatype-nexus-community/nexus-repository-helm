@@ -12,7 +12,15 @@
  */
 package org.sonatype.nexus.blobstore.restore.helm.internal;
 
-import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import org.sonatype.nexus.blobstore.api.BlobStoreManager;
 import org.sonatype.nexus.blobstore.restore.BaseRestoreBlobStrategy;
 import org.sonatype.nexus.blobstore.restore.RestoreBlobData;
@@ -27,13 +35,7 @@ import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmRestoreFacet;
 import org.sonatype.repository.helm.internal.HelmFormat;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import com.google.common.collect.ImmutableList;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.aether.util.StringUtils.isEmpty;
@@ -108,7 +110,6 @@ public class HelmRestoreBlobStrategy
   protected boolean componentRequired(final HelmRestoreBlobData data) {
     HelmRestoreFacet facet = getRestoreFacet(data);
     final String path = data.getBlobData().getBlobName();
-
     return facet.componentRequired(path);
   }
 
@@ -116,7 +117,7 @@ public class HelmRestoreBlobStrategy
   protected Query getComponentQuery(final HelmRestoreBlobData data) throws IOException {
     HelmRestoreFacet facet = getRestoreFacet(data);
     RestoreBlobData blobData = data.getBlobData();
-    HelmAttributes attributes = facet.extractComponentAttributesFromArchive(blobData.getBlob().getInputStream());
+    HelmAttributes attributes = facet.extractComponentAttributesFromArchive(blobData.getBlobName(), blobData.getBlob().getInputStream());
     return facet.getComponentQuery(attributes);
   }
 

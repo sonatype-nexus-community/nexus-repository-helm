@@ -25,18 +25,35 @@ import org.sonatype.nexus.repository.cache.CacheControllerHolder.CacheType;
  */
 public enum AssetKind
 {
-  HELM_INDEX(CacheControllerHolder.METADATA),
-  HELM_PROVENANCE(CacheControllerHolder.CONTENT),
-  HELM_PACKAGE(CacheControllerHolder.CONTENT);
+  HELM_INDEX(CacheControllerHolder.METADATA, ".yaml"),
+  HELM_PROVENANCE(CacheControllerHolder.CONTENT, ".tgz.prov"),
+  HELM_PACKAGE(CacheControllerHolder.CONTENT, ".tgz");
 
   private final CacheType cacheType;
+  private final String extension;
 
-  AssetKind(final CacheType cacheType) {
+  AssetKind(final CacheType cacheType, final String extension) {
     this.cacheType = cacheType;
+    this.extension = extension;
+  }
+
+  public static AssetKind getAssetKindByFileName(final String name) {
+    if (name.endsWith(HELM_PACKAGE.getExtension())) {
+      return AssetKind.HELM_PACKAGE;
+    }
+    else if (name.endsWith(HELM_PROVENANCE.getExtension())) {
+      return AssetKind.HELM_PROVENANCE;
+    }
+    return AssetKind.HELM_INDEX;
   }
 
   @Nonnull
   public CacheType getCacheType() {
     return cacheType;
+  }
+
+  @Nonnull
+  public String getExtension() {
+    return extension;
   }
 }

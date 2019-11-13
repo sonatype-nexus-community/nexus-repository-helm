@@ -36,7 +36,6 @@ import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
-import static org.sonatype.repository.helm.internal.util.HelmPathUtils.TGZ_EXTENSION;
 
 /**
  * @since 1.0.next
@@ -66,10 +65,9 @@ public class HelmRestoreFacetImpl
   @TransactionalTouchBlob
   public void restore(final AssetBlob assetBlob, final String path) throws IOException {
     StorageTx tx = UnitOfWork.currentTx();
-    HelmAttributes attributes = helmAttributeParser.getAttributesFromInputStream(assetBlob.getBlob().getInputStream());
-    Asset asset = componentRequired(path)
-        ? helmFacet.findOrCreateAsset(tx, path, AssetKind.HELM_PACKAGE, attributes)
-        : helmFacet.findOrCreateAsset(tx, path, AssetKind.HELM_INDEX, attributes);
+    AssetKind assetKind = AssetKind.getAssetKindByFileName(path);
+    HelmAttributes attributes = helmAttributeParser.getAttributes(assetKind, assetBlob.getBlob().getInputStream());
+    Asset asset = helmFacet.findOrCreateAsset(tx, path, assetKind, attributes);
     tx.attachBlob(asset, assetBlob);
     Content.applyToAsset(asset, Content.maintainLastModified(asset, new AttributesMap()));
     tx.saveAsset(asset);
@@ -84,7 +82,7 @@ public class HelmRestoreFacetImpl
 
   @Override
   public boolean componentRequired(final String name) {
-    return name.endsWith(TGZ_EXTENSION);
+    return AssetKind.getAssetKindByFileName(name) != AssetKind.HELM_INDEX;
   }
 
   @Override
@@ -94,7 +92,8 @@ public class HelmRestoreFacetImpl
   }
 
   @Override
-  public HelmAttributes extractComponentAttributesFromArchive(final InputStream is) throws IOException {
-    return helmAttributeParser.getAttributesFromInputStream(is);
+  public HelmAttributes extractComponentAttributesFromArchive(final String blobName, final InputStream is) throws IOException {
+    AssetKind assetKind = AssetKind.getAssetKindByFileName((blobName));
+    return helmAttributeParser.getAttributes(assetKind, is);
   }
 }
