@@ -37,6 +37,7 @@ import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
+import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
@@ -44,7 +45,9 @@ import com.google.common.eventbus.Subscribe;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.common.stateguard.StateGuardLifecycleSupport.State.STARTED;
+import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_INDEX;
+import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE;
 
 /**
  * Facet for rebuilding Helm index.yaml files
@@ -112,9 +115,12 @@ public class CreateIndexFacetImpl
   }
 
   private void maybeInvalidateIndex(final AssetEvent event) {
-     if(matchesRepository(event) && isEventRelevant(event)) {
-       invalidateIndex();
-     }
+    Asset asset = event.getAsset();
+    String assetKindString = (String) asset.formatAttributes().get(P_ASSET_KIND);
+    AssetKind assetKind = AssetKind.valueOf(assetKindString);
+    if (assetKind != HELM_PROVENANCE && matchesRepository(event) && isEventRelevant(event)) {
+        invalidateIndex();
+    }
   }
 
   @Subscribe

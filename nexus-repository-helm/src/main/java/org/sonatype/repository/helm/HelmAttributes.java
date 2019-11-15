@@ -26,6 +26,9 @@ import org.sonatype.repository.helm.internal.database.HelmProperties;
  */
 public class HelmAttributes
 {
+
+  public static final String MAINTAINERS_SEPARATOR = " : ";
+
   private final Map<HelmProperties, Object> attributesEnumMap;
 
   public HelmAttributes() {
@@ -50,8 +53,9 @@ public class HelmAttributes
       //              email: wibuch@microsoft.com
       // in list: Bitnami : containers@bitnami.com , wbuchwalter : wibuch@microsoft.com
       List<Map<String, String>> maintainersMap = (List<Map<String, String>>) value;
-      List<String> maintainers = maintainersMap.stream()
-          .map(map -> String.join(" : ", map.values()))
+      List<String> maintainers = maintainersMap
+          .stream()
+          .map(map -> String.join(MAINTAINERS_SEPARATOR, map.values()))
           .collect(Collectors.toList());
       attributesEnumMap.put(helmProperties, maintainers);
     }

@@ -13,8 +13,10 @@
 package org.sonatype.repository.helm.internal.createindex;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -30,11 +32,14 @@ import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
+import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmFacet;
+import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.metadata.ChartEntry;
 import org.sonatype.repository.helm.internal.metadata.ChartIndex;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlBuilder;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.DateTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -75,7 +80,7 @@ public class CreateIndexServiceImpl
 
     ChartIndex index = new ChartIndex();
 
-    for (Asset asset : helmFacet.browseComponentAssets(tx)) {
+    for (Asset asset : helmFacet.browseComponentAssets(tx, AssetKind.HELM_PACKAGE)) {
       parseAssetIntoChartEntry(index, asset);
     }
 
@@ -93,8 +98,23 @@ public class CreateIndexServiceImpl
     chartEntry.setDescription(formatAttributes.get(DESCRIPTION.getPropertyName(), String.class));
     chartEntry.setIcon(formatAttributes.get(ICON.getPropertyName(), String.class));
     chartEntry.setCreated(asset.blobCreated());
+
+    @SuppressWarnings("unchecked")
+    List<String> maintainers = formatAttributes.get(MAINTAINERS.getPropertyName(), List.class);
+    if (!CollectionUtils.isEmpty(maintainers)) {
+      List<Map<String, String>> nextMaintainers = maintainers
+          .stream()
+          .map(param -> {
+            String[] split = param.split(HelmAttributes.MAINTAINERS_SEPARATOR);
+            String key = split[0];
+            String value = split[1];
+            return Collections.singletonMap(key, value);
+          })
+          .collect(Collectors.toList());
+      chartEntry.setMaintainers(nextMaintainers);
+    }
+
     chartEntry.setAppVersion(formatAttributes.get(APP_VERSION.getPropertyName(), String.class));
-    chartEntry.setMaintainers(formatAttributes.get(MAINTAINERS.getPropertyName(), List.class));
     chartEntry.setDigest(assetAttributes.get("checksum", Map.class)
         .get("sha256").toString());
     createListOfRelativeUrls(formatAttributes, chartEntry);
