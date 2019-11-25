@@ -118,7 +118,7 @@ public class CreateIndexFacetImpl
   private void maybeInvalidateIndex(final AssetEvent event) {
     Asset asset = event.getAsset();
     String formatName = asset.format();
-    if (formatName.equals(HelmFormat.NAME)) {
+    if (HelmFormat.NAME.equals(formatName)) {
       String assetKindString = (String) asset.formatAttributes().get(P_ASSET_KIND);
       AssetKind assetKind = AssetKind.valueOf(assetKindString);
       if (assetKind == HELM_PACKAGE && matchesRepository(event) && isEventRelevant(event)) {
