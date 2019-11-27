@@ -3,6 +3,7 @@
 ARG NEXUS_VERSION=latest
 
 FROM maven:3-jdk-8-alpine AS build
+ARG MAVEN_OPTS
 
 COPY . /nexus-repository-helm/
 RUN cd /nexus-repository-helm/; \
