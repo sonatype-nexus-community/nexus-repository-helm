@@ -44,6 +44,7 @@ import static java.util.Collections.singletonList;
 import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
 import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_COMPONENT;
 import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
+import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_ATTRIBUTES;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
 import static org.sonatype.nexus.repository.storage.Query.builder;
 import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
@@ -121,17 +122,21 @@ public class HelmFacetImpl
   }
 
   /**
-   * Find assets for Helm components (charts)
+   * Find assets for Helm components by assetKind
    *
    * @return found assets or null if not found
    */
   @Nullable
-  public Iterable<Asset> browseComponentAssets(final StorageTx tx)
+  public Iterable<Asset> browseComponentAssets(final StorageTx tx, @Nullable final AssetKind assetKind)
   {
     Builder builder = builder()
         .where(P_COMPONENT).isNotNull();
+    if (assetKind != null) {
+      builder.and(P_ATTRIBUTES + "." + HelmFormat.NAME + "." + P_ASSET_KIND).eq(assetKind.name());
+    }
 
-    Query query = builder.build();
+    Query query = builder
+        .build();
     Bucket bucket = tx.findBucket(getRepository());
     return tx.browseAssets(query, bucket);
   }

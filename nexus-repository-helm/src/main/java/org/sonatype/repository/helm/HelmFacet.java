@@ -36,7 +36,7 @@ import com.google.common.base.Supplier;
 public interface HelmFacet
     extends Facet
 {
-  Iterable<Asset> browseComponentAssets(final StorageTx tx);
+  Iterable<Asset> browseComponentAssets(final StorageTx tx, @Nullable final AssetKind assetKind);
 
   Optional<Asset> findAsset(final StorageTx tx, final String assetName);
 
