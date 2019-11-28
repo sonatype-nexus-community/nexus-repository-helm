@@ -12,19 +12,21 @@
  */
 package org.sonatype.repository.helm.internal.util;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import org.sonatype.goodies.testsupport.TestSupport;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.sonatype.goodies.testsupport.TestSupport;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 public class TgzParserTest
-    extends TestSupport {
-
+    extends TestSupport
+{
   private TgzParser underTest;
 
   @Before

@@ -16,8 +16,10 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.inject.Named;
 import javax.inject.Singleton;
+
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
@@ -29,8 +31,8 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
  */
 @Named
 @Singleton
-public class TgzParser {
-
+public class TgzParser
+{
   private static final String CHART_NAME = "Chart.yaml";
 
   public InputStream getChartFromInputStream(final InputStream is) throws IOException {
@@ -39,7 +41,7 @@ public class TgzParser {
         ArchiveEntry currentEntry;
         while ((currentEntry = tais.getNextEntry()) != null) {
           String entryName = currentEntry.getName();
-          if (entryName.contains(CHART_NAME) &&
+          if (entryName.endsWith(CHART_NAME) &&
               entryName.chars().filter(value -> value == File.separatorChar).count() == 1) {
             byte[] buf = new byte[(int) currentEntry.getSize()];
             tais.read(buf, 0, buf.length);
