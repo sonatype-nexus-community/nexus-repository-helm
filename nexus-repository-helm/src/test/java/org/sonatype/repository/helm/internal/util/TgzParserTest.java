@@ -64,7 +64,7 @@ public class TgzParserTest
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void chartRoot() throws Exception {
+  public void chartNotFound() throws Exception {
     InputStream is = getClass().getResourceAsStream("mysql_negative-1.4.0.tgz");
     underTest.getChartFromInputStream(is);
   }

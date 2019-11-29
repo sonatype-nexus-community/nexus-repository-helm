@@ -40,9 +40,7 @@ public class TgzParser
       try (TarArchiveInputStream tais = new TarArchiveInputStream(gzis)) {
         ArchiveEntry currentEntry;
         while ((currentEntry = tais.getNextEntry()) != null) {
-          String entryName = currentEntry.getName();
-          if (entryName.endsWith(CHART_NAME) &&
-              entryName.chars().filter(value -> value == File.separatorChar).count() == 1) {
+          if (currentEntry.getName().endsWith(CHART_NAME)) {
             byte[] buf = new byte[(int) currentEntry.getSize()];
             tais.read(buf, 0, buf.length);
             return new ByteArrayInputStream(buf);
@@ -50,6 +48,6 @@ public class TgzParser
         }
       }
     }
-    throw new IllegalArgumentException(String.format("%s not found in root", CHART_NAME));
+    throw new IllegalArgumentException(String.format("%s not found", CHART_NAME));
   }
 }
