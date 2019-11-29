@@ -13,14 +13,12 @@
 package org.sonatype.repository.helm.internal.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import org.sonatype.nexus.repository.storage.TempBlob;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -37,28 +35,19 @@ public class TgzParser
 {
   private static final String CHART_NAME = "Chart.yaml";
 
-  @Nullable
   public InputStream getChartFromInputStream(final InputStream is) throws IOException {
     try (GzipCompressorInputStream gzis = new GzipCompressorInputStream(is)) {
       try (TarArchiveInputStream tais = new TarArchiveInputStream(gzis)) {
-        ArchiveEntry currentEntry = tais.getNextEntry();
-
-        while (currentEntry != null) {
-          if (currentEntry.getName().contains(CHART_NAME)) {
+        ArchiveEntry currentEntry;
+        while ((currentEntry = tais.getNextEntry()) != null) {
+          if (currentEntry.getName().endsWith(CHART_NAME)) {
             byte[] buf = new byte[(int) currentEntry.getSize()];
-
             tais.read(buf, 0, buf.length);
-
             return new ByteArrayInputStream(buf);
           }
         }
       }
     }
-    return null;
-  }
-
-  @Nullable
-  public InputStream getChartFromTempBlob(final TempBlob tempBlob) throws IOException {
-    return getChartFromInputStream(tempBlob.get());
+    throw new IllegalArgumentException(String.format("%s not found", CHART_NAME));
   }
 }
