@@ -50,6 +50,8 @@ public class TgzParser
             tais.read(buf, 0, buf.length);
 
             return new ByteArrayInputStream(buf);
+          } else {
+            currentEntry = tais.getNextEntry();
           }
         }
       }

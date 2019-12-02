@@ -47,4 +47,14 @@ public class TgzParserTest
     InputStream yaml = underTest.getChartFromTempBlob(tempBlob);
     assertThat(yaml, is(instanceOf(InputStream.class)));
   }
+
+  @Test(timeout = 10000)
+  public void getYamlFromTgzTest2() throws Exception {
+    InputStream is = getClass().getResourceAsStream("twitter-sentiment-0.1.0.tgz");
+    when(tempBlob.get()).thenReturn(is);
+
+    InputStream yaml = underTest.getChartFromTempBlob(tempBlob);
+    assertThat(yaml, is(instanceOf(InputStream.class)));
+  }
+
 }
