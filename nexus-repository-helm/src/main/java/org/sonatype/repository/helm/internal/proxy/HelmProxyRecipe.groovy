@@ -25,6 +25,7 @@ import org.sonatype.nexus.repository.cache.NegativeCacheFacet
 import org.sonatype.nexus.repository.cache.NegativeCacheHandler
 import org.sonatype.nexus.repository.http.HttpHandlers
 import org.sonatype.nexus.repository.proxy.ProxyHandler
+import org.sonatype.nexus.repository.routing.RoutingRuleHandler
 import org.sonatype.nexus.repository.types.ProxyType
 import org.sonatype.nexus.repository.view.ConfigurableViewFacet
 import org.sonatype.nexus.repository.view.Route
@@ -51,6 +52,9 @@ class HelmProxyRecipe
 
   @Inject
   ProxyHandler proxyHandler
+
+  @Inject
+  RoutingRuleHandler routingRuleHandler
 
   @Inject
   NegativeCacheHandler negativeCacheHandler
@@ -90,6 +94,7 @@ class HelmProxyRecipe
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)
           .handler(securityHandler)
+          .handler(routingRuleHandler)
           .handler(formatHighAvailabilitySupportHandler)
           .handler(exceptionHandler)
           .handler(handlerContributor)

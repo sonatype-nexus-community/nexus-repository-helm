@@ -29,18 +29,23 @@ import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.storage.StorageTx;
+import org.sonatype.nexus.testsuite.testsupport.FormatClientSupport;
 import org.sonatype.nexus.testsuite.testsupport.RepositoryITSupport;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.tika.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Rule;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 /**
  * Support class for Helm ITs.
@@ -142,6 +147,20 @@ public class HelmITSupport
     try (StorageTx tx = getStorageTx(repository)) {
       tx.begin();
       return IteratorUtils.toList(tx.browseAssets(component).iterator());
+    }
+  }
+
+  protected void assertGetResponseStatus(
+      final FormatClientSupport client,
+      final Repository repository,
+      final String path,
+      final int responseCode) throws IOException
+  {
+    try (CloseableHttpResponse response = client.get(path)) {
+      StatusLine statusLine = response.getStatusLine();
+      Assert.assertThat("Repository:" + repository.getName() + " Path:" + path,
+          statusLine.getStatusCode(),
+          is(responseCode));
     }
   }
 }
