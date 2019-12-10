@@ -23,7 +23,7 @@
   </parent>
 
   <artifactId>nexus-repository-base</artifactId>
-  <version>0.0.13</version>
+  <version>0.0.14-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <inceptionYear>2018</inceptionYear>
@@ -33,6 +33,11 @@
     <module>nexus-repository-helm-it</module>
     <module>nexus-restore-helm</module>
   </modules>
+
+  <scm>
+    <developerConnection>scm:git:git@github.com:sonatype-nexus-community/nexus-repository-helm.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 
   <distributionManagement>
     <snapshotRepository>
@@ -77,25 +82,44 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>rso</serverId>
+          <nexusUrl>https://repository.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <!-- Something in the pom hierarchy overrides the default 'pushChanges == true', so we reset that here. -->
+          <pushChanges>true</pushChanges>
+          <releaseProfiles>gpg-sign</releaseProfiles>
+          <!--
+          CI build runs out of memory during release, with error like this:
+          Failed to execute goal org.apache.maven.plugins:maven-release-plugin:2.5.2:prepare (default-cli) on project nexus-repository-base: Maven execution failed, exit code: '137' -> [Help 1]
+          TODO: Investigate increasing available memory for the CI build
+          -->
+          <arguments>-DskipTests</arguments>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
   <profiles>
     <profile>
-      <id>deploy</id>
+      <id>gpg-sign</id>
       <!--
       only sign during deploy phase
       -->
-      <activation>
-        <property>
-          <name>performRelease</name>
-          <value>true</value>
-        </property>
-      </activation>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>1.6</version>
             <executions>
@@ -114,18 +138,9 @@
               </execution>
             </executions>
           </plugin>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>rso</serverId>
-              <nexusUrl>https://repository.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>false</autoReleaseAfterClose>
-            </configuration>
-          </plugin>
         </plugins>
       </build>
     </profile>
+    
   </profiles>
 </project>
