@@ -23,7 +23,7 @@
   </parent>
 
   <artifactId>nexus-repository-base</artifactId>
-  <version>0.0.14-SNAPSHOT</version>
+  <version>0.0.13</version>
   <packaging>pom</packaging>
 
   <inceptionYear>2018</inceptionYear>
