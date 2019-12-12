@@ -39,12 +39,13 @@ public class HelmApiRepositoryAdapterTest
   @Mock
   private RoutingRuleStore routingRuleStore;
 
+  private Configuration configuration = new Configuration();
+
   @Before
   public void setup() {
     underTest = new SimpleApiRepositoryAdapter(routingRuleStore);
     BaseUrlHolder.set("http://nexus-url");
 
-    Configuration configuration = new Configuration();
     configuration.setOnline(true);
   }
 
