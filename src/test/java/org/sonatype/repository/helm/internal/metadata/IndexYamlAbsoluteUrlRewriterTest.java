@@ -19,7 +19,9 @@ import java.io.InputStreamReader;
 
 import org.sonatype.goodies.testsupport.TestSupport;
 import org.sonatype.nexus.blobstore.api.Blob;
+import org.sonatype.nexus.common.collect.NestedAttributesMap;
 import org.sonatype.nexus.repository.Repository;
+import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.TempBlob;
 
@@ -46,11 +48,15 @@ public class IndexYamlAbsoluteUrlRewriterTest
 
   private static final String INDEX_YAML_NO_ABSOLUTE_URLS = "indexWithRelativeUrls.yaml";
 
+  private static final String INDEX_WITH_SUB_FOLDER = "indexWithSubFolder.yaml";
+
   private static final String INDEX_YAML_URL_NODE = "url";
 
   private static final String HTTP = "http://";
 
   private static final String HTTPS = "https://";
+
+  private static final String REMOTE_URL = "https://kubernetes-charts.storage.googleapis.com";
 
   private IndexYamlAbsoluteUrlRewriter underTest;
 
@@ -63,10 +69,19 @@ public class IndexYamlAbsoluteUrlRewriterTest
   @Mock
   StorageFacet storageFacet;
 
+  @Mock
+  Configuration configuration;
+
+  @Mock
+  NestedAttributesMap attributesMap;
+
   @Before
   public void setUp() throws Exception {
     setupRepositoryMock();
     this.underTest = new IndexYamlAbsoluteUrlRewriter();
+    when(repository.getConfiguration()).thenReturn(configuration);
+    when(configuration.attributes("proxy")).thenReturn(attributesMap);
+    when(attributesMap.get("remoteUrl")).thenReturn(REMOTE_URL);
   }
 
   @Test
@@ -85,6 +100,14 @@ public class IndexYamlAbsoluteUrlRewriterTest
     checkThatAbsoluteUrlRemoved(newTempBlob.get());
   }
 
+  @Test
+  public void removeUrlsFromIndexYamlWithSubFolder() throws Exception {
+    setupIndexMock(INDEX_WITH_SUB_FOLDER);
+    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository);
+    assertThat(newTempBlob.get(), is(instanceOf(InputStream.class)));
+    checkThatAbsoluteUrlRemoved(newTempBlob.get());
+  }
+
   private void checkThatAbsoluteUrlRemoved(final InputStream is) throws Exception {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
       boolean checkNext = false;
@@ -94,6 +117,7 @@ public class IndexYamlAbsoluteUrlRewriterTest
         if (checkNext) {
           assertThat(line, either(not(containsString(HTTP))).or(not(containsString(HTTPS))));
           assertThat(line, not(startsWith("- /")));
+          assertThat(line, not(containsString(REMOTE_URL)));
           checkNext = false;
         }
         if (line.contains(INDEX_YAML_URL_NODE)) {
