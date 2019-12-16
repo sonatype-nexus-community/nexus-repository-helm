@@ -34,9 +34,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class HelmResourceITTest
+public class HelmResourceIT
     extends HelmITSupport
 {
+
   @Configuration
   public static Option[] configureNexus() {
     return NexusPaxExamSupport.options(
@@ -48,8 +49,6 @@ public class HelmResourceITTest
   @Before
   public void setUp() throws Exception {
     BaseUrlHolder.set(this.nexusUrl.toString());
-    repos.createHelmHosted("helm-hosted-test");
-    //client = createHelmClient(helmHosted);
   }
 
   @Test
