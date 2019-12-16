@@ -14,16 +14,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerSuite;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+@ExamReactorStrategy(PerSuite.class)
 public class HelmRepositoriesApiResourceTest
     extends HelmITSupport
 {
-
   @Configuration
   public static Option[] configureNexus() {
     return options(

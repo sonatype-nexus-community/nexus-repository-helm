@@ -53,8 +53,8 @@ import org.sonatype.nexus.repository.types.HostedType;
 import org.sonatype.nexus.repository.types.ProxyType;
 import org.sonatype.nexus.security.role.Role;
 import org.sonatype.nexus.testsuite.testsupport.FormatClientSupport;
-import org.sonatype.nexus.testsuite.testsupport.RepositoryITSupport;
 import org.sonatype.nexus.testsuite.testsupport.fixtures.SecurityRule;
+import org.sonatype.nexus.testsuite.testsupport.raw.RawITSupport;
 import org.sonatype.repository.helm.api.HelmHostedRepositoryApiRequest;
 import org.sonatype.repository.helm.api.HelmProxyRepositoryApiRequest;
 import org.sonatype.repository.helm.internal.HelmFormat;
@@ -76,6 +76,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.tika.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerSuite;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -89,7 +91,7 @@ import static org.hamcrest.Matchers.is;
  * @since 1.0.0
  */
 public class HelmITSupport
-    extends RepositoryITSupport
+    extends RawITSupport
 {
   public static final String HELM_FORMAT_NAME = "helm";
 
@@ -111,7 +113,7 @@ public class HelmITSupport
       MONGO_PKG_NAME, MONGO_PKG_VERSION_728, TGZ_EXT);
 
   public static final String MONGO_PKG_FILE_NAME_600_TGZ = format("%s-%s%s",
-    MONGO_PKG_NAME, MONGO_PKG_VERSION_600, TGZ_EXT);
+      MONGO_PKG_NAME, MONGO_PKG_VERSION_600, TGZ_EXT);
 
   public static final String MONGO_PKG_FILE_NAME_404_TGZ = format("%s-%s%s",
       MONGO_PKG_NAME, MONGO_PKG_VERSION_404, TGZ_EXT);
@@ -129,8 +131,8 @@ public class HelmITSupport
   public static final String MONGO_PATH_FULL_728_TARGZ = format("%s/%s", PKG_PATH, MONGO_PKG_FILE_NAME_728_TGZ);
 
   public static final String YAML_MONGO_600_STRING_DATA = "urls:\n    - mongodb-6.0.0.tgz\n    version: 6.0.0";
-  public static final String YAML_MONGO_728_STRING_DATA = "urls:\n    - mongodb-7.2.8.tgz\n    version: 7.2.8";
 
+  public static final String YAML_MONGO_728_STRING_DATA = "urls:\n    - mongodb-7.2.8.tgz\n    version: 7.2.8";
 
   @Rule
   public SecurityRule securityRule = new SecurityRule(() -> securitySystem, () -> selectorManager);
@@ -172,7 +174,7 @@ public class HelmITSupport
     assertThat(downloadedPackageData, containsString(expectedContent));
   }
 
-  private Path getFilePathByName(String fileName){
+  private Path getFilePathByName(String fileName) {
     return Paths.get(testData.resolveFile(fileName).getAbsolutePath());
   }
 
@@ -203,8 +205,6 @@ public class HelmITSupport
           is(responseCode));
     }
   }
-
-
 
   // SET YOUR FORMAT DATA
   public static final String FORMAT_VALUE = HelmFormat.NAME;
@@ -311,7 +311,8 @@ public class HelmITSupport
 
         HttpEntity entity = response.getEntity();
         if (entity != null) {
-          responseBuilder.entity(new ByteArrayInputStream(org.apache.commons.io.IOUtils.toByteArray(entity.getContent())));
+          responseBuilder
+              .entity(new ByteArrayInputStream(org.apache.commons.io.IOUtils.toByteArray(entity.getContent())));
         }
         return responseBuilder.build();
       }
