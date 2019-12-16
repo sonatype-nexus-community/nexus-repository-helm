@@ -1,4 +1,4 @@
-package org.sonatype.nexus.plugins.helm.api;
+package org.sonatype.nexus.plugins.helm.internal;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;

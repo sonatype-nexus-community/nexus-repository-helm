@@ -1,4 +1,4 @@
-package org.sonatype.nexus.plugins.helm.api;
+package org.sonatype.nexus.plugins.helm.internal;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
