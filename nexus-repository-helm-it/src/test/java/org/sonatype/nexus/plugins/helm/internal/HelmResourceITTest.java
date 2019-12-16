@@ -15,7 +15,6 @@ package org.sonatype.nexus.plugins.helm.internal;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.sonatype.goodies.testsupport.group.External;
 import org.sonatype.nexus.common.app.BaseUrlHolder;
 import org.sonatype.nexus.pax.exam.NexusPaxExamSupport;
 import org.sonatype.nexus.repository.Repository;
@@ -27,7 +26,6 @@ import org.sonatype.repository.helm.internal.HelmFormat;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 
@@ -36,7 +34,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@Category(External.class)
 public class HelmResourceITTest
     extends HelmITSupport
 {
