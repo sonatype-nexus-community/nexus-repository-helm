@@ -1,7 +1,6 @@
-package org.sonatype.nexus.plugins.helm.internal.api;
+package org.sonatype.nexus.plugins.helm.api;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
@@ -14,7 +13,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 
-import org.sonatype.nexus.plugins.helm.internal.HelmITSupport;
+import org.sonatype.nexus.plugins.helm.internal.fixtures.RepositoryRuleHelm;
 import org.sonatype.nexus.repository.rest.api.model.AbstractRepositoryApiRequest;
 import org.sonatype.nexus.repository.rest.api.model.CleanupPolicyAttributes;
 import org.sonatype.nexus.repository.rest.api.model.HostedStorageAttributes;
@@ -27,6 +26,7 @@ import org.sonatype.nexus.repository.storage.WritePolicy;
 import org.sonatype.nexus.repository.types.HostedType;
 import org.sonatype.nexus.repository.types.ProxyType;
 import org.sonatype.nexus.security.role.Role;
+import org.sonatype.nexus.testsuite.testsupport.RepositoryITSupport;
 import org.sonatype.nexus.testsuite.testsupport.fixtures.SecurityRule;
 import org.sonatype.repository.helm.api.HelmHostedRepositoryApiRequest;
 import org.sonatype.repository.helm.api.HelmProxyRepositoryApiRequest;
@@ -41,16 +41,13 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Rule;
 
-public class RepositoriesApiResourceMemberITSupport
-    extends HelmITSupport
+public class ResourceITSupport
+    extends RepositoryITSupport
 {
   // SET YOUR FORMAT DATA
   public static final String FORMAT_VALUE = HelmFormat.NAME;
@@ -70,6 +67,9 @@ public class RepositoriesApiResourceMemberITSupport
 
   @Rule
   public SecurityRule securityRule = new SecurityRule(() -> securitySystem, () -> selectorManager);
+
+  @Rule
+  public RepositoryRuleHelm repos = new RepositoryRuleHelm(() -> repositoryManager);
 
   protected void setUnauthorizedUser() {
     String randomRoleName = "role_" + UUID.randomUUID().toString();
@@ -113,7 +113,7 @@ public class RepositoriesApiResourceMemberITSupport
     HttpClientAttributes httpClient = new HttpClientAttributes(false, true, connection, authentication);
 
     // SET YOUR FORMAT DATA
-    return new HelmProxyRepositoryApiRequest(RepositoriesApiResourceMemberITSupport.PROXY_NAME, true, storage, cleanup,
+    return new HelmProxyRepositoryApiRequest(ResourceITSupport.PROXY_NAME, true, storage, cleanup,
         proxy, negativeCache,
         httpClient, null);
   }
@@ -124,7 +124,7 @@ public class RepositoriesApiResourceMemberITSupport
     CleanupPolicyAttributes cleanup = new CleanupPolicyAttributes(Collections.emptyList());
 
     // SET YOUR FORMAT DATA
-    return new HelmHostedRepositoryApiRequest(RepositoriesApiResourceMemberITSupport.HOSTED_NAME, true, storage,
+    return new HelmHostedRepositoryApiRequest(ResourceITSupport.HOSTED_NAME, true, storage,
         cleanup);
   }
 
@@ -137,28 +137,14 @@ public class RepositoriesApiResourceMemberITSupport
   }
 
   private Response execute(
-      final HttpRequestBase httpRequestBase,
+      final HttpEntityEnclosingRequestBase httpRequestBase,
       final String url,
       final Object body,
       final Map<String, String> queryParams) throws Exception
   {
-    if (httpRequestBase instanceof HttpEntityEnclosingRequestBase) {
-      HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) httpRequestBase;
-      if (body instanceof String) {
-        request.setEntity(new StringEntity((String) body, ContentType.TEXT_PLAIN));
-      }
-      else if (body instanceof byte[]) {
-        request.setEntity(new ByteArrayEntity((byte[]) body, ContentType.APPLICATION_OCTET_STREAM));
-      }
-      else if (body instanceof File) {
-        request.setEntity(new FileEntity((File) body, ContentType.APPLICATION_OCTET_STREAM));
-      }
-      else {
-        request.setEntity(
-            new StringEntity(objectMapper.writerFor(body.getClass()).writeValueAsString(body),
-                ContentType.APPLICATION_JSON));
-      }
-    }
+    httpRequestBase.setEntity(
+        new StringEntity(objectMapper.writerFor(body.getClass()).writeValueAsString(body),
+            ContentType.APPLICATION_JSON));
     UriBuilder uriBuilder = UriBuilder.fromUri(nexusUrl.toString()).path(url);
     queryParams.forEach(uriBuilder::queryParam);
     httpRequestBase.setURI(uriBuilder.build());

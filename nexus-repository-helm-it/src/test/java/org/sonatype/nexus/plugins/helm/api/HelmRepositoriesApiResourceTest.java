@@ -1,4 +1,4 @@
-package org.sonatype.nexus.plugins.helm.internal.api;
+package org.sonatype.nexus.plugins.helm.api;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -20,8 +20,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class HelmRepositoriesApiResourceMember
-    extends RepositoriesApiResourceMemberITSupport
+public class HelmRepositoriesApiResourceTest
+    extends ResourceITSupport
 {
 
   @Configuration
