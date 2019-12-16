@@ -53,8 +53,8 @@ import org.sonatype.nexus.repository.types.HostedType;
 import org.sonatype.nexus.repository.types.ProxyType;
 import org.sonatype.nexus.security.role.Role;
 import org.sonatype.nexus.testsuite.testsupport.FormatClientSupport;
+import org.sonatype.nexus.testsuite.testsupport.RepositoryITSupport;
 import org.sonatype.nexus.testsuite.testsupport.fixtures.SecurityRule;
-import org.sonatype.nexus.testsuite.testsupport.raw.RawITSupport;
 import org.sonatype.repository.helm.api.HelmHostedRepositoryApiRequest;
 import org.sonatype.repository.helm.api.HelmProxyRepositoryApiRequest;
 import org.sonatype.repository.helm.internal.HelmFormat;
@@ -76,8 +76,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.tika.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerSuite;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -91,7 +89,7 @@ import static org.hamcrest.Matchers.is;
  * @since 1.0.0
  */
 public class HelmITSupport
-    extends RawITSupport
+    extends RepositoryITSupport
 {
   public static final String HELM_FORMAT_NAME = "helm";
 
