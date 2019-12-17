@@ -39,7 +39,7 @@ public class HelmResourceIT
   @Test
   public void createProxy() throws Exception {
     AbstractRepositoryApiRequest request = createProxyRequest(true);
-    Response response = post(getCreateRepositoryPathFor(ProxyType.NAME), request);
+    Response response = post(getCreateRepositoryPathUrl(ProxyType.NAME), request);
     assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
 
     Repository repository = repositoryManager.get(request.getName());
@@ -54,7 +54,7 @@ public class HelmResourceIT
   public void createProxy_noAuthc() throws Exception {
     setBadCredentials();
     AbstractRepositoryApiRequest request = createProxyRequest(true);
-    Response response = post(getCreateRepositoryPathFor(ProxyType.NAME), request);
+    Response response = post(getCreateRepositoryPathUrl(ProxyType.NAME), request);
     assertEquals(Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
   }
 
@@ -62,14 +62,14 @@ public class HelmResourceIT
   public void createProxy_noAuthz() throws Exception {
     setUnauthorizedUser();
     AbstractRepositoryApiRequest request = createProxyRequest(true);
-    Response response = post(getCreateRepositoryPathFor(ProxyType.NAME), request);
+    Response response = post(getCreateRepositoryPathUrl(ProxyType.NAME), request);
     assertEquals(Status.FORBIDDEN.getStatusCode(), response.getStatus());
   }
 
   @Test
   public void createHosted() throws Exception {
     AbstractRepositoryApiRequest request = createHostedRequest(true);
-    Response response = post(getCreateRepositoryPathFor(HostedType.NAME), request);
+    Response response = post(getCreateRepositoryPathUrl(HostedType.NAME), request);
     assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
 
     Repository repository = repositoryManager.get(request.getName());
@@ -84,7 +84,7 @@ public class HelmResourceIT
   public void createHosted_noAuthc() throws Exception {
     setBadCredentials();
     AbstractRepositoryApiRequest request = createHostedRequest(true);
-    Response response = post(getCreateRepositoryPathFor(HostedType.NAME), request);
+    Response response = post(getCreateRepositoryPathUrl(HostedType.NAME), request);
     assertEquals(Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
   }
 
@@ -92,7 +92,7 @@ public class HelmResourceIT
   public void createHosted_noAuthz() throws Exception {
     setUnauthorizedUser();
     AbstractRepositoryApiRequest request = createHostedRequest(true);
-    Response response = post(getCreateRepositoryPathFor(HostedType.NAME), request);
+    Response response = post(getCreateRepositoryPathUrl(HostedType.NAME), request);
     assertEquals(Status.FORBIDDEN.getStatusCode(), response.getStatus());
   }
 
@@ -102,7 +102,7 @@ public class HelmResourceIT
 
     AbstractRepositoryApiRequest request = createProxyRequest(false);
 
-    Response response = put(getUpdateRepositoryPathFor(ProxyType.NAME, PROXY_NAME), request);
+    Response response = put(getUpdateRepositoryPathUrl(ProxyType.NAME, PROXY_NAME), request);
     assertEquals(Status.NO_CONTENT.getStatusCode(), response.getStatus());
 
     Repository repository = repositoryManager.get(request.getName());
@@ -119,7 +119,7 @@ public class HelmResourceIT
     setBadCredentials();
     AbstractRepositoryApiRequest request = createProxyRequest(false);
 
-    Response response = put(getUpdateRepositoryPathFor(ProxyType.NAME, PROXY_NAME), request);
+    Response response = put(getUpdateRepositoryPathUrl(ProxyType.NAME, PROXY_NAME), request);
     assertEquals(Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
   }
 
@@ -130,7 +130,7 @@ public class HelmResourceIT
     setUnauthorizedUser();
     AbstractRepositoryApiRequest request = createProxyRequest(false);
 
-    Response response = put(getUpdateRepositoryPathFor(ProxyType.NAME, PROXY_NAME), request);
+    Response response = put(getUpdateRepositoryPathUrl(ProxyType.NAME, PROXY_NAME), request);
     assertEquals(Status.FORBIDDEN.getStatusCode(), response.getStatus());
   }
 
@@ -140,7 +140,7 @@ public class HelmResourceIT
 
     AbstractRepositoryApiRequest request = createHostedRequest(false);
 
-    Response response = put(getUpdateRepositoryPathFor(HostedType.NAME, HOSTED_NAME), request);
+    Response response = put(getUpdateRepositoryPathUrl(HostedType.NAME, HOSTED_NAME), request);
     assertEquals(Status.NO_CONTENT.getStatusCode(), response.getStatus());
 
     Repository repository = repositoryManager.get(request.getName());
@@ -158,7 +158,7 @@ public class HelmResourceIT
     setBadCredentials();
     AbstractRepositoryApiRequest request = createHostedRequest(false);
 
-    Response response = put(getUpdateRepositoryPathFor(HostedType.NAME, HOSTED_NAME), request);
+    Response response = put(getUpdateRepositoryPathUrl(HostedType.NAME, HOSTED_NAME), request);
     assertEquals(Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
   }
 
@@ -169,7 +169,7 @@ public class HelmResourceIT
     setUnauthorizedUser();
     AbstractRepositoryApiRequest request = createHostedRequest(false);
 
-    Response response = put(getUpdateRepositoryPathFor(HostedType.NAME, HOSTED_NAME), request);
+    Response response = put(getUpdateRepositoryPathUrl(HostedType.NAME, HOSTED_NAME), request);
     assertEquals(Status.FORBIDDEN.getStatusCode(), response.getStatus());
   }
 }

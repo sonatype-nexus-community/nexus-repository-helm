@@ -83,7 +83,7 @@ public class ResourceITSupport
     credentials = new UsernamePasswordCredentials("fake_user", "fake_user");
   }
 
-  protected String getCreateRepositoryPathFor(final String type) {
+  protected String getCreateRepositoryPathUrl(final String type) {
     return new StringJoiner("/")
         .add(REPOSITORIES_API_URL)
         .add(FORMAT_VALUE)
@@ -91,7 +91,7 @@ public class ResourceITSupport
         .toString();
   }
 
-  protected String getUpdateRepositoryPathFor(final String type, final String name) {
+  protected String getUpdateRepositoryPathUrl(final String type, final String name) {
     return new StringJoiner("/")
         .add(REPOSITORIES_API_URL)
         .add(FORMAT_VALUE)
@@ -141,17 +141,15 @@ public class ResourceITSupport
   }
 
   private Response execute(HttpEntityEnclosingRequestBase request) throws Exception {
-    try (CloseableHttpClient client = super.clientBuilder().build()) {
-      try (CloseableHttpResponse response = client.execute(request)) {
-        ResponseBuilder responseBuilder = Response.status(response.getStatusLine().getStatusCode());
-        Arrays.stream(response.getAllHeaders()).forEach(h -> responseBuilder.header(h.getName(), h.getValue()));
+    try (CloseableHttpResponse response = clientBuilder().build().execute(request)) {
+      ResponseBuilder responseBuilder = Response.status(response.getStatusLine().getStatusCode());
+      Arrays.stream(response.getAllHeaders()).forEach(h -> responseBuilder.header(h.getName(), h.getValue()));
 
-        HttpEntity entity = response.getEntity();
-        if (entity != null) {
-          responseBuilder.entity(new ByteArrayInputStream(IOUtils.toByteArray(entity.getContent())));
-        }
-        return responseBuilder.build();
+      HttpEntity entity = response.getEntity();
+      if (entity != null) {
+        responseBuilder.entity(new ByteArrayInputStream(IOUtils.toByteArray(entity.getContent())));
       }
+      return responseBuilder.build();
     }
   }
 
