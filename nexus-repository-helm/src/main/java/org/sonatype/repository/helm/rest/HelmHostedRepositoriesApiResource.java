@@ -10,7 +10,7 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.api;
+package org.sonatype.repository.helm.rest;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -22,6 +22,7 @@ import org.sonatype.nexus.repository.rest.api.AbstractRepositoryApiRequestToConf
 import org.sonatype.nexus.repository.rest.api.AuthorizingRepositoryManager;
 import org.sonatype.nexus.repository.rest.api.RepositoriesApiResource;
 import org.sonatype.nexus.rest.Resource;
+import org.sonatype.repository.helm.api.HelmHostedRepositoryApiRequest;
 
 @Named
 @Singleton

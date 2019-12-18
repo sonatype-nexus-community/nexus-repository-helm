@@ -1,7 +1,6 @@
-package org.sonatype.nexus.plugins.helm.api;
+package org.sonatype.nexus.plugins.helm.rest;
 
 import java.io.ByteArrayInputStream;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
@@ -43,7 +42,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Rule;
 
 public class ResourceITSupport
