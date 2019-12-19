@@ -18,6 +18,7 @@ Sonatype internal people, in alphabetical order by username:
 
 * [@DarthHater](https://github.com/darthhater/) (Jeffry Hesse)
 * [@doddi](https://github.com/doddi/) (Mark Dodgson)
+* [@mlukaretkyi](https://github.com/mlukaretkyi) (Maksym Lukaretkyi)
 
 External contributors:
 
