@@ -7,8 +7,6 @@
  */
 package org.sonatype.repository.helm.rest;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 
 import org.sonatype.repository.helm.api.HelmProxyRepositoryApiRequest;
@@ -34,7 +32,7 @@ public interface HelmProxyRepositoriesApiResourceDoc
       @ApiResponse(code = 401, message = AUTHENTICATION_REQUIRED),
       @ApiResponse(code = 403, message = INSUFFICIENT_PERMISSIONS)
   })
-  Response createRepository(@Valid @NotNull final HelmProxyRepositoryApiRequest request);
+  Response createRepository(final HelmProxyRepositoryApiRequest request);
 
   @ApiOperation("Update Helm proxy repository")
   @ApiResponses(value = {
@@ -43,6 +41,6 @@ public interface HelmProxyRepositoriesApiResourceDoc
       @ApiResponse(code = 403, message = INSUFFICIENT_PERMISSIONS)
   })
   Response updateRepository(
-      @Valid @NotNull final HelmProxyRepositoryApiRequest request,
+      final HelmProxyRepositoryApiRequest request,
       @ApiParam(value = "Name of the repository to update") final String repositoryName);
 }
