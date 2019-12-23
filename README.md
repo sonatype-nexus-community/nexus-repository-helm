@@ -23,14 +23,13 @@
 [![DepShield Badge](https://depshield.sonatype.org/badges/sonatype-nexus-community/nexus-repository-helm/depshield.svg)](https://depshield.github.io)
 
 # Table Of Contents
+* [Release notes](https://help.sonatype.com/display/NXRM3/2020+Release+Notes#id-2020ReleaseNotes-RepositoryManager3.21.0)
 * [Developing](#developing)
    * [Requirements](#requirements)
    * [Building](#building)
 * [Using Helm with Nexus Repository Manger 3](#using-helm-with-nexus-repository-manager-3)
 * [Installing the plugin](#installing-the-plugin)
-   * [Temporary Install](#temporary-install)
-   * [(more) Permanent Install](#more-permanent-install)
-   * [(most) Permament Install](#most-permanent-install)
+   * [Permanent Install](#permanent-reinstall)
 * [The Fine Print](#the-fine-print)
 * [Getting Help](#getting-help)
 
@@ -52,15 +51,15 @@ To build the project and generate the bundle use Maven
 
 If everything checks out, the bundle for Helm should be available in the `target` folder.
 
-In the examples below, substitute `0.0.12` with the current version of the helm format plugin.
+In the examples below, substitute `<helm_version>` with the current version of the helm format plugin.
 
 #### Build with Docker
 
-    docker build -t nexus-repository-helm .
+`docker build -t nexus-repository-helm:<helm_version> .`
 
 #### Run as a Docker container
 
-    docker run -d -p 8081:8081 --name nexus-repository-helm nexus-repository-helm
+`docker run -d -p 8081:8081 --name nexus nexus-repository-helm:<helm_version>` 
 
 For further information like how to persist volumes check out [the GitHub repo for our official image](https://github.com/sonatype/docker-nexus3).
 
@@ -69,133 +68,72 @@ The application will now be available from your browser at http://localhost:8081
 * As of Nexus Repository Manager Version 3.17, the default admin password is randomly generated.
   If running in a Docker container, you will need to view the generated password file 
   (/nexus-data/admin.password) in order to login to Nexus. The command below will open a bash shell 
-  in the container named `nexus-repository-helm`:
+  in the container named `nexus`:
 
-      docker exec -it nexus-repository-helm /bin/bash
+      docker exec -it nexus /bin/bash
       $ cat /nexus-data/admin.password 
       
-  Once logged into the application UI as `admin` using the generated password, you should also 
+  Once logged into the application UI as `admin` using the generated password, you may also want to 
   turn on "Enable anonymous access" when prompted by the setup wizard.     
 
 ## Using Helm With Nexus Repository Manager 3
 
-[We have detailed instructions on how to get started here!](docs/HELM_USER_DOCUMENTATION.md)
+[We have detailed instructions on how to get started here!](https://help.sonatype.com/repomanager3/formats/helm-repositories)
 
 ## Compatibility with Nexus Repository Manager 3 Versions
 
 The table below outlines what version of Nexus Repository the plugin was built against
 
-| Plugin Version | Nexus Repository Version |
-|----------------|--------------------------|
-| v0.0.6         | 3.13.0-01                |
-| v0.0.7         | 3.14.0-04                |
-| v0.0.8         | 3.15.2-01                |
-| v0.0.9         | 3.16.2-01                |
-| v0.0.10        | 3.17.0-01                |
-| v0.0.11        | 3.18.0-01                |
-| v0.0.12        | 3.18.0-01                |
-| v0.0.13        | 3.18.0-01                |
-
-If a new version of Nexus Repository is released and the plugin needs changes, a new release will be made, and this
-table will be updated to indicate which version of Nexus Repository it will function against. This is done on a time 
-available basis, as this is community supported. If you see a new version of Nexus Repository, go ahead and update the
-plugin and send us a PR after testing it out!
-
+| Plugin Version        | Nexus Repository Version |
+|-----------------------|--------------------------|
+| v0.0.6                | 3.13.0-01                |
+| v0.0.7                | 3.14.0-04                |
+| v0.0.8                | 3.15.2-01                |
+| v0.0.9                | 3.16.2-01                |
+| v0.0.10               | 3.17.0-01                |
+| v0.0.11               | 3.18.0-01                |
+| v0.0.12               | 3.18.0-01                |
+| v0.0.13               | 3.18.0-01                |
+| v1.0.0 In product     | 3.21.0-01                |
 All released versions can be found [here](https://github.com/sonatype-nexus-community/nexus-repository-helm/releases).
 
 ## Features Implemented In This Plugin 
 
 | Feature | Implemented          |
 |---------|----------------------|
-| Proxy   | :heavy_check_mark: * |
-| Hosted  | :heavy_check_mark: * |
+| Proxy   | :heavy_check_mark:   |
+| Hosted  | :heavy_check_mark:   |
 | Group   |                      |
+  
+## Installing The Plugin
+In Nexus Repository Manager 3.21+ `Helm` format is already included. So there is no need to install it. But if you want to reinstall the plugin with your improvements then following instructions will be useful. <br> <b>Note:</b> Using an unofficial version of the plugin is not supported by the Sonatype Support team.  
 
-`* tested primarily against the Google Helm Chart registry, not guaranteed to work on the wide wild world of Helm repositories.`
+### Permanent Reinstall
 
-### Supported Helm Commands
-
-#### Proxy
-
-| Command                      | Implemented              |
-|------------------------------|--------------------------|
-| `helm repo add`              | :heavy_check_mark:       |
-| `helm install`               | :heavy_check_mark:       |
-
-#### Hosted
-
-TBD
-
-## Installing the plugin
-
-There are a range of options for installing the Helm plugin. You'll need to build it first, and
-then install the plugin with the options shown below:
-
-### Temporary Install
-
-Installations done via the Karaf console will be wiped out with every restart of Nexus Repository. This is a
-good installation path if you are just testing or doing development on the plugin.
-
-* Enable Nexus console: edit `<nexus_dir>/bin/nexus.vmoptions` and change `karaf.startLocalConsole`  to `true`.
-
-  More details here: [Bundle Development](https://help.sonatype.com/display/NXRM3/Bundle+Development+Overview)
-
-* Run Nexus' console:
-  ```
-  # sudo su - nexus
-  $ cd <nexus_dir>/bin
-  $ ./nexus run
-  > bundle:install file:///tmp/nexus-repository-helm-0.0.12.jar
-  > bundle:list
-  ```
-  (look for org.sonatype.nexus.plugins:nexus-repository-helm ID, should be the last one)
-  ```
-  > bundle:start <org.sonatype.nexus.plugins:nexus-repository-helm ID>
-  ```
-
-### (more) Permanent Install
-
-For more permanent installs of the nexus-repository-helm plugin, follow these instructions:
-
-* Copy the bundle (nexus-repository-helm-0.0.12.jar) into <nexus_dir>/deploy
-
-This will cause the plugin to be loaded with each restart of Nexus Repository. As well, this folder is monitored
-by Nexus Repository and the plugin should load within 60 seconds of being copied there if Nexus Repository
-is running. You will still need to start the bundle using the karaf commands mentioned in the temporary install.
-
-### (most) Permanent Install
-
-If you are trying to use the Helm plugin permanently, it likely makes more sense to do the following:
-
-* Copy the bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-helm/0.0.12/nexus-repository-helm-0.0.12.jar`
-* Make the following additions marked with + to `<nexus_dir>/system/org/sonatype/nexus/assemblies/nexus-core-feature/3.x.y/nexus-core-feature-3.x.y-features.xml`
+* Copy the new bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-helm/<helm_version>/nexus-repository-helm-<helm_version>.jar`
+* If you are using OSS edition, make these mods in: `<nexus_dir>/system/com/sonatype/nexus/assemblies/nexus-oss-feature/3.x.y/nexus-oss-feature-3.x.y-features.xml`
+* If you are using PRO edition, make these mods in: `<nexus_dir>/system/com/sonatype/nexus/assemblies/nexus-pro-feature/3.x.y/nexus-pro-feature-3.x.y-features.xml`
 
    ```
-         <feature prerequisite="false" dependency="false">nexus-repository-rubygems</feature>
-   +     <feature prerequisite="false" dependency="false">nexus-repository-helm</feature>
-         <feature prerequisite="false" dependency="false">nexus-repository-gitlfs</feature>
+         <feature version="3.x.y.xy" prerequisite="false" dependency="false">nexus-repository-rubygems</feature>
+   +     <feature version="<helm_version>" prerequisite="false" dependency="false">nexus-repository-helm</feature>
+         <feature version="3.x.y.xy" prerequisite="false" dependency="false">nexus-repository-yum</feature>
      </feature>
    ```
    And
    ```
-   + <feature name="nexus-repository-helm" description="org.sonatype.nexus.plugins:nexus-repository-helm" version="0.0.12">
+   + <feature name="nexus-repository-helm" description="org.sonatype.nexus.plugins:nexus-repository-helm" version="<helm_version>">
    +     <details>org.sonatype.nexus.plugins:nexus-repository-helm</details>
-   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-helm/0.0.12</bundle>
+   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-helm/<helm_version></bundle>
    + </feature>
     </features>
    ```
-This will cause the plugin to be loaded and started with each startup of Nexus Repository.
+This will cause the plugin to be loaded and started with each startup of Nexus Repository Manager.
 
 ## The Fine Print
 
-It is worth noting that this is **NOT SUPPORTED** by Sonatype, and is a contribution of ours
+Starting from version 3.21+ the `Helm` plugin is supported by Sonatype, but still is a contribution of ours
 to the open source community (read: you!)
-
-Remember:
-
-* Use this contribution at the risk tolerance that you have
-* Do NOT file Sonatype support tickets related to Helm support in regard to this plugin
-* DO file issues here on GitHub, so that the community can pitch in
 
 Phew, that was easier than I thought. Last but not least of all:
 
@@ -205,6 +143,7 @@ Have fun creating and using this plugin and the Nexus platform, we are glad to h
 
 Looking to contribute to our code but need some help? There's a few ways to get information:
 
+* If using Nexus Repository Manager 3.21+ or later please file any issues at https://issues.sonatype.org/.
 * Chat with us on [Gitter](https://gitter.im/sonatype/nexus-developers)
 * Check out the [Nexus3](http://stackoverflow.com/questions/tagged/nexus3) tag on Stack Overflow
 * Check out the [Nexus Repository User List](https://groups.google.com/a/glists.sonatype.com/forum/?hl=en#!forum/nexus-users)
