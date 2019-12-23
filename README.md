@@ -23,7 +23,7 @@
 [![DepShield Badge](https://depshield.sonatype.org/badges/sonatype-nexus-community/nexus-repository-helm/depshield.svg)](https://depshield.github.io)
 
 # Table Of Contents
-* [Release notes](https://help.sonatype.com/display/NXRM3/2020+Release+Notes)
+* [Release notes](https://help.sonatype.com/display/NXRM3/2020+Release+Notes#id-2020ReleaseNotes-RepositoryManager3.21.0)
 * [Developing](#developing)
    * [Requirements](#requirements)
    * [Building](#building)
