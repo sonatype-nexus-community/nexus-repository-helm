@@ -25,6 +25,7 @@
   <artifactId>nexus-repository-base</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+  <name>${project.groupId}:${project.artifactId}-parent</name>
 
   <inceptionYear>2018</inceptionYear>
 
