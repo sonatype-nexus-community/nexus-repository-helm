@@ -13,6 +13,9 @@
 package org.sonatype.repository.helm.internal.util;
 
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.sonatype.goodies.testsupport.TestSupport;
 import org.sonatype.repository.helm.HelmAttributes;
@@ -23,7 +26,6 @@ import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 
 public class HelmAttributeParserTest
     extends TestSupport
@@ -37,7 +39,7 @@ public class HelmAttributeParserTest
   private HelmAttributeParser underTest;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     yamlParser = new YamlParser();
     tgzParser = new TgzParser();
     provenanceParser = new ProvenanceParser();
@@ -51,11 +53,18 @@ public class HelmAttributeParserTest
     AssetKind assetKind = AssetKind.getAssetKindByFileName(name);
     HelmAttributes result = underTest.getAttributes(assetKind, chart);
 
-    assertThat(result.getName(), is(notNullValue()));
-    assertThat(result.getVersion(), is(notNullValue()));
-    assertThat(result.getDescription(), is(notNullValue()));
-    assertThat(result.getIcon(), is(notNullValue()));
-    assertThat(result.getMaintainers(), is(notNullValue()));
-    assertThat(result.getSources(), is(notNullValue()));
+    assertThat(result.getName(), is("mongodb"));
+    assertThat(result.getVersion(), is("0.4.9"));
+    assertThat(result.getDescription(),
+        is("NoSQL document-oriented database that stores JSON-like documents with dynamic schemas, simplifying the integration of data in content-driven applications."));
+    assertThat(result.getIcon(), is("https://bitnami.com/assets/stacks/mongodb/img/mongodb-stack-220x234.png"));
+
+    Map<String, String> maintainers = new LinkedHashMap<String, String>()
+    {{
+      put("email", "containers@bitnami.com");
+      put("name", "Bitnami");
+    }};
+    assertThat(result.getMaintainers(), is(Collections.singletonList(maintainers)));
+    assertThat(result.getSources(), is(Collections.singletonList("https://github.com/bitnami/bitnami-docker-mongodb")));
   }
 }
