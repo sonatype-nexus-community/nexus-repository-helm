@@ -16,7 +16,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.sonatype.nexus.common.collect.NestedAttributesMap;
 import org.sonatype.repository.helm.internal.database.HelmProperties;
@@ -26,9 +25,6 @@ import org.sonatype.repository.helm.internal.database.HelmProperties;
  */
 public class HelmAttributes
 {
-
-  public static final String MAINTAINERS_SEPARATOR = " : ";
-
   private final Map<HelmProperties, Object> attributesEnumMap;
 
   public HelmAttributes() {
@@ -40,34 +36,13 @@ public class HelmAttributes
     attributesMap.forEach((key, value) -> {
       Optional<HelmProperties> propertyOpt = HelmProperties.findByPropertyName(key);
       if (value != null && propertyOpt.isPresent()) {
-        putInMap(propertyOpt.get(), value);
+        attributesEnumMap.put(propertyOpt.get(), value);
       }
     });
   }
 
-  private void putInMap(final HelmProperties helmProperties, final Object value) {
-    if (helmProperties == HelmProperties.MAINTAINERS) {
-      // convert map: name: Bitnami
-      //              email: containers@bitnami.com
-      //              name: wbuchwalter
-      //              email: wibuch@microsoft.com
-      // in list: Bitnami : containers@bitnami.com , wbuchwalter : wibuch@microsoft.com
-      List<Map<String, String>> maintainersMap = (List<Map<String, String>>) value;
-      List<String> maintainers = maintainersMap
-          .stream()
-          .map(map -> String.join(MAINTAINERS_SEPARATOR, map.values()))
-          .collect(Collectors.toList());
-      attributesEnumMap.put(helmProperties, maintainers);
-    }
-    else {
-      attributesEnumMap.put(helmProperties, value);
-    }
-  }
-
   public void populate(final NestedAttributesMap attributesMap) {
-    attributesEnumMap.forEach((helmProperties, o) -> {
-        attributesMap.set(helmProperties.getPropertyName(), o);
-    });
+    attributesEnumMap.forEach((helmProperties, o) -> attributesMap.set(helmProperties.getPropertyName(), o));
   }
 
   public String getName() {
@@ -90,7 +65,7 @@ public class HelmAttributes
     return getValue(HelmProperties.ICON, String.class);
   }
 
-  public List<String> getMaintainers() {
+  public List<Map<String, String>> getMaintainers() {
 
     return getValue(HelmProperties.MAINTAINERS, List.class);
   }
@@ -119,7 +94,7 @@ public class HelmAttributes
     attributesEnumMap.put(HelmProperties.APP_VERSION, appVersion);
   }
 
-  private <T> T getValue(HelmProperties property, Class<T> tClass){
+  private <T> T getValue(HelmProperties property, Class<T> tClass) {
     return tClass.cast(attributesEnumMap.get(property));
   }
 }

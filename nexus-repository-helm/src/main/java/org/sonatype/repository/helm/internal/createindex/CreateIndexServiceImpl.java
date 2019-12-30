@@ -89,21 +89,6 @@ public class CreateIndexServiceImpl
     return indexYamlBuilder.build(index, storageFacet);
   }
 
-  private List<Map<String, String>> mapMaintainers(List<String> maintainers) {
-    if (CollectionUtils.isEmpty(maintainers)) {
-      return null;
-    }
-    return maintainers
-        .stream()
-        .map(param -> {
-          String[] split = param.split(HelmAttributes.MAINTAINERS_SEPARATOR);
-          String key = split[0];
-          String value = split[1];
-          return Collections.singletonMap(key, value);
-        })
-        .collect(Collectors.toList());
-  }
-
   private void parseAssetIntoChartEntry(final ChartIndex index, final Asset asset) {
     NestedAttributesMap formatAttributes = asset.formatAttributes();
     NestedAttributesMap assetAttributes = asset.attributes();
@@ -115,8 +100,8 @@ public class CreateIndexServiceImpl
     chartEntry.setCreated(asset.blobCreated());
 
     @SuppressWarnings("unchecked")
-    List<String> maintainers = formatAttributes.get(MAINTAINERS.getPropertyName(), List.class);
-    chartEntry.setMaintainers(mapMaintainers(maintainers));
+    List<Map<String, String>> maintainers = formatAttributes.get(MAINTAINERS.getPropertyName(), List.class);
+    chartEntry.setMaintainers(maintainers);
     chartEntry.setAppVersion(formatAttributes.get(APP_VERSION.getPropertyName(), String.class));
     chartEntry.setDigest(assetAttributes.get("checksum", Map.class)
         .get("sha256").toString());
