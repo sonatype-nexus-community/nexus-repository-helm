@@ -56,7 +56,7 @@ public class HelmProxyRepositoriesApiResource
     super(authorizingRepositoryManager, configurationAdapter);
   }
 
-  @ApiOperation("Create Maven proxy repository")
+  @ApiOperation("Create Helm proxy repository")
   @ApiResponses(value = {
       @ApiResponse(code = 201, message = REPOSITORY_CREATED),
       @ApiResponse(code = 401, message = AUTHENTICATION_REQUIRED),
