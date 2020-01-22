@@ -29,7 +29,7 @@ import org.sonatype.nexus.repository.storage.ComponentDirector;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * @since 1.0.next
+ * @since 1.0.0
  */
 @Named(HelmFormat.NAME)
 @Singleton

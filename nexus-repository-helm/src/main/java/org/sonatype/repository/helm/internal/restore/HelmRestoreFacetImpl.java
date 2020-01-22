@@ -38,7 +38,7 @@ import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VER
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
 
 /**
- * @since 1.0.next
+ * @since 1.0.0
  */
 @Named
 public class HelmRestoreFacetImpl

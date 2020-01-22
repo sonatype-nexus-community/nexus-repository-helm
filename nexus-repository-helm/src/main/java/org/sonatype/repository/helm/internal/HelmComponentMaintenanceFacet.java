@@ -28,6 +28,9 @@ import org.sonatype.nexus.transaction.UnitOfWork;
 
 import com.orientechnologies.common.concur.ONeedRetryException;
 
+/**
+ * @since 1.0.0
+ */
 @Named
 public class HelmComponentMaintenanceFacet
     extends DefaultComponentMaintenanceImpl

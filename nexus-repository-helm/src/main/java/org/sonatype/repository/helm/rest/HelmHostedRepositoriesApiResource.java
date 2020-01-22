@@ -41,6 +41,9 @@ import static org.sonatype.nexus.rest.ApiDocConstants.INSUFFICIENT_PERMISSIONS;
 import static org.sonatype.nexus.rest.ApiDocConstants.REPOSITORY_CREATED;
 import static org.sonatype.nexus.rest.ApiDocConstants.REPOSITORY_UPDATED;
 
+/**
+ * @since 1.0.0
+ */
 @Api(value = API_REPOSITORY_MANAGEMENT)
 @Named
 @Singleton

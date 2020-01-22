@@ -29,6 +29,8 @@ import static org.sonatype.nexus.repository.search.DefaultComponentMetadataProdu
 
 /**
  * Defines which cleanup policy fields to display for Helm.
+ *
+ * @since 1.0.0
  */
 @Named(HelmFormat.NAME)
 @Singleton

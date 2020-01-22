@@ -19,6 +19,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * @since 1.0.0
+ */
 @JsonIgnoreProperties({"format", "type"})
 public class HelmProxyRepositoryApiRequest
     extends ProxyRepositoryApiRequest

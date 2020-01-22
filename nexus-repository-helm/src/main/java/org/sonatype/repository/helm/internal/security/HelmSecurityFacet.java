@@ -22,15 +22,18 @@ import org.sonatype.nexus.repository.security.VariableResolverAdapter;
 
 /**
  * Helm format security facet.
+ *
+ * @since 1.0.0
  */
 @Named
 public class HelmSecurityFacet
     extends SecurityFacetSupport
 {
   @Inject
-  public HelmSecurityFacet(final HelmFormatSecurityContributor securityResource,
-                            @Named("simple") final VariableResolverAdapter variableResolverAdapter,
-                            final ContentPermissionChecker contentPermissionChecker)
+  public HelmSecurityFacet(
+      final HelmFormatSecurityContributor securityResource,
+      @Named("simple") final VariableResolverAdapter variableResolverAdapter,
+      final ContentPermissionChecker contentPermissionChecker)
   {
     super(securityResource, variableResolverAdapter, contentPermissionChecker);
   }

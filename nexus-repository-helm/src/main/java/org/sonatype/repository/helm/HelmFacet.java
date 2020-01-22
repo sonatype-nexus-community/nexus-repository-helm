@@ -30,7 +30,7 @@ import org.sonatype.repository.helm.internal.AssetKind;
 import com.google.common.base.Supplier;
 
 /**
- * @since 1.0.next
+ * @since 1.0.0
  */
 @Facet.Exposed
 public interface HelmFacet

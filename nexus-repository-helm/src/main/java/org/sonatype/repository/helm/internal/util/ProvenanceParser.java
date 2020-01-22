@@ -23,6 +23,9 @@ import javax.inject.Singleton;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.database.HelmProperties;
 
+/**
+ * @since 1.0.0
+ */
 @Named
 @Singleton
 public class ProvenanceParser
