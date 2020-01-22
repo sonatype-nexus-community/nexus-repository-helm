@@ -22,8 +22,6 @@ import org.sonatype.nexus.repository.security.VariableResolverAdapter;
 
 /**
  * Helm format security facet.
- *
- * @since 1.0.0
  */
 @Named
 public class HelmSecurityFacet
