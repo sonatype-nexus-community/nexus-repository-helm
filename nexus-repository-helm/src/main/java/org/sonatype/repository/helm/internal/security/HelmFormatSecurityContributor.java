@@ -22,8 +22,6 @@ import org.sonatype.repository.helm.internal.HelmFormat;
 
 /**
  * Helm format security resource.
- *
- * @since 1.0.0
  */
 @Named
 @Singleton
