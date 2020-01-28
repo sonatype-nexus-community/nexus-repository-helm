@@ -90,6 +90,8 @@ class HelmHostedRecipe
   private ViewFacet configure(final ConfigurableViewFacet facet) {
     Router.Builder builder = new Router.Builder()
 
+    addBrowseUnsupportedRoute(builder)
+
     [indexMatcher(), packageMatcher()].each { matcher ->
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)
@@ -130,11 +132,6 @@ class HelmHostedRecipe
         .handler(contentHeadersHandler)
         .handler(unitOfWorkHandler)
         .handler(hostedHandlers.delete)
-        .create())
-
-    builder.route(new Route.Builder()
-        .matcher(BrowseUnsupportedHandler.MATCHER)
-        .handler(browseUnsupportedHandler)
         .create())
 
     builder.defaultHandlers(HttpHandlers.notFound())

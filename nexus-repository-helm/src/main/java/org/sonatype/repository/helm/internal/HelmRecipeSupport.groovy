@@ -94,9 +94,6 @@ abstract class HelmRecipeSupport
   UnitOfWorkHandler unitOfWorkHandler
 
   @Inject
-  BrowseUnsupportedHandler browseUnsupportedHandler
-
-  @Inject
   HandlerContributor handlerContributor
 
   @Inject
