@@ -29,7 +29,6 @@ import org.sonatype.nexus.repository.view.Matcher
 import org.sonatype.nexus.repository.view.Route
 import org.sonatype.nexus.repository.view.Router
 import org.sonatype.nexus.repository.view.ViewFacet
-import org.sonatype.nexus.repository.view.handlers.BrowseUnsupportedHandler
 import org.sonatype.nexus.repository.view.matchers.ActionMatcher
 import org.sonatype.nexus.repository.view.matchers.logic.LogicMatchers
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher
@@ -90,6 +89,8 @@ class HelmHostedRecipe
   private ViewFacet configure(final ConfigurableViewFacet facet) {
     Router.Builder builder = new Router.Builder()
 
+    addBrowseUnsupportedRoute(builder)
+
     [indexMatcher(), packageMatcher()].each { matcher ->
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)
@@ -130,11 +131,6 @@ class HelmHostedRecipe
         .handler(contentHeadersHandler)
         .handler(unitOfWorkHandler)
         .handler(hostedHandlers.delete)
-        .create())
-
-    builder.route(new Route.Builder()
-        .matcher(BrowseUnsupportedHandler.MATCHER)
-        .handler(browseUnsupportedHandler)
         .create())
 
     builder.defaultHandlers(HttpHandlers.notFound())
