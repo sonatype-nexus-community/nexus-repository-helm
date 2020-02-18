@@ -94,7 +94,7 @@ The table below outlines what version of Nexus Repository the plugin was built a
 | v0.0.11               | 3.18.0-01                |
 | v0.0.12               | 3.18.0-01                |
 | v0.0.13               | 3.18.0-01                |
-| v1.0.0 In product     | 3.21.0-01                |
+| v1.0.2 In product     | 3.21.0-05                |
 All released versions can be found [here](https://github.com/sonatype-nexus-community/nexus-repository-helm/releases).
 
 ## Features Implemented In This Plugin 
