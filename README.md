@@ -94,7 +94,7 @@ The table below outlines what version of Nexus Repository the plugin was built a
 | v0.0.11               | 3.18.0-01                |
 | v0.0.12               | 3.18.0-01                |
 | v0.0.13               | 3.18.0-01                |
-| v1.0.0 In product     | 3.21.0-01                |
+| v1.0.2 In product     | 3.21.0+                  |
 All released versions can be found [here](https://github.com/sonatype-nexus-community/nexus-repository-helm/releases).
 
 ## Features Implemented In This Plugin 
@@ -111,24 +111,28 @@ In Nexus Repository Manager 3.21+ `Helm` format is already included. So there is
 ### Permanent Reinstall
 
 * Copy the new bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-helm/<helm_version>/nexus-repository-helm-<helm_version>.jar`
-* If you are using OSS edition, make these mods in: `<nexus_dir>/system/com/sonatype/nexus/assemblies/nexus-oss-feature/3.x.y/nexus-oss-feature-3.x.y-features.xml`
-* If you are using PRO edition, make these mods in: `<nexus_dir>/system/com/sonatype/nexus/assemblies/nexus-pro-feature/3.x.y/nexus-pro-feature-3.x.y-features.xml`
+* Edit `<nexus_dir>/system/org/sonatype/nexus/assemblies/nexus-cma-feature/3.x.y/nexus-cma-feature-3.x.y-features.xml`  changing helm to your build version (examples, the actual lines surrounding may vary):
 
    ```
-         <feature version="3.x.y.xy" prerequisite="false" dependency="false">nexus-repository-rubygems</feature>
-   +     <feature version="<helm_version>" prerequisite="false" dependency="false">nexus-repository-helm</feature>
-         <feature version="3.x.y.xy" prerequisite="false" dependency="false">nexus-repository-yum</feature>
+         <feature version="3.a.b">nexus-repository-p2</feature>
+         <feature version="<helm_version>">nexus-repository-helm</feature>
+         <feature version="3.x.y.xy">nexus-repository-raw</feature>
      </feature>
    ```
    And
    ```
-   + <feature name="nexus-repository-helm" description="org.sonatype.nexus.plugins:nexus-repository-helm" version="<helm_version>">
-   +     <details>org.sonatype.nexus.plugins:nexus-repository-helm</details>
-   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-helm/<helm_version></bundle>
-   + </feature>
-    </features>
+    <feature name="nexus-repository-helm" description="org.sonatype.nexus.plugins:nexus-repository-helm" version="<helm_version>">
+        <details>org.sonatype.nexus.plugins:nexus-repository-helm</details>
+        <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-helm/<helm_version></bundle>
+    </feature>
    ```
 This will cause the plugin to be loaded and started with each startup of Nexus Repository Manager.
+
+NOTE: The file location changed in version 3.21. For older versions, edit these files:
+* If you are using OSS edition, make these mods in: `<nexus_dir>/system/com/sonatype/nexus/assemblies/nexus-oss-feature/3.x.y/nexus-oss-feature-3.x.y-features.xml`
+* If you are using PRO edition, make these mods in: `<nexus_dir>/system/com/sonatype/nexus/assemblies/nexus-pro-feature/3.x.y/nexus-pro-feature-3.x.y-features.xml`
+
+Additionally, prior to 3.21 the lines did not exist so they'd need to be added instead of edited.
 
 ## The Fine Print
 
