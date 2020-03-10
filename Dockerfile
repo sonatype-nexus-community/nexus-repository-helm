@@ -12,7 +12,5 @@ FROM sonatype/nexus3:$NEXUS_VERSION
 
 ARG DEPLOY_DIR=/opt/sonatype/nexus/deploy/
 USER root
-# @todo Change the COPY source directory after IT modules are introduced from 'development' branch
-#COPY --from=build /nexus-repository-helm/nexus-repository-helm/target/nexus-repository-helm-*-bundle.kar ${DEPLOY_DIR}
-COPY --from=build /nexus-repository-helm/target/nexus-repository-helm-*-bundle.kar ${DEPLOY_DIR}
+COPY --from=build /nexus-repository-helm/nexus-repository-helm/target/nexus-repository-helm-*-bundle.kar ${DEPLOY_DIR}
 USER nexus
