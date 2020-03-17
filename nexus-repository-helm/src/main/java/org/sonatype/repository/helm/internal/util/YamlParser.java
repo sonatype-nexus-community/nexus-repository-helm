@@ -32,6 +32,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Construct;
@@ -67,9 +69,9 @@ public class YamlParser
     Map<String, Object> map;
 
     try {
-      Yaml yaml = new Yaml(new Constructor(), new Representer(),
-          new DumperOptions(), new Resolver());
-      map = yaml.load(data);
+      LoadSettings loadSettings = LoadSettings.builder().build();
+      Load loader = new Load(loadSettings);
+      map = (Map<String, Object>) loader.loadFromString(data);
     }
     catch (YAMLException e) {
       map = (Map<String, Object>) mapper.readValue(data, Map.class);
