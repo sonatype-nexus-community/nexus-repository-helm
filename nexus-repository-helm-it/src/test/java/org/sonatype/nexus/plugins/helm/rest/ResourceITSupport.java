@@ -100,7 +100,7 @@ public class ResourceITSupport
 
   protected AbstractRepositoryApiRequest createProxyRequest(boolean strictContentTypeValidation) {
     HostedStorageAttributes storage =
-        new HostedStorageAttributes("default", strictContentTypeValidation, WritePolicy.ALLOW);
+        new HostedStorageAttributes("default", strictContentTypeValidation, WritePolicy.ALLOW.name());
     CleanupPolicyAttributes cleanup = new CleanupPolicyAttributes(Collections.emptyList());
     ProxyAttributes proxy = new ProxyAttributes("http://example.net", 1, 2);
     NegativeCacheAttributes negativeCache = new NegativeCacheAttributes(false, 1440);
@@ -118,7 +118,7 @@ public class ResourceITSupport
 
   protected AbstractRepositoryApiRequest createHostedRequest(boolean strictContentTypeValidation) {
     HostedStorageAttributes storage =
-        new HostedStorageAttributes("default", strictContentTypeValidation, WritePolicy.ALLOW);
+        new HostedStorageAttributes("default", strictContentTypeValidation, WritePolicy.ALLOW.name());
     CleanupPolicyAttributes cleanup = new CleanupPolicyAttributes(Collections.emptyList());
 
     // SET YOUR FORMAT DATA
