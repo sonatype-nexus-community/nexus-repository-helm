@@ -63,15 +63,11 @@ In the examples below, substitute `<helm_version>` with the current version of t
 
 For further information like how to persist volumes check out [the GitHub repo for our official image](https://github.com/sonatype/docker-nexus3).
 
-The application will now be available from your browser at http://localhost:8081
+After allowing some time to spin up, the application will be available from your browser at http://localhost:8081.
 
-* As of Nexus Repository Manager Version 3.17, the default admin password is randomly generated.
-  If running in a Docker container, you will need to view the generated password file 
-  (/nexus-data/admin.password) in order to login to Nexus. The command below will open a bash shell 
-  in the container named `nexus`:
+To read the generated admin password for your first login to the web UI, you can use the command below against the running docker container:
 
-      docker exec -it nexus /bin/bash
-      $ cat /nexus-data/admin.password 
+      docker exec -it nexus cat /nexus-data/admin.password && echo
       
   Once logged into the application UI as `admin` using the generated password, you may also want to 
   turn on "Enable anonymous access" when prompted by the setup wizard.     
