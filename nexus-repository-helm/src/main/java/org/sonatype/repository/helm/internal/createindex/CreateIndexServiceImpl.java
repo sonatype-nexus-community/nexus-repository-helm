@@ -62,7 +62,7 @@ public class CreateIndexServiceImpl
     extends ComponentSupport
     implements CreateIndexService
 {
-  private final static String API_VERSION = "1.0";
+  private final static String API_VERSION = "v1";
 
   private IndexYamlBuilder indexYamlBuilder;
 
