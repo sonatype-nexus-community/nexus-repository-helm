@@ -10,7 +10,7 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.internal;
+package org.sonatype.repository.helm.internal.orient;
 
 import java.util.Optional;
 
@@ -25,6 +25,7 @@ import org.sonatype.nexus.repository.storage.Bucket;
 import org.sonatype.nexus.repository.storage.BucketStore;
 import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.storage.ComponentDirector;
+import org.sonatype.repository.helm.internal.HelmFormat;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

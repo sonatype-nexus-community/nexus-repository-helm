@@ -10,7 +10,7 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.internal.createindex;
+package org.sonatype.repository.helm.internal.orient.createindex;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -36,10 +36,10 @@ import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
-import org.sonatype.repository.helm.HelmFacet;
+import org.sonatype.repository.helm.internal.orient.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.HelmFormat;
-import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
+import org.sonatype.repository.helm.internal.orient.hosted.HelmHostedFacet;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
@@ -66,9 +66,9 @@ public class CreateIndexFacetImpl
 
   private final long interval;
 
-  private final static String INDEX_YAML = "index.yaml";
+  private static final String INDEX_YAML = "index.yaml";
 
-  private final static String TGZ_CONTENT_TYPE = "application/x-tgz";
+  private static final String TGZ_CONTENT_TYPE = "application/x-tgz";
 
   private final AtomicBoolean acceptingEvents = new AtomicBoolean(true);
 
