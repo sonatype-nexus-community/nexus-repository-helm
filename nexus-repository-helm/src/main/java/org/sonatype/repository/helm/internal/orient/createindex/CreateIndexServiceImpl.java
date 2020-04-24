@@ -10,13 +10,11 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.internal.createindex;
+package org.sonatype.repository.helm.internal.orient.createindex;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -32,14 +30,12 @@ import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
-import org.sonatype.repository.helm.HelmAttributes;
-import org.sonatype.repository.helm.HelmFacet;
+import org.sonatype.repository.helm.internal.orient.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.metadata.ChartEntry;
 import org.sonatype.repository.helm.internal.metadata.ChartIndex;
-import org.sonatype.repository.helm.internal.metadata.IndexYamlBuilder;
+import org.sonatype.repository.helm.internal.orient.metadata.IndexYamlBuilder;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.DateTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;

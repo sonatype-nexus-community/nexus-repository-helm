@@ -10,7 +10,7 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.internal.restore;
+package org.sonatype.repository.helm.internal.orient.restore;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +29,7 @@ import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
-import org.sonatype.repository.helm.HelmFacet;
+import org.sonatype.repository.helm.internal.orient.HelmFacet;
 import org.sonatype.repository.helm.HelmRestoreFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
