@@ -58,16 +58,18 @@ public class IndexYamlAbsoluteUrlRewriter
   private StorageFacet storageFacet;
 
   public TempBlob removeUrlsFromIndexYamlAndWriteToTempBlob(final TempBlob index,
-                                                            final Repository repository)
+                                                            final Repository repository, 
+                                                            final URI remoteUrl)
   {
     storageFacet = repository.facet(StorageFacet.class);
 
-    return new StreamCopier<>(outputStream -> updateUrls(index.get(), outputStream),
+    return new StreamCopier<>(outputStream -> updateUrls(index.get(), outputStream, remoteUrl),
         this::createTempBlob).read();
   }
 
   private void updateUrls(final InputStream is,
-                          final OutputStream os)
+                          final OutputStream os,
+                          final URI remoteUrl)
   {
     try (Reader reader = new InputStreamReader(is);
          Writer writer = new OutputStreamWriter(os)) {
@@ -78,7 +80,7 @@ public class IndexYamlAbsoluteUrlRewriter
         if (event instanceof ScalarEvent) {
           ScalarEvent scalarEvent = (ScalarEvent) event;
           if (rewrite) {
-            event = maybeSetAbsoluteUrlAsRelative(scalarEvent);
+            event = maybeSetAbsoluteUrlAsRelative(scalarEvent, remoteUrl);
           }
           else if (URLS.equals(scalarEvent.getValue())) {
             rewrite = true;
@@ -98,19 +100,32 @@ public class IndexYamlAbsoluteUrlRewriter
     }
   }
 
-  private Event maybeSetAbsoluteUrlAsRelative(ScalarEvent scalarEvent) {
+  private Event maybeSetAbsoluteUrlAsRelative(ScalarEvent scalarEvent, URI remoteUrl) {
     String oldUrl = scalarEvent.getValue();
     try {
       URI uri = new URIBuilder(oldUrl).build();
       if (uri.isAbsolute()) {
-        String fileName = uri.getPath();
-        // Rewrite absolute paths to relative
-        if (!fileName.isEmpty()) {
+
+        // There are a couple possibilities for algorithms to remove here.
+        // Frequently, this is will be relative to the remote. If so, relativize
+        // explicity against the remote such that any path elements in the remote are stripped
+        // out.
+        String fileName = null;
+        String remoteStr = remoteUrl.toString();
+        if (oldUrl.startsWith(remoteStr) && oldUrl.length() > remoteStr.length()) {
+          fileName = oldUrl.substring(remoteStr.length(), oldUrl.length());
+        }
+        else {
+          // Otherwise, we just strip out the host.
+          fileName = uri.getPath();
+        }
+
+        // Strip leading slash if it exists.
+        if (fileName.startsWith("/")) {
           fileName = Paths.get(fileName).getFileName().toString();
         }
-        scalarEvent = new ScalarEvent(scalarEvent.getAnchor(), scalarEvent.getTag(),
-            scalarEvent.getImplicit(), fileName, scalarEvent.getStartMark(),
-            scalarEvent.getEndMark(), scalarEvent.getStyle());
+        scalarEvent = new ScalarEvent(scalarEvent.getAnchor(), scalarEvent.getTag(), scalarEvent.getImplicit(),
+            fileName, scalarEvent.getStartMark(), scalarEvent.getEndMark(), scalarEvent.getStyle());
       }
     }
     catch (URISyntaxException ex) {
