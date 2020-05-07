@@ -23,7 +23,7 @@
   </parent>
 
   <artifactId>nexus-repository-base</artifactId>
-  <version>1.0.8</version>
+  <version>1.0.9-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>${project.groupId}:${project.artifactId}-parent</name>
 
@@ -37,7 +37,7 @@
 
   <scm>
     <developerConnection>scm:git:git@github.com:sonatype-nexus-community/nexus-repository-helm.git</developerConnection>
-    <tag>nexus-repository-base-1.0.8</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <distributionManagement>
