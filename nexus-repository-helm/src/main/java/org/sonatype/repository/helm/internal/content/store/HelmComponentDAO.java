@@ -15,7 +15,7 @@ package org.sonatype.repository.helm.internal.content.store;
 import org.sonatype.nexus.repository.content.store.ComponentDAO;
 
 /**
- * @since 1.0.9
+ * @since 1.0.10
  */
 public interface HelmComponentDAO
     extends ComponentDAO

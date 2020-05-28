@@ -37,7 +37,7 @@ import org.yaml.snakeyaml.events.ScalarEvent;
 /**
  * Removes absolute URL entries from index.yaml
  *
- * @since 1.0.9
+ * @since 1.0.10
  */
 public class IndexYamlAbsoluteUrlRewriterSupport
     extends ComponentSupport

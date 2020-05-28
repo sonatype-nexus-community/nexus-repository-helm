@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /**
- * @since 1.0.9
+ * @since 1.0.10
  */
 @Named
 public class HelmProxyFacet
