@@ -29,6 +29,7 @@ import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
+import org.sonatype.repository.helm.internal.content.metadata.IndexYamlAbsoluteUrlRewriter;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import com.google.common.collect.ImmutableList;
@@ -49,16 +50,16 @@ public class HelmContentFacetImpl
 
   private final HelmAttributeParser helmAttributeParser;
 
-  //private final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter;
+  private final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter;
 
   @Inject
   public HelmContentFacetImpl(@Named(HelmFormat.NAME) final FormatStoreManager formatStoreManager,
-                              final HelmAttributeParser helmAttributeParser)
-                              //final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter)
+                              final HelmAttributeParser helmAttributeParser,
+                              final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter)
   {
     super(formatStoreManager);
     this.helmAttributeParser = checkNotNull(helmAttributeParser);
-    //this.indexYamlAbsoluteUrlRewriter = checkNotNull(indexYamlAbsoluteUrlRewriter);
+    this.indexYamlAbsoluteUrlRewriter = checkNotNull(indexYamlAbsoluteUrlRewriter);
   }
 
   @Override
@@ -70,18 +71,18 @@ public class HelmContentFacetImpl
   public Content putIndex(final String path, final Content content, final AssetKind assetKind) throws IOException
   {
     try (TempBlob blob = blobs().ingest(content, HASHING)) {
-      //try (TempBlob newTempBlob = indexYamlAbsoluteUrlRewriter
-      //    .removeUrlsFromIndexYamlAndWriteToTempBlob(blob, getRepository())) {
+      try (TempBlob newTempBlob = indexYamlAbsoluteUrlRewriter
+          .removeUrlsFromIndexYamlAndWriteToTempBlob(blob, getRepository())) {
         return assets()
             .path(path)
             .kind(assetKind.name())
             .getOrCreate()
-            .attach(blob)
+            .attach(newTempBlob)
             //.withAttribute(CONTENT, contentAttributes) //does not work now
             //.markAsCached(cacheInfo) //does not work now
             //.withAttribute(CACHE, cacheInfo) //does not work now
             .download();
-     // }
+      }
     }
   }
 
