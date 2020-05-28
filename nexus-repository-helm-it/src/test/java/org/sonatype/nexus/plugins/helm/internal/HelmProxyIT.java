@@ -24,10 +24,12 @@ import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.storage.ComponentMaintenance;
+import org.sonatype.nexus.testsuite.testsupport.NexusITSupport;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.error;
 import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.file;
 
@@ -43,8 +45,9 @@ public class HelmProxyIT
   @Configuration
   public static Option[] configureNexus() {
     return options(
-        configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm")
+        NexusITSupport.configureNexusBase(),
+        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm"),
+        systemProperty("nexus-exclude-features").value("nexus-cma-community")
     );
   }
 

@@ -29,6 +29,7 @@ import org.sonatype.nexus.common.entity.EntityId;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.routing.RoutingRuleStore;
 import org.sonatype.nexus.testsuite.testsupport.FormatClientSupport;
+import org.sonatype.nexus.testsuite.testsupport.NexusITSupport;
 import org.sonatype.nexus.testsuite.testsupport.fixtures.RoutingRuleRule;
 import org.sonatype.repository.helm.internal.HelmFormat;
 
@@ -41,6 +42,7 @@ import org.ops4j.pax.exam.Option;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 public class HelmRoutingRuleIT
     extends HelmITSupport
@@ -58,8 +60,9 @@ public class HelmRoutingRuleIT
   @Configuration
   public static Option[] configureNexus() {
     return options(
-        configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", String.format("nexus-repository-%s", HelmFormat.NAME))
+        NexusITSupport.configureNexusBase(),
+        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm"),
+        systemProperty("nexus-exclude-features").value("nexus-cma-community")
     );
   }
 

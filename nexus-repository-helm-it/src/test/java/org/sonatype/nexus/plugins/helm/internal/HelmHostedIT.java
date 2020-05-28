@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.MediaType;
 
 import org.sonatype.nexus.common.app.BaseUrlHolder;
-import org.sonatype.nexus.pax.exam.NexusPaxExamSupport;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.Component;
@@ -42,6 +41,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.sonatype.nexus.repository.http.HttpStatus.NOT_FOUND;
 import static org.sonatype.nexus.testsuite.testsupport.FormatClientSupport.status;
 
@@ -54,9 +54,10 @@ public class HelmHostedIT
 
   @Configuration
   public static Option[] configureNexus() {
-    return NexusPaxExamSupport.options(
+    return options(
         NexusITSupport.configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm")
+        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm"),
+        systemProperty("nexus-exclude-features").value("nexus-cma-community")
     );
   }
 

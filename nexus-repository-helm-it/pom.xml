@@ -86,6 +86,17 @@
       <version>${nxrm-version}</version>
       <type>zip</type>
       <scope>test</scope>
+      <exclusions>
+        <!-- Avoid leaking older r plugins from distro -->
+        <exclusion>
+          <groupId>org.sonatype.nexus.plugins</groupId>
+          <artifactId>nexus-repository-helm</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.sonatype.nexus.plugins</groupId>
+          <artifactId>nexus-restore-helm</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

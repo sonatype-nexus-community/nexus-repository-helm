@@ -74,19 +74,20 @@ public class HelmHostedFacetImpl
   @Override
   @TransactionalTouchBlob
   public Content get(final String path) {
-    checkNotNull(path);
-    StorageTx tx = UnitOfWork.currentTx();
-
-    Optional<Asset> assetOpt = helmFacet.findAsset(tx, path);
-    if (!assetOpt.isPresent()) {
-      return null;
-    }
-    Asset asset = assetOpt.get();
-    if (asset.markAsDownloaded()) {
-      tx.saveAsset(asset);
-    }
-
-    return helmFacet.toContent(asset, tx.requireBlob(asset.requireBlobRef()));
+    throw new RuntimeException();
+    //checkNotNull(path);
+    //StorageTx tx = UnitOfWork.currentTx();
+    //
+    //Optional<Asset> assetOpt = helmFacet.findAsset(tx, path);
+    //if (!assetOpt.isPresent()) {
+    //  return null;
+    //}
+    //Asset asset = assetOpt.get();
+    //if (asset.markAsDownloaded()) {
+    //  tx.saveAsset(asset);
+    //}
+    //
+    //return helmFacet.toContent(asset, tx.requireBlob(asset.requireBlobRef()));
   }
 
   @Override
@@ -94,27 +95,29 @@ public class HelmHostedFacetImpl
                      final Payload payload,
                      final AssetKind assetKind) throws IOException
   {
-    try (TempBlob tempBlob = facet(StorageFacet.class).createTempBlob(payload, HASH_ALGORITHMS)) {
-      upload(path, tempBlob, payload, assetKind);
-    }
+    throw new RuntimeException();
+    //try (TempBlob tempBlob = facet(StorageFacet.class).createTempBlob(payload, HASH_ALGORITHMS)) {
+    //  upload(path, tempBlob, payload, assetKind);
+    //}
   }
 
   @Override
   @TransactionalStoreBlob
   public Asset upload(String path, TempBlob tempBlob, Payload payload, AssetKind assetKind) throws IOException {
-    if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
-      throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
-    }
-    checkNotNull(path);
-    checkNotNull(tempBlob);
-
-    StorageTx tx = UnitOfWork.currentTx();
-    InputStream inputStream = tempBlob.get();
-    HelmAttributes attributes = helmAttributeParser.getAttributes(assetKind, inputStream);
-    final Asset asset =
-        helmFacet.findOrCreateAsset(tx, path, assetKind, attributes);
-    helmFacet.saveAsset(tx, asset, tempBlob, payload);
-    return asset;
+    throw new RuntimeException();
+    //if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
+    //  throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
+    //}
+    //checkNotNull(path);
+    //checkNotNull(tempBlob);
+    //
+    //StorageTx tx = UnitOfWork.currentTx();
+    //InputStream inputStream = tempBlob.get();
+    //HelmAttributes attributes = helmAttributeParser.getAttributes(assetKind, inputStream);
+    //final Asset asset =
+    //    helmFacet.findOrCreateAsset(tx, path, assetKind, attributes);
+    //helmFacet.saveAsset(tx, asset, tempBlob, payload);
+    //return asset;
   }
 
   @Override

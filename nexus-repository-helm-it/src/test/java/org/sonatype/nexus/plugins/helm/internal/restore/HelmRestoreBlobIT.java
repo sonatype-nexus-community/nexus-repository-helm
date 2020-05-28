@@ -43,6 +43,7 @@ import org.ops4j.pax.exam.Option;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.file;
 import static org.sonatype.nexus.blobstore.api.BlobAttributesConstants.HEADER_PREFIX;
 import static org.sonatype.nexus.blobstore.api.BlobStore.BLOB_NAME_HEADER;
@@ -75,10 +76,11 @@ public class HelmRestoreBlobIT
 
   @Configuration
   public static Option[] configureNexus() {
-    return NexusPaxExamSupport.options(
+    return options(
         NexusITSupport.configureNexusBase(),
         nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm"),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-restore-helm")
+        nexusFeature("org.sonatype.nexus.plugins", "nexus-restore-helm"),
+        systemProperty("nexus-exclude-features").value("nexus-cma-community")
     );
   }
 

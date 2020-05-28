@@ -67,9 +67,10 @@ public class HelmFacetImpl
       final AssetKind assetKind,
       final HelmAttributes helmAttributes)
   {
-    Optional<Asset> assetOpt = findAsset(tx, assetPath);
-    return assetOpt.orElseGet(() ->
-        createAsset(tx, assetPath, helmAttributes, assetKind));
+    throw new RuntimeException();
+    //Optional<Asset> assetOpt = findAsset(tx, assetPath);
+    //return assetOpt.orElseGet(() ->
+    //    createAsset(tx, assetPath, helmAttributes, assetKind));
   }
 
   private Asset createAsset(

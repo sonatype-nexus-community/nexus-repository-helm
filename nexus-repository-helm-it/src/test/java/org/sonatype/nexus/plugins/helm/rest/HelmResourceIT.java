@@ -8,6 +8,7 @@ import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.rest.api.model.AbstractRepositoryApiRequest;
 import org.sonatype.nexus.repository.types.HostedType;
 import org.sonatype.nexus.repository.types.ProxyType;
+import org.sonatype.nexus.testsuite.testsupport.NexusITSupport;
 import org.sonatype.repository.helm.internal.HelmFormat;
 
 import org.junit.Before;
@@ -19,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 public class HelmResourceIT
     extends ResourceITSupport
@@ -26,8 +28,9 @@ public class HelmResourceIT
   @Configuration
   public static Option[] configureNexus() {
     return options(
-        configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm")
+        NexusITSupport.configureNexusBase(),
+        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm"),
+        systemProperty("nexus-exclude-features").value("nexus-cma-community")
     );
   }
 
