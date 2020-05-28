@@ -104,11 +104,9 @@ public class ResourceITSupport
     CleanupPolicyAttributes cleanup = new CleanupPolicyAttributes(Collections.emptyList());
     ProxyAttributes proxy = new ProxyAttributes("http://example.net", 1, 2);
     NegativeCacheAttributes negativeCache = new NegativeCacheAttributes(false, 1440);
-    HttpClientConnectionAuthenticationAttributes authentication =
-        new HttpClientConnectionAuthenticationAttributes("username", null, null, null, null);
     HttpClientConnectionAttributes connection =
         new HttpClientConnectionAttributes(1, null, 5, false, false);
-    HttpClientAttributes httpClient = new HttpClientAttributes(false, true, connection, authentication);
+    HttpClientAttributes httpClient = new HttpClientAttributes(false, true, connection, null);
 
     // SET YOUR FORMAT DATA
     return new HelmProxyRepositoryApiRequest(PROXY_NAME, true, storage, cleanup,
