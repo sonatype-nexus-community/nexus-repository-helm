@@ -16,8 +16,10 @@ import java.io.IOException;
 import java.util.Optional;
 
 import org.sonatype.nexus.repository.Facet;
+import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.content.facet.ContentFacet;
+import org.sonatype.repository.helm.internal.AssetKind;
 
 /**
  * @since 1.0.9
@@ -26,9 +28,11 @@ import org.sonatype.nexus.repository.content.facet.ContentFacet;
 public interface HelmContentFacet
     extends ContentFacet
 {
-  Optional<Payload> get(String path) throws IOException;
+  Optional<Payload> getAsset(String path) throws IOException;
 
-  Payload put(String path, Payload content) throws IOException;
+  Content putIndex(String path, Content content, AssetKind assetKind) throws IOException;
+
+  Content putComponent(String path, Content content, AssetKind assetKind) throws IOException;
 
   boolean delete(String path) throws IOException;
 }

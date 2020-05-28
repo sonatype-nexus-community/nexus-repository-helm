@@ -65,6 +65,15 @@ public class HelmAttributes
     return getValue(HelmProperties.ICON, String.class);
   }
 
+  public String getEgine() {
+    return getValue(HelmProperties.ENGINE, String.class);
+  }
+
+  public List<String> getKeywords() {
+    return getValue(HelmProperties.KEYWORDS, List.class);
+  }
+
+
   public List<Map<String, String>> getMaintainers() {
 
     return getValue(HelmProperties.MAINTAINERS, List.class);
@@ -92,6 +101,18 @@ public class HelmAttributes
 
   public void setAppVersion(final String appVersion) {
     attributesEnumMap.put(HelmProperties.APP_VERSION, appVersion);
+  }
+
+  public void setEgine(final String engine) {
+    attributesEnumMap.put(HelmProperties.ENGINE, engine);
+  }
+
+  public void setKeywords(final List<String> keywords) {
+    attributesEnumMap.put(HelmProperties.KEYWORDS, keywords);
+  }
+
+  public void setMaintainers(final List<Map<String, String>> maintainers) {
+    attributesEnumMap.put(HelmProperties.MAINTAINERS, maintainers);
   }
 
   private <T> T getValue(HelmProperties property, Class<T> tClass) {

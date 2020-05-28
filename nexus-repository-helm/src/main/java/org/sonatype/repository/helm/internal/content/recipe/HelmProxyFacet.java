@@ -25,12 +25,12 @@ import org.sonatype.nexus.repository.proxy.ProxyFacetSupport;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
+import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
-import org.sonatype.repository.helm.internal.orient.metadata.IndexYamlAbsoluteUrlRewriter;
-import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
 
 /**
  * @since 1.0.9
@@ -41,20 +41,12 @@ public class HelmProxyFacet
 {
   private final HelmPathUtils helmPathUtils;
 
-  private final HelmAttributeParser helmAttributeParser;
-
-  private final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter;
-
   private static final String INDEX_YAML = "index.yaml";
 
   @Inject
-  public HelmProxyFacet(final HelmPathUtils helmPathUtils,
-                            final HelmAttributeParser helmAttributeParser,
-                            final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter)
+  public HelmProxyFacet(final HelmPathUtils helmPathUtils)
   {
     this.helmPathUtils = checkNotNull(helmPathUtils);
-    this.helmAttributeParser = checkNotNull(helmAttributeParser);
-    this.indexYamlAbsoluteUrlRewriter = checkNotNull(indexYamlAbsoluteUrlRewriter);
   }
 
   @Override
@@ -62,46 +54,56 @@ public class HelmProxyFacet
     super.doInit(configuration);
   }
 
-  // HACK: Workaround for known CGLIB issue, forces an Import-Package for org.sonatype.nexus.repository.config
   @Override
   protected void doValidate(final Configuration configuration) throws Exception {
     super.doValidate(configuration);
   }
 
-  private String componentPath(final Context context) {
-    final TokenMatcher.State tokenMatcherState = context.getAttributes().require(TokenMatcher.State.class);
-    return tokenMatcherState.getTokens().get(HelmProxyRecipe.PATH_NAME);
-  }
-
-  private HelmContentFacet content() {
-    return getRepository().facet(HelmContentFacet.class);
-  }
-
   @Nullable
   @Override
   protected Content getCachedContent(final Context context)  throws IOException {
-
     return content()
-        .get(getUrl(context))
+        .getAsset(getUrl(context))
         .map(Content::new)
         .orElse(null);
   }
 
   @Override
   protected Content store(final Context context, final Content content) throws IOException {
-    return new Content(content().put(getUrl(context), content));
+    AssetKind assetKind = context.getAttributes().require(AssetKind.class);
+    switch (assetKind) {
+      case HELM_INDEX:
+        return new Content(content().putIndex(getUrl(context), content, assetKind));
+      case HELM_PACKAGE:
+        return new Content(content().putComponent(getUrl(context), content, assetKind));
+      default:
+        throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
+    }
   }
 
   @Override
   protected void indicateVerified(final Context context, final Content content, final CacheInfo cacheInfo)
+      throws IOException
   {
     log.debug("Not implemented yet");
     //caching will be worked on in - NEXUS-23605
   }
 
-
   @Override
   protected String getUrl(@Nonnull final Context context) {
-    return context.getRequest().getPath().substring(1);
+    AssetKind assetKind = context.getAttributes().require(AssetKind.class);
+    switch (assetKind) {
+      case HELM_INDEX:
+        return INDEX_YAML;
+      case HELM_PACKAGE:
+        TokenMatcher.State matcherState = helmPathUtils.matcherState(context);
+        return helmPathUtils.filename(matcherState);
+      default:
+        throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
+    }
+  }
+
+  private HelmContentFacet content() {
+    return getRepository().facet(HelmContentFacet.class);
   }
 }
