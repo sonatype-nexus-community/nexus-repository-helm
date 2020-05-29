@@ -78,9 +78,6 @@ public class HelmContentFacetImpl
             .kind(assetKind.name())
             .getOrCreate()
             .attach(newTempBlob)
-            //.withAttribute(CONTENT, contentAttributes) //does not work now
-            //.markAsCached(cacheInfo) //does not work now
-            //.withAttribute(CACHE, cacheInfo) //does not work now
             .download();
       }
     }
@@ -102,9 +99,6 @@ public class HelmContentFacetImpl
           .getOrCreate()
           .attach(blob)
           .withAttribute(HelmFormat.NAME, helmAttributes)
-          //.withAttribute(CONTENT, contentAttributes) //does not work now
-          //.markAsCached(cacheInfo) //does not work now
-          //.withAttribute(CACHE, cacheInfo) //does not work now
           .download();
     }
   }

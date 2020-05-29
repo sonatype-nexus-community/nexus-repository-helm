@@ -50,17 +50,6 @@ public class HelmProxyFacet
   }
 
   @Override
-  protected void doInit(final Configuration configuration) throws Exception {
-    super.doInit(configuration);
-  }
-
-  @Override
-  protected void doValidate(final Configuration configuration) throws Exception {
-    super.doValidate(configuration);
-  }
-
-  @Nullable
-  @Override
   protected Content getCachedContent(final Context context)  throws IOException {
     return content()
         .getAsset(getUrl(context))
@@ -86,7 +75,6 @@ public class HelmProxyFacet
       throws IOException
   {
     log.debug("Not implemented yet");
-    //caching will be worked on in - NEXUS-23605
   }
 
   @Override
