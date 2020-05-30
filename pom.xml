@@ -23,7 +23,7 @@
   </parent>
 
   <artifactId>nexus-repository-base</artifactId>
-  <version>1.0.6-SNAPSHOT</version>
+  <version>1.0.10-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>${project.groupId}:${project.artifactId}-parent</name>
 
@@ -141,6 +141,9 @@
           </plugin>
         </plugins>
       </build>
+      <properties>
+        <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
+      </properties>
     </profile>
   </profiles>
 </project>
