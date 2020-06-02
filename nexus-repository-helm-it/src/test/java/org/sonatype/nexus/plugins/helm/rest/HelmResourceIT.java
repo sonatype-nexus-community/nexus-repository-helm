@@ -19,16 +19,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.sonatype.nexus.plugins.helm.HelmITConfig.configureHelmBase;
 
 public class HelmResourceIT
     extends ResourceITSupport
 {
   @Configuration
   public static Option[] configureNexus() {
-    return options(
-        configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm")
-    );
+    return configureHelmBase();
   }
 
   @Before

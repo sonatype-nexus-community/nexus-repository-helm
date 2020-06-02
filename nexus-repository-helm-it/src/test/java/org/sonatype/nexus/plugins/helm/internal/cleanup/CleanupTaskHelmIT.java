@@ -35,6 +35,7 @@ import org.ops4j.pax.exam.Option;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.sonatype.nexus.plugins.helm.HelmITConfig.configureHelmBase;
 import static org.sonatype.nexus.plugins.helm.internal.HelmITSupport.MONGO_PKG_FILE_NAME_404_TGZ;
 import static org.sonatype.nexus.plugins.helm.internal.HelmITSupport.MONGO_PKG_FILE_NAME_600_TGZ;
 import static org.sonatype.nexus.plugins.helm.internal.HelmITSupport.MONGO_PKG_FILE_NAME_728_TGZ;
@@ -55,10 +56,7 @@ public class CleanupTaskHelmIT
 
   @Configuration
   public static Option[] configureNexus() {
-    return NexusPaxExamSupport.options(
-        NexusITSupport.configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm")
-    );
+    return configureHelmBase();
   }
 
   @Before

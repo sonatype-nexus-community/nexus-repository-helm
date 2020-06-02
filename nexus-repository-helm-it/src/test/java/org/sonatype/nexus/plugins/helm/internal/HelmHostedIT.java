@@ -42,6 +42,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.sonatype.nexus.plugins.helm.HelmITConfig.configureHelmBase;
 import static org.sonatype.nexus.repository.http.HttpStatus.NOT_FOUND;
 import static org.sonatype.nexus.testsuite.testsupport.FormatClientSupport.status;
 
@@ -54,10 +55,7 @@ public class HelmHostedIT
 
   @Configuration
   public static Option[] configureNexus() {
-    return NexusPaxExamSupport.options(
-        NexusITSupport.configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm")
-    );
+    return configureHelmBase();
   }
 
   @Before
