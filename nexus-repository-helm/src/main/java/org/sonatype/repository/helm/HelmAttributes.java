@@ -65,7 +65,7 @@ public class HelmAttributes
     return getValue(HelmProperties.ICON, String.class);
   }
 
-  public String getEgine() {
+  public String getEngine() {
     return getValue(HelmProperties.ENGINE, String.class);
   }
 
@@ -103,7 +103,7 @@ public class HelmAttributes
     attributesEnumMap.put(HelmProperties.APP_VERSION, appVersion);
   }
 
-  public void setEgine(final String engine) {
+  public void setEngine(final String engine) {
     attributesEnumMap.put(HelmProperties.ENGINE, engine);
   }
 

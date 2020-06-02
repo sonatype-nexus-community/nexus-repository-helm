@@ -72,7 +72,7 @@ public class IndexYamlAbsoluteUrlRewriterSupport
       }
     }
     catch (IOException ex) {
-      log.debug("Error rewriting urls in index.yaml", ex);
+      log.error("Error rewriting urls in index.yaml", ex);
     }
   }
 
@@ -92,7 +92,7 @@ public class IndexYamlAbsoluteUrlRewriterSupport
       }
     }
     catch (URISyntaxException ex) {
-      log.debug("Invalid URI in index.yaml", ex);
+      log.error("Invalid URI in index.yaml", ex);
     }
     return scalarEvent;
   }
