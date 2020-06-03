@@ -65,6 +65,14 @@
 
     <dependency>
       <groupId>org.sonatype.nexus.testsuite</groupId>
+      <artifactId>nexus-repository-content-testsupport</artifactId>
+      <version>${nxrm-version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.sonatype.nexus.testsuite</groupId>
       <artifactId>nexus-repository-testsupport</artifactId>
       <version>${nxrm-version}</version>
       <scope>test</scope>
