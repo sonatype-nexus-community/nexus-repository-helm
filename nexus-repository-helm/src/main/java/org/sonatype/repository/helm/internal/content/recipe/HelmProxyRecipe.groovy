@@ -65,7 +65,7 @@ class HelmProxyRecipe
     extends RecipeSupport
 {
   public static final String NAME = 'helm-proxy'
-  
+
   @Inject
   Provider<HelmSecurityFacet> securityFacet
 
