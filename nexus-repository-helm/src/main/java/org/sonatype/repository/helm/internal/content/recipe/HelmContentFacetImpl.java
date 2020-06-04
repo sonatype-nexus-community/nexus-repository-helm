@@ -63,7 +63,7 @@ public class HelmContentFacetImpl
   }
 
   @Override
-  public Optional<Payload> getAsset(final String path) {
+  public Optional<Content> getAsset(final String path) {
     return assets().path(path).find().map(FluentAsset::download);
   }
 
@@ -78,6 +78,7 @@ public class HelmContentFacetImpl
             .kind(assetKind.name())
             .getOrCreate()
             .attach(newTempBlob)
+            .markAsCached(content)
             .download();
       }
     }
@@ -98,6 +99,7 @@ public class HelmContentFacetImpl
               .getOrCreate())
           .getOrCreate()
           .attach(blob)
+          .markAsCached(content)
           .withAttribute(HelmFormat.NAME, helmAttributes)
           .download();
     }

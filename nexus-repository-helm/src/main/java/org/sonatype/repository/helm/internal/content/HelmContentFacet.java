@@ -28,7 +28,7 @@ import org.sonatype.repository.helm.internal.AssetKind;
 public interface HelmContentFacet
     extends ContentFacet
 {
-  Optional<Payload> getAsset(String path) throws IOException;
+  Optional<Content> getAsset(String path) throws IOException;
 
   Content putIndex(String path, Content content, AssetKind assetKind) throws IOException;
 

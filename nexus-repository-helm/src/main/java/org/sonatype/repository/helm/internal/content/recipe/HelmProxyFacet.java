@@ -18,8 +18,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.sonatype.nexus.repository.cache.CacheInfo;
-import org.sonatype.nexus.repository.proxy.ProxyFacetSupport;
+import org.sonatype.nexus.repository.content.facet.ContentProxyFacetSupport;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
@@ -35,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Named
 public class HelmProxyFacet
-    extends ProxyFacetSupport
+    extends ContentProxyFacetSupport
 {
   private final HelmPathUtils helmPathUtils;
 
@@ -49,10 +48,7 @@ public class HelmProxyFacet
 
   @Override
   protected Content getCachedContent(final Context context)  throws IOException {
-    return content()
-        .getAsset(getUrl(context))
-        .map(Content::new)
-        .orElse(null);
+    return content().getAsset(getUrl(context)).orElse(null);
   }
 
   @Override
@@ -68,12 +64,6 @@ public class HelmProxyFacet
     }
   }
 
-  @Override
-  protected void indicateVerified(final Context context, final Content content, final CacheInfo cacheInfo)
-      throws IOException
-  {
-    log.debug("Not implemented yet");
-  }
 
   @Override
   protected String getUrl(@Nonnull final Context context) {
