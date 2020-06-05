@@ -18,7 +18,7 @@ import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.nexus.repository.content.store.FormatStoreModule;
 
 /**
- * @since 1.0.10
+ * @since 1.0.11
  */
 @Named(HelmFormat.NAME)
 public class HelmStoreModule

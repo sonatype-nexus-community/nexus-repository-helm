@@ -39,7 +39,7 @@ import static org.sonatype.nexus.common.hash.HashAlgorithm.MD5;
 import static org.sonatype.nexus.common.hash.HashAlgorithm.SHA1;
 
 /**
- * @since 1.0.10
+ * @since 1.0.11
  */
 @Named(HelmFormat.NAME)
 public class HelmContentFacetImpl

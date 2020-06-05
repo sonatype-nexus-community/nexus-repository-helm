@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /**
- * @since 1.0.10
+ * @since 1.0.11
  */
 @Named
 public class HelmProxyFacet
@@ -56,9 +56,9 @@ public class HelmProxyFacet
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     switch (assetKind) {
       case HELM_INDEX:
-        return new Content(content().putIndex(getUrl(context), content, assetKind));
+        return content().putIndex(getUrl(context), content, assetKind);
       case HELM_PACKAGE:
-        return new Content(content().putComponent(getUrl(context), content, assetKind));
+        return content().putComponent(getUrl(context), content, assetKind);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }

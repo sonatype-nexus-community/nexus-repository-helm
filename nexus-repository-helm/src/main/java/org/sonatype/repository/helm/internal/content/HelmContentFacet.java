@@ -22,7 +22,7 @@ import org.sonatype.nexus.repository.content.facet.ContentFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 
 /**
- * @since 1.0.10
+ * @since 1.0.11
  */
 @Facet.Exposed
 public interface HelmContentFacet
