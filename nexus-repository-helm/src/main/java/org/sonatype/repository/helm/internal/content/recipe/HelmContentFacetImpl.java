@@ -68,9 +68,9 @@ public class HelmContentFacetImpl
   }
 
   @Override
-  public Content putIndex(final String path, final Content content, final AssetKind assetKind) throws IOException
+  public Content putIndex(final String path, final Payload payload, final AssetKind assetKind)
   {
-    try (TempBlob blob = blobs().ingest(content, HASHING)) {
+    try (TempBlob blob = blobs().ingest(payload, HASHING)) {
       try (TempBlob newTempBlob = indexYamlAbsoluteUrlRewriter
           .removeUrlsFromIndexYamlAndWriteToTempBlob(blob, getRepository())) {
         return assets()
@@ -78,16 +78,16 @@ public class HelmContentFacetImpl
             .kind(assetKind.name())
             .getOrCreate()
             .attach(newTempBlob)
-            .markAsCached(content)
+            .markAsCached(payload)
             .download();
       }
     }
   }
 
   @Override
-  public Content putComponent(final String path, final Content content, final AssetKind assetKind) throws IOException
+  public Content putComponent(final String path, final Payload payload, final AssetKind assetKind) throws IOException
   {
-    try (TempBlob blob = blobs().ingest(content, HASHING)) {
+    try (TempBlob blob = blobs().ingest(payload, HASHING)) {
       HelmAttributes helmAttributes = helmAttributeParser.getAttributes(assetKind, blob.get());
 
       return assets()
@@ -99,14 +99,14 @@ public class HelmContentFacetImpl
               .getOrCreate())
           .getOrCreate()
           .attach(blob)
-          .markAsCached(content)
+          .markAsCached(payload)
           .withAttribute(HelmFormat.NAME, helmAttributes)
           .download();
     }
   }
 
   @Override
-  public boolean delete(final String path) throws IOException {
+  public boolean delete(final String path) {
     return assets().path(path).find().map(FluentAsset::delete).orElse(false);
   }
 }

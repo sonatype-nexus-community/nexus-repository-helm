@@ -22,7 +22,6 @@ import org.sonatype.nexus.repository.view.Handler;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
 import org.sonatype.repository.helm.internal.AssetKind;
-import org.sonatype.repository.helm.internal.orient.hosted.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,7 +45,7 @@ public class HostedHandlers
     this.helmPathUtils = checkNotNull(helmPathUtils);
   }
 
-  final Handler get = context -> {
+  public final Handler get = context -> {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     String path;
     if (assetKind == AssetKind.HELM_INDEX) {
@@ -61,7 +60,7 @@ public class HostedHandlers
     return (content != null) ? ok(content) : notFound();
   };
 
-  final Handler upload = context -> {
+  public final Handler upload = context -> {
     State state = context.getAttributes().require(TokenMatcher.State.class);
     String path = helmPathUtils.buildAssetPath(state);
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
@@ -69,7 +68,7 @@ public class HostedHandlers
     return ok();
   };
 
-  final Handler delete = context -> {
+  public final Handler delete = context -> {
     State state = context.getAttributes().require(TokenMatcher.State.class);
     String path = helmPathUtils.buildAssetPath(state);
 

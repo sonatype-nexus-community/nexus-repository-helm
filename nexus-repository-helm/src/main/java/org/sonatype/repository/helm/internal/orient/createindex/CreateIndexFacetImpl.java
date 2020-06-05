@@ -39,7 +39,7 @@ import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.orient.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.HelmFormat;
-import org.sonatype.repository.helm.internal.orient.hosted.HelmHostedFacet;
+import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
