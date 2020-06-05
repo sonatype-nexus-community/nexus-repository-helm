@@ -87,7 +87,7 @@
       <type>zip</type>
       <scope>test</scope>
       <exclusions>
-        <!-- Avoid leaking older r plugins from distro -->
+        <!-- Avoid leaking older helm plugins from distro -->
         <exclusion>
           <groupId>org.sonatype.nexus.plugins</groupId>
           <artifactId>nexus-repository-helm</artifactId>
