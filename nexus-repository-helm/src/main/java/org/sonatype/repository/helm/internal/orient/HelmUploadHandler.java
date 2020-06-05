@@ -36,7 +36,7 @@ import org.sonatype.nexus.rest.ValidationErrorsException;
 import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.AssetKind;
-import org.sonatype.repository.helm.internal.orient.hosted.HelmHostedFacet;
+import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import org.apache.commons.lang3.StringUtils;

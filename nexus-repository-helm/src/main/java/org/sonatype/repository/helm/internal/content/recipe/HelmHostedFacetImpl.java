@@ -22,12 +22,15 @@ import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
+import org.sonatype.nexus.repository.view.payloads.TempBlob;
+import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE;
+import org.sonatype.repository.helm.internal.content.HelmContentFacet;
 
 /**
  * {@link HelmHostedFacet implementation}
@@ -65,6 +68,21 @@ public class HelmHostedFacetImpl
       throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
     }
     helmContentFacet.putComponent(path, new Content(payload), assetKind);
+  }
+
+  @Override
+  public Content upload(
+      final String path,
+      final TempBlob tempBlob,
+      final HelmAttributes helmAttributes,
+      final Payload payload,
+      final AssetKind assetKind)
+  {
+    checkNotNull(path);
+    if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
+      throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
+    }
+    return helmContentFacet.putComponent(path, tempBlob, helmAttributes, new Content(payload), assetKind);
   }
 
   @Override
