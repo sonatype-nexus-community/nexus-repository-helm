@@ -12,6 +12,7 @@
  */
 package org.sonatype.repository.helm.internal.orient.metadata;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -21,6 +22,7 @@ import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.repository.helm.internal.metadata.ChartIndex;
 import org.sonatype.repository.helm.internal.util.YamlParser;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -51,6 +53,7 @@ public class IndexYamlBuilderTest
 
   @Before
   public void setUp() throws Exception {
+    setupRepositoryMock();
     underTest = new IndexYamlBuilder(this.yamlParser);
     index = new ChartIndex();
   }
@@ -78,5 +81,14 @@ public class IndexYamlBuilderTest
 
   private void initializeStorageFacet() {
     when(storageFacet.createTempBlob(any(InputStream.class), eq(HASH_ALGORITHMS))).thenReturn(tempBlob);
+  }
+
+  private void setupRepositoryMock() {
+    when(storageFacet.createTempBlob(any(InputStream.class), any(Iterable.class))).thenAnswer(args -> {
+      InputStream inputStream = (InputStream) args.getArguments()[0];
+      byte[] bytes = IOUtils.toByteArray(inputStream);
+      when(tempBlob.get()).thenReturn(new ByteArrayInputStream(bytes));
+      return tempBlob;
+    });
   }
 }
