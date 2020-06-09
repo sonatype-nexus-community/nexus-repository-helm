@@ -53,13 +53,13 @@ public class IndexYamlBuilderTest
 
   @Before
   public void setUp() throws Exception {
-    setupRepositoryMock();
     underTest = new IndexYamlBuilder(this.yamlParser);
     index = new ChartIndex();
   }
 
   @Test
   public void testChartIndexPassedCorrectly() throws Exception {
+    setupRepositoryMock();
     ArgumentCaptor<InputStream> captorStorage = ArgumentCaptor.forClass(InputStream.class);
     ArgumentCaptor<ChartIndex> captor = ArgumentCaptor.forClass(ChartIndex.class);
 
