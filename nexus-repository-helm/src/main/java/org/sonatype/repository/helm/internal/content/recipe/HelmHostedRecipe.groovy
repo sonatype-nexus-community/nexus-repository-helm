@@ -51,7 +51,7 @@ import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE
  *
  * @since 1.0.10
  */
-@Named(NAME)
+@Named(HelmHostedRecipe.NAME)
 @Singleton
 class HelmHostedRecipe
     extends RecipeSupport
@@ -180,7 +180,7 @@ class HelmHostedRecipe
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)
           .handler(securityHandler)
-          .handler(formatHighAvailabilitySupportHandler)
+          //.handler(formatHighAvailabilitySupportHandler)
           .handler(exceptionHandler)
           .handler(handlerContributor)
           .handler(partialFetchHandler)
@@ -193,7 +193,7 @@ class HelmHostedRecipe
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)
           .handler(securityHandler)
-          .handler(formatHighAvailabilitySupportHandler)
+          //.handler(formatHighAvailabilitySupportHandler)
           .handler(exceptionHandler)
           .handler(handlerContributor)
           .handler(conditionalRequestHandler)
@@ -206,7 +206,7 @@ class HelmHostedRecipe
     builder.route(new Route.Builder().matcher(chartDeleteMatcher())
         .handler(timingHandler)
         .handler(securityHandler)
-        .handler(formatHighAvailabilitySupportHandler)
+        //.handler(formatHighAvailabilitySupportHandler)
         .handler(exceptionHandler)
         .handler(handlerContributor)
         .handler(conditionalRequestHandler)

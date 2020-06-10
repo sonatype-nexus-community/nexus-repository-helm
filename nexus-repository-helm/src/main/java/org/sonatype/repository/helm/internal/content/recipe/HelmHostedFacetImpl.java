@@ -3,14 +3,11 @@ package org.sonatype.repository.helm.internal.content.recipe;
 import java.io.IOException;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.config.Configuration;
-import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.TempBlob;
-import org.sonatype.nexus.repository.transaction.TransactionalDeleteBlob;
-import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.repository.helm.internal.AssetKind;
@@ -22,7 +19,7 @@ import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE;
 
 /**
- * {@link org.sonatype.repository.helm.internal.hosted.HelmHostedFacet implementation}
+ * {@link HelmHostedFacet implementation}
  *
  * @since 1.0.10
  */
@@ -33,6 +30,11 @@ public class HelmHostedFacetImpl
 {
   private HelmContentFacet helmContentFacet;
 
+  @Inject
+  public HelmHostedFacetImpl()
+  {
+  }
+
   @Override
   protected void doInit(final Configuration configuration) throws Exception {
     super.doInit(configuration);
@@ -42,12 +44,12 @@ public class HelmHostedFacetImpl
 
   @Nullable
   @Override
-  @TransactionalTouchBlob
   public Content get(final String path) {
     checkNotNull(path);
     return helmContentFacet.getAsset(path).orElse(null);
   }
 
+  @Override
   public void upload(
       final String path,
       final Payload payload,
@@ -62,13 +64,6 @@ public class HelmHostedFacetImpl
   }
 
   @Override
-  @Deprecated
-  public Asset upload(String path, TempBlob tempBlob, Payload payload, AssetKind assetKind) {
-    throw new IllegalArgumentException("Unsupported uploading method"); // TODO: Unsupported???
-  }
-
-  @Override
-  @TransactionalDeleteBlob
   public boolean delete(final String path) {
     checkNotNull(path);
     return helmContentFacet.delete(path);
