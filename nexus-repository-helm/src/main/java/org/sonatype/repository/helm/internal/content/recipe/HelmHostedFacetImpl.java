@@ -44,6 +44,11 @@ public class HelmHostedFacetImpl
 {
   private HelmContentFacet helmContentFacet;
 
+  @Inject
+  public HelmHostedFacetImpl()
+  {
+  }
+
   @Override
   protected void doInit(final Configuration configuration) throws Exception {
     super.doInit(configuration);

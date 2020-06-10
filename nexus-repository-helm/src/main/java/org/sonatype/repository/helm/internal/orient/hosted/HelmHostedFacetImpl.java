@@ -102,7 +102,6 @@ public class HelmHostedFacetImpl
     }
   }
 
-  @Override
   @TransactionalStoreBlob
   public Asset upload(String path, TempBlob tempBlob, Payload payload, AssetKind assetKind) throws IOException {
     checkNotNull(path);
