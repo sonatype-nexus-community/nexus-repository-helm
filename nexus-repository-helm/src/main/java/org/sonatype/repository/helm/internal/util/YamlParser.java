@@ -77,13 +77,17 @@ public class YamlParser
     return map;
   }
 
+  public String getYamlContent(final ChartIndex index) {
+    Yaml yaml = new Yaml(new JodaPropertyConstructor(),
+        setupRepresenter(),
+        new DumperOptions(),
+        new Resolver());
+    return yaml.dumpAsMap(index);
+  }
+
   public void write(final OutputStream os, final ChartIndex index) {
     try (OutputStreamWriter writer = new OutputStreamWriter(os)) {
-      Yaml yaml = new Yaml(new JodaPropertyConstructor(),
-          setupRepresenter(),
-          new DumperOptions(),
-          new Resolver());
-      String result = yaml.dumpAsMap(index);
+      String result = getYamlContent(index);
       writer.write(result);
     }
     catch (IOException ex) {

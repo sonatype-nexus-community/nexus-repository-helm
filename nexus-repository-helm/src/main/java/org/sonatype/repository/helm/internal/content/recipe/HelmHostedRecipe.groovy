@@ -35,6 +35,7 @@ import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher
 import org.sonatype.repository.helm.internal.AssetKind
 import org.sonatype.repository.helm.internal.HelmFormat
 import org.sonatype.repository.helm.internal.content.HelmContentFacet
+import org.sonatype.repository.helm.internal.content.createindex.CreateIndexFacetImpl
 import org.sonatype.repository.helm.internal.hosted.HostedHandlers
 import org.sonatype.repository.helm.internal.security.HelmSecurityFacet
 
@@ -49,7 +50,7 @@ import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE
 /**
  * Helm Hosted Recipe
  *
- * @since 1.0.10
+ * @since 1.0.11
  */
 @Named(HelmHostedRecipe.NAME)
 @Singleton
@@ -61,8 +62,8 @@ class HelmHostedRecipe
   @Inject
   HostedHandlers hostedHandlers
 
-  //@Inject
-  //Provider<CreateIndexFacetImpl> createIndexFacet
+  @Inject
+  Provider<CreateIndexFacetImpl> createIndexFacet
 
   @Inject
   Provider<HelmContentFacet> helmFacet
@@ -76,11 +77,6 @@ class HelmHostedRecipe
   @Inject
   Provider<ConfigurableViewFacet> viewFacet
 
-  //@Inject
-  //Provider<SearchFacet> searchFacet
-
-  //@Inject
-  //Provider<AttributesFacet> attributesFacet
 
   @Inject
   ExceptionHandler exceptionHandler
@@ -163,9 +159,7 @@ class HelmHostedRecipe
     repository.attach(httpClientFacet.get())
     repository.attach(hostedFacet.get())
     repository.attach(helmFacet.get())
-    //repository.attach(createIndexFacet.get())
-    //repository.attach(searchFacet.get())
-    //repository.attach(attributesFacet.get())
+    repository.attach(createIndexFacet.get())
   }
 
   /**
@@ -180,7 +174,6 @@ class HelmHostedRecipe
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)
           .handler(securityHandler)
-          //.handler(formatHighAvailabilitySupportHandler)
           .handler(exceptionHandler)
           .handler(handlerContributor)
           .handler(partialFetchHandler)
@@ -193,7 +186,6 @@ class HelmHostedRecipe
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)
           .handler(securityHandler)
-          //.handler(formatHighAvailabilitySupportHandler)
           .handler(exceptionHandler)
           .handler(handlerContributor)
           .handler(conditionalRequestHandler)
@@ -206,7 +198,6 @@ class HelmHostedRecipe
     builder.route(new Route.Builder().matcher(chartDeleteMatcher())
         .handler(timingHandler)
         .handler(securityHandler)
-        //.handler(formatHighAvailabilitySupportHandler)
         .handler(exceptionHandler)
         .handler(handlerContributor)
         .handler(conditionalRequestHandler)
