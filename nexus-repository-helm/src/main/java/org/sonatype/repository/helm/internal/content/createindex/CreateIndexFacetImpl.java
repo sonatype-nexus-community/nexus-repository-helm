@@ -23,6 +23,7 @@ import org.sonatype.nexus.common.stateguard.Guarded;
 import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.manager.RepositoryCreatedEvent;
+import org.sonatype.nexus.repository.manager.RepositoryDeletedEvent;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.payloads.StringPayload;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
@@ -87,6 +88,14 @@ public class CreateIndexFacetImpl
   }
 
   @Subscribe
+  @Guarded(by = STARTED)
+  @AllowConcurrentEvents
+  public void on(RepositoryDeletedEvent deletedEvent) {
+    log.debug("Deleting index.yaml for hosted repository {}", getRepository().getName());
+    deleteIndexYaml();
+  }
+
+  @Subscribe
   public void on(final HelmIndexInvalidationEvent event) {
     if (shouldProcess(event)) {
       acceptingEvents.set(false);
@@ -105,14 +114,6 @@ public class CreateIndexFacetImpl
       }
     }
   }
-
-  //protected void updateIndexYaml(final TempBlob indexYaml) {
-  //  if (indexYaml == null) {
-  //    deleteIndexYaml();
-  //  } else {
-  //    createIndexYaml(indexYaml);
-  //  }
-  //}
 
   private void createIndexYaml() {
     ChartIndex index = new ChartIndex();
