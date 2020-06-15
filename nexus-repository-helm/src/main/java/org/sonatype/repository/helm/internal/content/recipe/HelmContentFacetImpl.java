@@ -23,7 +23,6 @@ import org.sonatype.nexus.repository.content.facet.ContentFacetSupport;
 import org.sonatype.nexus.repository.content.fluent.FluentAsset;
 import org.sonatype.nexus.repository.content.store.FormatStoreManager;
 import org.sonatype.nexus.repository.view.Content;
-import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.view.payloads.TempBlob;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.AssetKind;
@@ -68,9 +67,9 @@ public class HelmContentFacetImpl
   }
 
   @Override
-  public Content putIndex(final String path, final Payload payload, final AssetKind assetKind)
+  public Content putIndex(final String path, final Content content, final AssetKind assetKind)
   {
-    try (TempBlob blob = blobs().ingest(payload, HASHING)) {
+    try (TempBlob blob = blobs().ingest(content, HASHING)) {
       try (TempBlob newTempBlob = indexYamlAbsoluteUrlRewriter
           .removeUrlsFromIndexYamlAndWriteToTempBlob(blob, getRepository())) {
         return assets()
@@ -78,16 +77,16 @@ public class HelmContentFacetImpl
             .kind(assetKind.name())
             .getOrCreate()
             .attach(newTempBlob)
-            .markAsCached(payload)
+            .markAsCached(content)
             .download();
       }
     }
   }
 
   @Override
-  public Content putComponent(final String path, final Payload payload, final AssetKind assetKind) throws IOException
+  public Content putComponent(final String path, final Content content, final AssetKind assetKind) throws IOException
   {
-    try (TempBlob blob = blobs().ingest(payload, HASHING)) {
+    try (TempBlob blob = blobs().ingest(content, HASHING)) {
       HelmAttributes helmAttributes = helmAttributeParser.getAttributes(assetKind, blob.get());
 
       return assets()
@@ -99,7 +98,7 @@ public class HelmContentFacetImpl
               .getOrCreate())
           .getOrCreate()
           .attach(blob)
-          .markAsCached(payload)
+          .markAsCached(content)
           .withAttribute(HelmFormat.NAME, helmAttributes)
           .download();
     }

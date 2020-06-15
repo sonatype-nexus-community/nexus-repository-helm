@@ -38,7 +38,6 @@ public class HelmHostedFacetImpl
   @Override
   protected void doInit(final Configuration configuration) throws Exception {
     super.doInit(configuration);
-    //getRepository().facet(StorageFacet.class).registerWritePolicySelector(new HelmHostedWritePolicySelector());
     helmContentFacet = facet(HelmContentFacet.class);
   }
 
@@ -60,7 +59,7 @@ public class HelmHostedFacetImpl
     if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
       throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
     }
-    helmContentFacet.putComponent(path, payload, assetKind);
+    helmContentFacet.putComponent(path, new Content(payload), assetKind);
   }
 
   @Override
