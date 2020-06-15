@@ -60,7 +60,7 @@ public class CreateIndexFacetImpl
 
   private final AtomicBoolean acceptingEvents = new AtomicBoolean(true);
 
-  private final static String API_VERSION = "v1";
+  private static final String API_VERSION = "v1";
 
   private final YamlParser yamlParser;
 
