@@ -49,7 +49,7 @@
   </distributionManagement>
 
   <properties>
-    <nxrm-version>3.24.0-01</nxrm-version>
+    <nxrm-version>3.24.0-77</nxrm-version>
   </properties>
 
   <repositories>
