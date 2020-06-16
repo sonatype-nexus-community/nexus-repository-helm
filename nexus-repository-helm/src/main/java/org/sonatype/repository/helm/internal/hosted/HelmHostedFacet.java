@@ -23,7 +23,7 @@ import org.sonatype.repository.helm.internal.AssetKind;
 /**
  * Helm Hosted Facet
  *
- * @since 0.0.2
+ * @since 1.0.11
  */
 @Exposed
 public interface HelmHostedFacet
