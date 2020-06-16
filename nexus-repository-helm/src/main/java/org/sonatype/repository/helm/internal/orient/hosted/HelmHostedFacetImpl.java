@@ -33,9 +33,8 @@ import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
-import org.sonatype.repository.helm.internal.AssetKind;
-import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.orient.HelmFacet;
+import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -102,6 +101,7 @@ public class HelmHostedFacetImpl
     }
   }
 
+  @Override
   @TransactionalStoreBlob
   public Asset upload(String path, TempBlob tempBlob, Payload payload, AssetKind assetKind) throws IOException {
     checkNotNull(path);
