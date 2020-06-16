@@ -52,4 +52,18 @@ entries:
     urls:
     - acs-engine-autoscaler-2.1.1.tgz
     version: 2.1.1
+  internal-power-app:
+  - apiVersion: v1
+    appVersion: 7.5.0
+    created: 2018-02-13T23:19:19.729122896Z
+    description: Dummy chart to prove parsing logic
+    digest: 39e66eb53c310529bd9dd19776f8ba662e063a4ebd51fc5ec9f2267e2e073e3e
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: tory.mckeag@ge.com
+      name: Tory McKeag
+    name: digital-energy-market
+    urls:
+    - https://path.to.repo.infrastructure/pathtorepo/pathwithinrepo/some-application-7.5.0.tgz
+    version: 0.0.1   
 generated: 2018-03-27T20:26:09.598062444Z

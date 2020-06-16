@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 
 import org.sonatype.goodies.testsupport.TestSupport;
 import org.sonatype.nexus.blobstore.api.Blob;
@@ -27,9 +28,15 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.events.CollectionEndEvent;
+import org.yaml.snakeyaml.events.CollectionStartEvent;
+import org.yaml.snakeyaml.events.Event;
+import org.yaml.snakeyaml.events.ScalarEvent;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.either;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -42,6 +49,9 @@ import static org.mockito.Mockito.when;
 public class IndexYamlAbsoluteUrlRewriterTest
     extends TestSupport
 {
+  private URI remoteRepositoryUri = URI.create("https://path.to.repo.infrastructure/pathtorepo/");
+  
+  
   private static final String INDEX_YAML = "index.yaml";
 
   private static final String INDEX_YAML_NO_ABSOLUTE_URLS = "indexWithRelativeUrls.yaml";
@@ -74,7 +84,7 @@ public class IndexYamlAbsoluteUrlRewriterTest
   @Test
   public void checkCustomUrls() throws Exception {
     setupIndexMock(INDEX_YAML_WITH_CUSTOM_URL);
-    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository);
+    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository, remoteRepositoryUri);
     assertThat(newTempBlob.get(), is(instanceOf(InputStream.class)));
     checkThatAbsoluteUrlRemoved(newTempBlob.get());
   }
@@ -82,7 +92,7 @@ public class IndexYamlAbsoluteUrlRewriterTest
   @Test
   public void removeUrlsFromIndexYaml() throws Exception {
     setupIndexMock(INDEX_YAML);
-    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository);
+    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository, remoteRepositoryUri);
     assertThat(newTempBlob.get(), is(instanceOf(InputStream.class)));
     checkThatAbsoluteUrlRemoved(newTempBlob.get());
   }
@@ -90,9 +100,42 @@ public class IndexYamlAbsoluteUrlRewriterTest
   @Test
   public void doNotModifyUrlsWhenAlreadyRelative() throws Exception {
     setupIndexMock(INDEX_YAML_NO_ABSOLUTE_URLS);
-    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository);
+    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository, remoteRepositoryUri);
     assertThat(newTempBlob.get(), is(instanceOf(InputStream.class)));
-    checkThatAbsoluteUrlRemoved(newTempBlob.get());
+    checkRelativeUrlsInSet(newTempBlob.get());
+  }
+  
+  // The expected URL strings based on indexWithRelativeUrls.yaml
+  private static final String[] expectedConvertedURLs =
+      {"acs-engine-autoscaler-2.1.3.tgz", 
+          "charts/acs-engine-autoscaler-2.1.2.tgz", 
+          "acs-engine-autoscaler-2.1.1.tgz",
+          "pathwithinrepo/some-application-7.5.0.tgz"};
+
+  private void checkRelativeUrlsInSet(final InputStream is) throws Exception {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+      Yaml yaml = new Yaml();
+      int urlIndex = 0;
+      boolean inUrl = false;
+      for (Event yamlEvent : yaml.parse(reader)) {
+        if (yamlEvent instanceof ScalarEvent) {
+          ScalarEvent scalarEvent = (ScalarEvent) yamlEvent;
+          if (inUrl) {
+            assertThat(scalarEvent.getValue(), equalTo(expectedConvertedURLs[urlIndex]));
+            urlIndex++;
+          }
+          else if ("urls".equals(scalarEvent.getValue())) {
+            inUrl = true;
+          }
+        }
+        else if (yamlEvent instanceof CollectionStartEvent) {
+          // NOOP
+        }
+        else if (yamlEvent instanceof CollectionEndEvent) {
+          inUrl = false;
+        }
+      }
+    }
   }
 
   private void checkThatAbsoluteUrlRemoved(final InputStream is) throws Exception {
@@ -119,7 +162,7 @@ public class IndexYamlAbsoluteUrlRewriterTest
   @Test
   public void ensureNoExclamationMarksInYaml() throws Exception {
     setupIndexMock(INDEX_YAML);
-    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository);
+    underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository, remoteRepositoryUri);
     BufferedReader reader = new BufferedReader(new InputStreamReader(tempBlob.get()));
     String line;
     while ((line = reader.readLine()) != null) {
@@ -134,6 +177,7 @@ public class IndexYamlAbsoluteUrlRewriterTest
     when(tempBlob.getBlob()).thenReturn(mock(Blob.class));
   }
 
+  @SuppressWarnings("unchecked")
   private void setupRepositoryMock() {
     when(repository.facet(StorageFacet.class)).thenReturn(storageFacet);
     when(storageFacet.createTempBlob(any(InputStream.class), any(Iterable.class))).thenAnswer(args -> {
