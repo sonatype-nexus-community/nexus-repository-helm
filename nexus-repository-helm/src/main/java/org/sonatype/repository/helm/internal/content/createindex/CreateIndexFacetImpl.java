@@ -101,7 +101,7 @@ public class CreateIndexFacetImpl
       acceptingEvents.set(false);
       maybeWait(event);
 
-      log.info("Rebuilding helm index for repository {}", getRepository().getName());
+      log.info("Rebuilding Helm index for repository {}", getRepository().getName());
 
       try {
         acceptingEvents.set(true);
@@ -110,7 +110,7 @@ public class CreateIndexFacetImpl
         createIndexYaml();
       }
       finally {
-        log.info("Finished rebuilding helm index for repository {}", getRepository().getName());
+        log.info("Finished rebuilding Helm index for repository {}", getRepository().getName());
       }
     }
   }
@@ -161,7 +161,7 @@ public class CreateIndexFacetImpl
   @Override
   public synchronized void invalidateIndex() {
     if (acceptingEvents.get() && !eventFired.get()) {
-      log.info("Scheduling rebuild of helm metadata to start in {} seconds", interval / 1000);
+      log.info("Scheduling rebuild of Helm metadata to start in {} seconds", interval / 1000);
 
       // Prevent another event being fired if one is already queued up
       eventFired.set(true);
