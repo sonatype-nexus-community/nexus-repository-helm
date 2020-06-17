@@ -40,7 +40,7 @@ import org.sonatype.repository.helm.internal.createindex.CreateIndexFacet;
 import org.sonatype.repository.helm.internal.orient.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.HelmFormat;
-import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
+import org.sonatype.repository.helm.internal.content.recipe.HelmHostedFacet;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;

@@ -28,7 +28,7 @@ import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.payloads.StringPayload;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
 import org.sonatype.repository.helm.internal.createindex.CreateIndexFacet;
-import org.sonatype.repository.helm.internal.hosted.HelmHostedFacet;
+import org.sonatype.repository.helm.internal.content.recipe.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.metadata.ChartIndex;
 import org.sonatype.repository.helm.internal.orient.createindex.HelmIndexInvalidationEvent;
 import org.sonatype.repository.helm.internal.util.YamlParser;

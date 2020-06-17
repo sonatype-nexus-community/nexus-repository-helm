@@ -35,7 +35,6 @@ import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher
 import org.sonatype.repository.helm.internal.AssetKind
 import org.sonatype.repository.helm.internal.HelmFormat
 import org.sonatype.repository.helm.internal.HelmRecipeSupport
-import org.sonatype.repository.helm.internal.hosted.HostedHandlers
 import org.sonatype.repository.helm.internal.orient.createindex.CreateIndexFacetImpl
 
 import static org.sonatype.nexus.repository.http.HttpMethods.DELETE

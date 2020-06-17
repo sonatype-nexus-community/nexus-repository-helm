@@ -36,7 +36,6 @@ import org.sonatype.repository.helm.internal.AssetKind
 import org.sonatype.repository.helm.internal.HelmFormat
 import org.sonatype.repository.helm.internal.content.HelmContentFacet
 import org.sonatype.repository.helm.internal.content.createindex.CreateIndexFacetImpl
-import org.sonatype.repository.helm.internal.hosted.HostedHandlers
 import org.sonatype.repository.helm.internal.security.HelmSecurityFacet
 
 import static org.sonatype.nexus.repository.http.HttpMethods.DELETE
