@@ -58,7 +58,7 @@ public class HelmHostedFacetImpl
   }
 
   @Override
-  public void upload(
+  public Content upload(
       final String path,
       final Payload payload,
       final AssetKind assetKind) throws IOException
@@ -67,7 +67,23 @@ public class HelmHostedFacetImpl
     if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
       throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
     }
-    helmContentFacet.putComponent(path, new Content(payload), assetKind);
+    return helmContentFacet.putComponent(path, new Content(payload), assetKind);
+  }
+
+  @Override
+  public Content upload(
+      final String path,
+      TempBlob tempBlob,
+      HelmAttributes helmAttributes,
+      final Payload payload,
+      final AssetKind assetKind) throws IOException
+  {
+    // TODO: Write policy selector
+    checkNotNull(path);
+    if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
+      throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
+    }
+    return helmContentFacet.putComponent(path, tempBlob, helmAttributes, new Content(payload), assetKind);
   }
 
   @Override
