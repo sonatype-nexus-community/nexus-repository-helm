@@ -29,6 +29,7 @@ import org.sonatype.nexus.testsuite.testsupport.NexusITSupport;
 
 import org.apache.http.HttpResponse;
 import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.exam.Configuration;
@@ -69,15 +70,24 @@ public class HelmHostedIT
   public void testPackageUpload() throws IOException
   {
     uploadPackages(MONGO_PKG_FILE_NAME_600_TGZ, MONGO_PKG_FILE_NAME_728_TGZ);
-    //Verify DB contains data about uploaded component and asset
-    Component component = findComponent(repository, MONGO_PKG_NAME);
-    assertThat(component.name(), is(equalTo(MONGO_PKG_NAME)));
-    assertThat(component.version(), is(equalTo(MONGO_PKG_VERSION_600)));
+    //Verify DB contains data about uploaded components and assets
+    Assert.assertTrue(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
+    Assert.assertTrue(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_728));
 
-    //Verify Asset is created.
-    Asset asset = findAsset(repository, MONGO_PATH_FULL_600_TARGZ);
-    assertThat(asset.name(), is(equalTo(MONGO_PATH_FULL_600_TARGZ)));
-    assertThat(asset.format(), is(equalTo(HELM_FORMAT_NAME)));
+    //Verify Assets are created.
+    Assert.assertTrue(componentAssetTestHelper.assetExists(repository, MONGO_PATH_FULL_600_TARGZ));
+    Assert.assertTrue(componentAssetTestHelper.assetExists(repository, MONGO_PATH_FULL_728_TARGZ));
+    List<String> assetPaths = componentAssetTestHelper.findAssetPaths(repository.getName());
+    Assert.assertTrue(assetPaths.contains(MONGO_PATH_FULL_600_TARGZ));
+    Assert.assertTrue(assetPaths.contains(MONGO_PATH_FULL_728_TARGZ));
+    Assert.assertThat(componentAssetTestHelper.contentTypeFor(repository.getName(), MONGO_PATH_FULL_600_TARGZ),
+        is(equalTo(CONTENT_TYPE_TGZ)));
+    Assert.assertThat(componentAssetTestHelper.contentTypeFor(repository.getName(), MONGO_PATH_FULL_728_TARGZ),
+        is(equalTo(CONTENT_TYPE_TGZ)));
+    Assert.assertTrue(
+        componentAssetTestHelper.attributes(repository, MONGO_PATH_FULL_600_TARGZ).contains(HELM_FORMAT_NAME));
+    Assert.assertTrue(
+        componentAssetTestHelper.attributes(repository, MONGO_PATH_FULL_728_TARGZ).contains(HELM_FORMAT_NAME));
   }
 
   @Test
@@ -109,9 +119,7 @@ public class HelmHostedIT
     checkYamlIncludesContent(content, YAML_MONGO_728_STRING_DATA);
 
     //Verify metadata is clean if component has been deleted
-    List<Component> components = getAllComponents(repository);
-    ComponentMaintenance maintenanceFacet = repository.facet(ComponentMaintenance.class);
-    maintenanceFacet.deleteComponent(components.get(1).getEntityMetadata().getId());
+    componentAssetTestHelper.deleteComponent(repository, null, MONGO_PKG_NAME, MONGO_PKG_VERSION_600);
 
     //Sleeping again to rebuild index.yaml
     TimeUnit.SECONDS.sleep(2);
@@ -122,44 +130,39 @@ public class HelmHostedIT
   @Test
   public void testDeletingRemainingAssetAlsoDeletesComponent() throws IOException {
     uploadPackages(MONGO_PKG_FILE_NAME_600_TGZ, MONGO_PKG_FILE_NAME_728_TGZ);
-    final Asset asset = findAsset(repository, MONGO_PATH_FULL_600_TARGZ);
-    assertNotNull(asset);
-    assertNotNull(asset.componentId());
+    Assert.assertTrue(componentAssetTestHelper.assetExists(repository, MONGO_PATH_FULL_600_TARGZ));
+    Assert.assertTrue(componentAssetTestHelper.assetExists(repository, MONGO_PATH_FULL_728_TARGZ));
+    Assert.assertTrue(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
+    Assert.assertTrue(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_728));
 
-    final Component component = findComponentById(repository, asset.componentId());
-    assertNotNull(component);
-    assertEquals(1, findAssetsByComponent(repository, component).size());
-
-    ComponentMaintenance maintenanceFacet = repository.facet(ComponentMaintenance.class);
-    maintenanceFacet.deleteAsset(asset.getEntityMetadata().getId(), true);
-
-    assertNull(findAsset(repository, MONGO_PATH_FULL_600_TARGZ));
-    assertNull(findComponentById(repository, asset.componentId()));
+    componentAssetTestHelper.removeAsset(repository, MONGO_PATH_FULL_600_TARGZ);
+    Assert.assertFalse(componentAssetTestHelper.assetExists(repository, MONGO_PATH_FULL_600_TARGZ));
+    Assert.assertTrue(componentAssetTestHelper.assetExists(repository, MONGO_PATH_FULL_728_TARGZ));
+    Assert.assertFalse(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
+    Assert.assertTrue(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_728));
   }
 
   @Test
   public void testDeletingComponentDeletesAllAssociatedAssets() throws IOException {
     uploadPackages(MONGO_PKG_FILE_NAME_600_TGZ, MONGO_PKG_FILE_NAME_728_TGZ);
-    final Asset asset = findAsset(repository, MONGO_PATH_FULL_600_TARGZ);
-    assertNotNull(asset);
-    assertNotNull(asset.componentId());
-
-    final Component component = findComponentById(repository, asset.componentId());
-    assertNotNull(component);
+    final Component component = findComponent(repository, MONGO_PKG_NAME);
+    Assert.assertNotNull(component);
+    Assert.assertEquals(2, componentAssetTestHelper.countComponents(repository));
+    Assert.assertFalse(findAssetsByComponent(repository, component).isEmpty());
 
     ComponentMaintenance maintenanceFacet = repository.facet(ComponentMaintenance.class);
     maintenanceFacet.deleteComponent(component.getEntityMetadata().getId(), true);
 
-    assertNull(findAsset(repository, MONGO_PATH_FULL_600_TARGZ));
-    assertNull(findComponentById(repository, asset.componentId()));
+    Assert.assertEquals(1, componentAssetTestHelper.countComponents(repository));
+    Assert.assertTrue(findAssetsByComponent(repository, component).isEmpty());
   }
 
   private void uploadPackages(String... names) throws IOException {
-    assertThat(getAllComponents(repository), hasSize(0));
+    assertThat(componentAssetTestHelper.findAssetPaths(repository.getName()), hasSize(0));
     for (String name : names) {
       uploadSinglePackage(name);
     }
-    assertThat(getAllComponents(repository), hasSize(names.length));
+    assertThat(componentAssetTestHelper.findAssetPaths(repository.getName()), hasSize(names.length));
   }
 
   private void uploadSinglePackage(String name) throws IOException {

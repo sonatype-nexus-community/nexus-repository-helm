@@ -28,6 +28,7 @@ import org.sonatype.nexus.plugins.helm.internal.fixtures.RepositoryRuleHelm;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.Component;
+import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.StorageTx;
 import org.sonatype.nexus.testsuite.testsupport.FormatClientSupport;
 import org.sonatype.nexus.testsuite.testsupport.RepositoryITSupport;
@@ -46,6 +47,7 @@ import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
 
 /**
  * Support class for Helm ITs.
@@ -136,17 +138,17 @@ public class HelmITSupport
     return Paths.get(testData.resolveFile(fileName).getAbsolutePath());
   }
 
-  protected Component findComponentById(final Repository repository, final EntityId componentId) {
-    try (StorageTx tx = getStorageTx(repository)) {
-      tx.begin();
-      return tx.findComponent(componentId);
-    }
-  }
-
   protected List<Asset> findAssetsByComponent(final Repository repository, final Component component) {
     try (StorageTx tx = getStorageTx(repository)) {
       tx.begin();
       return IteratorUtils.toList(tx.browseAssets(component).iterator());
+    }
+  }
+
+  protected static Component findComponent(final Repository repo, final String name) {
+    try (StorageTx tx = getStorageTx(repo)) {
+      tx.begin();
+      return tx.findComponentWithProperty(P_NAME, name, tx.findBucket(repo));
     }
   }
 
@@ -162,5 +164,8 @@ public class HelmITSupport
           statusLine.getStatusCode(),
           is(responseCode));
     }
+  }
+  protected static StorageTx getStorageTx(final Repository repository) {
+    return repository.facet(StorageFacet.class).txSupplier().get();
   }
 }

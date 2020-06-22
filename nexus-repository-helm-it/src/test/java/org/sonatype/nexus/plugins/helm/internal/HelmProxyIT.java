@@ -12,6 +12,9 @@
  */
 package org.sonatype.nexus.plugins.helm.internal;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -65,32 +68,19 @@ public class HelmProxyIT
 
   @Test
   public void fetchTgzPackageFile() throws Exception {
-    assertSuccessResponseMatches(client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ), MONGO_PKG_FILE_NAME_600_TGZ);
-    final Asset asset = findAsset(repository, MONGO_PKG_FILE_NAME_600_TGZ);
-    Assert.assertThat(asset.name(), is(equalTo(MONGO_PKG_FILE_NAME_600_TGZ)));
-    Assert.assertThat(asset.contentType(), is(equalTo(CONTENT_TYPE_TGZ)));
-    Assert.assertThat(asset.format(), is(equalTo(HELM_FORMAT_NAME)));
+    checkAsset(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
   }
 
   @Test
   public void fetchMetaData() throws Exception {
-    assertSuccessResponseMatches(client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML), YAML_FILE_NAME);
-    final Asset asset = findAsset(repository, YAML_FILE_NAME);
-    Assert.assertThat(asset.contentType(), is(equalTo(CONTENT_TYPE_YAML)));
-    Assert.assertThat(asset.format(), is(equalTo(HELM_FORMAT_NAME)));
+    checkAsset(YAML_FILE_NAME, CONTENT_TYPE_YAML);
   }
 
   @Test
   public void checkComponentCreated() throws Exception {
-    final Component nullComponent = findComponent(repository, MONGO_PKG_NAME);
-    Assert.assertThat(nullComponent, is(nullValue()));
+    Assert.assertFalse(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
-
-    final Component component = findComponent(repository, MONGO_PKG_NAME);
-    Assert.assertThat(component.name(), is(equalTo(MONGO_PKG_NAME)));
-    Assert.assertThat(component.format(), is(equalTo(HELM_FORMAT_NAME)));
-    Assert.assertThat(component.group(), is(nullValue()));
-    Assert.assertThat(component.version(), is(equalTo(MONGO_PKG_VERSION_600)));
+    Assert.assertTrue(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
   }
 
   @Test
@@ -98,28 +88,25 @@ public class HelmProxyIT
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
     final Component component = findComponent(repository, MONGO_PKG_NAME);
     Assert.assertNotNull(component);
+    Assert.assertEquals(1, componentAssetTestHelper.countComponents(repository));
     Assert.assertFalse(findAssetsByComponent(repository, component).isEmpty());
 
     ComponentMaintenance maintenanceFacet = repository.facet(ComponentMaintenance.class);
     maintenanceFacet.deleteComponent(component.getEntityMetadata().getId(), true);
 
-    Assert.assertNull(findComponent(repository, MONGO_PKG_NAME));
+    Assert.assertEquals(0, componentAssetTestHelper.countComponents(repository));
     Assert.assertTrue(findAssetsByComponent(repository, component).isEmpty());
   }
 
   @Test
   public void testDeletingRemainingAssetAlsoDeletesComponent() throws Exception {
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
+    Assert.assertTrue(componentAssetTestHelper.assetExists(repository, MONGO_PKG_FILE_NAME_600_TGZ));
+    Assert.assertTrue(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
 
-    final Asset asset = findAsset(repository, MONGO_PKG_FILE_NAME_600_TGZ);
-    Assert.assertNotNull(asset);
-    Assert.assertNotNull(findComponentById(repository, asset.componentId()));
-
-    ComponentMaintenance maintenanceFacet = repository.facet(ComponentMaintenance.class);
-    maintenanceFacet.deleteAsset(asset.getEntityMetadata().getId(), true);
-
-    Assert.assertNull(findAsset(repository, MONGO_PKG_FILE_NAME_600_TGZ));
-    Assert.assertNull(findComponentById(repository, asset.componentId()));
+    componentAssetTestHelper.removeAsset(repository, MONGO_PKG_FILE_NAME_600_TGZ);
+    Assert.assertFalse(componentAssetTestHelper.assetExists(repository, MONGO_PKG_FILE_NAME_600_TGZ));
+    Assert.assertFalse(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
   }
 
   @Test
@@ -134,5 +121,14 @@ public class HelmProxyIT
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
     server.stop();
     assertSuccessResponseMatches(client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ), MONGO_PKG_FILE_NAME_600_TGZ);
+  }
+
+  public void checkAsset(final String path, final String type) throws IOException {
+    assertSuccessResponseMatches(client.fetch(path, type), path);
+    Assert.assertTrue(componentAssetTestHelper.assetExists(repository, path));
+    List<String> assetPaths = componentAssetTestHelper.findAssetPaths(repository.getName());
+    Assert.assertThat(assetPaths.get(0), is(equalTo(path)));
+    Assert.assertThat(componentAssetTestHelper.contentTypeFor(repository.getName(), path), is(equalTo(type)));
+    Assert.assertTrue(componentAssetTestHelper.attributes(repository, path).contains(HELM_FORMAT_NAME));
   }
 }
