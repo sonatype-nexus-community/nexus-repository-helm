@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.sonatype.nexus.plugins</groupId>
     <artifactId>nexus-plugins</artifactId>
-    <version>3.24.0-01</version>
+    <version>3.25.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>nexus-repository-base</artifactId>
@@ -49,7 +49,7 @@
   </distributionManagement>
 
   <properties>
-    <nxrm-version>3.24.0-01</nxrm-version>
+    <nxrm-version>3.25.0-SNAPSHOT</nxrm-version>
   </properties>
 
   <repositories>
