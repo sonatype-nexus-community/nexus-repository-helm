@@ -21,10 +21,12 @@ import org.sonatype.nexus.plugins.helm.internal.content.fixtures.RepositoryRuleH
 import org.sonatype.nexus.repository.Repository;
 
 import org.junit.Rule;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 public class HelmContentITSupport
     extends NexusITSupport
@@ -47,6 +49,16 @@ public class HelmContentITSupport
   public static final String CONTENT_TYPE_YAML = "text/x-yaml";
 
   public static final String YAML_FILE_NAME = String.format("%s%s", YAML_NAME, YAML_EXT);
+
+  @Configuration
+  public static Option[] configureNexus() {
+    return NexusPaxExamSupport.options(
+        NexusITSupport.configureNexusBase(),
+        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm"),
+        systemProperty("nexus-exclude-features").value("nexus-cma-community"),
+        systemProperty("nexus-exclude-features").value("nexus-community-feature")
+    );
+  }
 
 
   @Rule
