@@ -29,9 +29,9 @@ public interface HelmContentFacet
 {
   Optional<Content> getAsset(String path);
 
-  Content putIndex(String path, Content payload, AssetKind assetKind);
+  Content putIndex(String path, Content content, AssetKind assetKind);
 
-  Content putComponent(String path, Content payload, AssetKind assetKind) throws IOException;
+  Content putComponent(String path, Content content, AssetKind assetKind) throws IOException;
 
   boolean delete(String path);
 }
