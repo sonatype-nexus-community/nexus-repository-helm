@@ -26,8 +26,7 @@ public class HelmITConfig
     return NexusPaxExamSupport.options(
         NexusITSupport.configureNexusBase(),
         nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm"),
-        systemProperty("nexus-exclude-features").value("nexus-cma-community"),
-        systemProperty("nexus-exclude-features").value("nexus-community-feature")
+        systemProperty("nexus-exclude-features").value("nexus-cma-community, nexus-community-feature")
     );
   }
 }
