@@ -28,7 +28,7 @@ import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 /**
  * Removes absolute URL entries from index.yaml
  *
- * @since 1.0.10
+ * @since 1.0.11
  */
 @Named
 @Singleton

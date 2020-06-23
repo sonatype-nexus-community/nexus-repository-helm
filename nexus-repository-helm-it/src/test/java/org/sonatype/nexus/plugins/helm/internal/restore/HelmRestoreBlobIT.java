@@ -30,7 +30,6 @@ import org.sonatype.nexus.repository.http.HttpStatus;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.AssetEntityAdapter;
 import org.sonatype.nexus.repository.storage.StorageTx;
-import org.sonatype.nexus.testsuite.testsupport.NexusITSupport;
 import org.sonatype.nexus.testsuite.testsupport.blobstore.restore.BlobstoreRestoreTestHelper;
 import org.sonatype.repository.helm.internal.HelmFormat;
 
@@ -47,6 +46,7 @@ import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.file;
 import static org.sonatype.nexus.blobstore.api.BlobAttributesConstants.HEADER_PREFIX;
 import static org.sonatype.nexus.blobstore.api.BlobStore.BLOB_NAME_HEADER;
 import static org.sonatype.nexus.blobstore.api.BlobStore.CONTENT_TYPE_HEADER;
+import static org.sonatype.nexus.plugins.helm.HelmITConfig.configureHelmBase;
 import static org.sonatype.nexus.repository.storage.Bucket.REPO_NAME_HEADER;
 
 public class HelmRestoreBlobIT
@@ -76,8 +76,7 @@ public class HelmRestoreBlobIT
   @Configuration
   public static Option[] configureNexus() {
     return NexusPaxExamSupport.options(
-        NexusITSupport.configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm"),
+        configureHelmBase(),
         nexusFeature("org.sonatype.nexus.plugins", "nexus-restore-helm")
     );
   }

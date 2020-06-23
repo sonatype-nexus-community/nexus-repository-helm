@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.error;
 import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.file;
+import static org.sonatype.nexus.plugins.helm.HelmITConfig.configureHelmBase;
 
 public class HelmProxyIT
     extends HelmITSupport
@@ -42,10 +43,7 @@ public class HelmProxyIT
 
   @Configuration
   public static Option[] configureNexus() {
-    return options(
-        configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm")
-    );
+    return configureHelmBase();
   }
 
   @Before
