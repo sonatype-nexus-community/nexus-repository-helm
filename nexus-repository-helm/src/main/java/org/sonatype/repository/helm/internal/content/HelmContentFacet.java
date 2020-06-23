@@ -10,23 +10,29 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.nexus.plugins.helm;
+package org.sonatype.repository.helm.internal.content;
 
-import org.sonatype.nexus.pax.exam.NexusPaxExamSupport;
-import org.sonatype.nexus.testsuite.testsupport.NexusITSupport;
+import java.io.IOException;
+import java.util.Optional;
 
-import org.ops4j.pax.exam.Option;
+import org.sonatype.nexus.repository.Facet;
+import org.sonatype.nexus.repository.view.Content;
+import org.sonatype.nexus.repository.view.Payload;
+import org.sonatype.nexus.repository.content.facet.ContentFacet;
+import org.sonatype.repository.helm.internal.AssetKind;
 
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.sonatype.nexus.pax.exam.NexusPaxExamSupport.nexusFeature;
-
-public class HelmITConfig
+/**
+ * @since 1.0.11
+ */
+@Facet.Exposed
+public interface HelmContentFacet
+    extends ContentFacet
 {
-  public static Option[] configureHelmBase() {
-    return NexusPaxExamSupport.options(
-        NexusITSupport.configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm"),
-        systemProperty("nexus-exclude-features").value("nexus-cma-community, nexus-community-feature")
-    );
-  }
+  Optional<Content> getAsset(String path) throws IOException;
+
+  Content putIndex(String path, Content content, AssetKind assetKind) throws IOException;
+
+  Content putComponent(String path, Content content, AssetKind assetKind) throws IOException;
+
+  boolean delete(String path) throws IOException;
 }

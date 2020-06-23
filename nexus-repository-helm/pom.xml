@@ -28,7 +28,6 @@
   <inceptionYear>2018</inceptionYear>
 
   <dependencies>
-
     <dependency>
       <groupId>org.sonatype.nexus</groupId>
       <artifactId>nexus-plugin-api</artifactId>
@@ -38,6 +37,14 @@
     <dependency>
       <groupId>org.sonatype.nexus</groupId>
       <artifactId>nexus-repository</artifactId>
+      <optional>true</optional>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-repository-content</artifactId>
+      <optional>true</optional>
       <scope>provided</scope>
     </dependency>
 
@@ -76,6 +83,7 @@
       <artifactId>nexus-cleanup</artifactId>
       <scope>provided</scope>
     </dependency>
+
   </dependencies>
 
   <build>

@@ -10,23 +10,18 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.nexus.plugins.helm;
+package org.sonatype.nexus.plugins.helm.internal.content.fixtures
 
-import org.sonatype.nexus.pax.exam.NexusPaxExamSupport;
-import org.sonatype.nexus.testsuite.testsupport.NexusITSupport;
+import javax.inject.Provider
 
-import org.ops4j.pax.exam.Option;
+import org.sonatype.nexus.repository.manager.RepositoryManager
+import org.sonatype.nexus.content.testsupport.fixtures.RepositoryRule
 
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.sonatype.nexus.pax.exam.NexusPaxExamSupport.nexusFeature;
-
-public class HelmITConfig
+class RepositoryRuleHelm
+    extends RepositoryRule
+    implements HelmRepoRecipes
 {
-  public static Option[] configureHelmBase() {
-    return NexusPaxExamSupport.options(
-        NexusITSupport.configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm"),
-        systemProperty("nexus-exclude-features").value("nexus-cma-community, nexus-community-feature")
-    );
+  RepositoryRuleHelm(final Provider<RepositoryManager> repositoryManagerProvider) {
+    super(repositoryManagerProvider)
   }
 }
