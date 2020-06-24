@@ -13,9 +13,8 @@
 package org.sonatype.repository.helm.internal.content;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -97,15 +96,7 @@ public class HelmUploadHandler
 
       Content content = facet.upload(path, tempBlob, attributesFromInputStream, payload, assetKind);
 
-      List<String> paths = new ArrayList<>();
-
-      paths.add(path);
-
-      List<Content> contents = new ArrayList<>();
-
-      contents.add(content);
-
-      return new UploadResponse(contents, paths);
+      return new UploadResponse(Collections.singletonList(content), Collections.singletonList(path));
     }
   }
 
