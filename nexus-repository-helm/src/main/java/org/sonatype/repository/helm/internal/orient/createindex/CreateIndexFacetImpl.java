@@ -130,7 +130,7 @@ public class CreateIndexFacetImpl
 
   @Subscribe
   public void on(final HelmIndexInvalidationEvent event) {
-    if(shouldProcess(event)) {
+    if (shouldProcess(event)) {
       acceptingEvents.set(false);
       maybeWait(event);
 
@@ -155,7 +155,8 @@ public class CreateIndexFacetImpl
   protected void updateIndexYaml(final TempBlob indexYaml) {
     if (indexYaml == null) {
       deleteIndexYaml();
-    } else {
+    }
+    else {
       createIndexYaml(indexYaml);
     }
   }
@@ -180,7 +181,8 @@ public class CreateIndexFacetImpl
     boolean result = hosted.delete(INDEX_YAML);
     if (result) {
       log.info("Deleted index.yaml because of empty asset list");
-    } else {
+    }
+    else {
       log.warn("Unable to delete index.yaml asset");
     }
   }

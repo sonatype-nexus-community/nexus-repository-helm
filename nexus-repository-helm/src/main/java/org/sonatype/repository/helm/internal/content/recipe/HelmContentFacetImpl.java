@@ -1,6 +1,6 @@
 /*
  * Sonatype Nexus (TM) Open Source Version
- * Copyright (c) 2017-present Sonatype, Inc.
+ * Copyright (c) 2018-present Sonatype, Inc.
  * All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
@@ -13,13 +13,16 @@
 package org.sonatype.repository.helm.internal.content.recipe;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sonatype.nexus.common.hash.HashAlgorithm;
+import org.sonatype.nexus.repository.content.Asset;
 import org.sonatype.nexus.repository.content.facet.ContentFacetSupport;
+import org.sonatype.nexus.repository.content.facet.WritePolicy;
 import org.sonatype.nexus.repository.content.fluent.FluentAsset;
 import org.sonatype.nexus.repository.content.store.FormatStoreManager;
 import org.sonatype.nexus.repository.view.Content;
@@ -36,6 +39,8 @@ import com.google.common.collect.ImmutableList;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.common.hash.HashAlgorithm.MD5;
 import static org.sonatype.nexus.common.hash.HashAlgorithm.SHA1;
+import static org.sonatype.nexus.repository.content.facet.WritePolicy.ALLOW_ONCE;
+import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
 
 /**
  * @since 1.0.11
@@ -59,6 +64,17 @@ public class HelmContentFacetImpl
     super(formatStoreManager);
     this.helmAttributeParser = checkNotNull(helmAttributeParser);
     this.indexYamlAbsoluteUrlRewriter = checkNotNull(indexYamlAbsoluteUrlRewriter);
+  }
+
+  @Override
+  protected WritePolicy writePolicy(final Asset asset) {
+    WritePolicy writePolicy = super.writePolicy(asset);
+    if (writePolicy == ALLOW_ONCE) {
+      if (!Objects.equals(HELM_PACKAGE.name(), asset.kind())) {
+        writePolicy = WritePolicy.ALLOW;
+      }
+    }
+    return writePolicy;
   }
 
   @Override

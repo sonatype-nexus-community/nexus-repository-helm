@@ -50,7 +50,7 @@ import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE
 @Named(HelmHostedRecipe.NAME)
 @Singleton
 class HelmHostedRecipe
-  extends HelmRecipeSupport
+    extends HelmRecipeSupport
 {
   public static final String NAME = 'helm-hosted'
 
@@ -105,7 +105,7 @@ class HelmHostedRecipe
           .create())
     }
 
-    [chartUploadMatcher(), provenanceUploadMatcher()].each {matcher ->
+    [chartUploadMatcher(), provenanceUploadMatcher()].each { matcher ->
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)
           .handler(securityHandler)
