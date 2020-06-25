@@ -119,11 +119,6 @@ class HelmHostedRecipe
     super(type, format)
   }
 
-  @Override
-  boolean isFeatureEnabled() {
-    return false;
-  }
-
   /**
    * Matcher for index.yaml
    */
