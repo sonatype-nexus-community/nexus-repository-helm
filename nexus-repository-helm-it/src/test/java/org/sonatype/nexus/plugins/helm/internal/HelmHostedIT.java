@@ -44,8 +44,6 @@ import static org.sonatype.nexus.plugins.helm.HelmITConfig.configureHelmBase;
 import static org.sonatype.nexus.repository.http.HttpStatus.NOT_FOUND;
 import static org.sonatype.nexus.testsuite.testsupport.FormatClientSupport.status;
 
-//import org.junit.Assert;
-
 public class HelmHostedIT
     extends HelmITSupport
 {
