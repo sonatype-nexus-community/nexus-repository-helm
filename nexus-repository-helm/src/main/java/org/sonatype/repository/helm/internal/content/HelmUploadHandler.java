@@ -13,7 +13,6 @@
 package org.sonatype.repository.helm.internal.content;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
@@ -44,8 +43,8 @@ import static org.sonatype.repository.helm.internal.HelmFormat.NAME;
 
 /**
  * Support helm upload for web page
- *
- * @author yinlongfei
+ /**
+ * @since 1.0.11
  */
 @Singleton
 @Named(NAME)

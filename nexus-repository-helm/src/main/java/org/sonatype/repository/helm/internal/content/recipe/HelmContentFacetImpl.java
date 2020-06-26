@@ -85,9 +85,9 @@ public class HelmContentFacetImpl
   }
 
   @Override
-  public Content putIndex(final String path, final Content content, final AssetKind assetKind)
+  public Content putIndex(final String path, final Content payload, final AssetKind assetKind)
   {
-    try (TempBlob blob = blobs().ingest(content, HASHING)) {
+    try (TempBlob blob = blobs().ingest(payload, HASHING)) {
       try (TempBlob newTempBlob = indexYamlAbsoluteUrlRewriter
           .removeUrlsFromIndexYamlAndWriteToTempBlob(blob, getRepository())) {
         return assets()
@@ -95,15 +95,15 @@ public class HelmContentFacetImpl
             .kind(assetKind.name())
             .getOrCreate()
             .attach(newTempBlob)
-            .markAsCached(content)
+            .markAsCached(payload)
             .download();
       }
     }
   }
 
   @Override
-  public TempBlob getTempBlob(Payload content) {
-    return blobs().ingest(content, HASHING);
+  public TempBlob getTempBlob(Payload payload) {
+    return blobs().ingest(payload, HASHING);
   }
 
   @Override

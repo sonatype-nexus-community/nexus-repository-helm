@@ -30,7 +30,7 @@ import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
-import org.sonatype.nexus.repository.view.payloads.TempBlob;
+import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.AssetKind;
@@ -103,7 +103,7 @@ public class HelmHostedFacetImpl
 
   @Override
   @TransactionalStoreBlob
-  public Asset upload(String path, TempBlob tempBlob, Payload payload, AssetKind assetKind) throws IOException {
+  public Asset upload(final String path, final TempBlob tempBlob, final Payload payload, final AssetKind assetKind) throws IOException {
     checkNotNull(path);
     checkNotNull(tempBlob);
     if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {

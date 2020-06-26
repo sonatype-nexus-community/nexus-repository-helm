@@ -15,7 +15,6 @@ package org.sonatype.repository.helm.internal.content.recipe;
 import java.io.IOException;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sonatype.nexus.repository.FacetSupport;
@@ -58,7 +57,7 @@ public class HelmHostedFacetImpl
   }
 
   @Override
-  public Content upload(
+  public void upload(
       final String path,
       final Payload payload,
       final AssetKind assetKind) throws IOException
@@ -67,7 +66,7 @@ public class HelmHostedFacetImpl
     if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
       throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
     }
-    return helmContentFacet.putComponent(path, new Content(payload), assetKind);
+    helmContentFacet.putComponent(path, new Content(payload), assetKind);
   }
 
   @Override
@@ -76,9 +75,8 @@ public class HelmHostedFacetImpl
       TempBlob tempBlob,
       HelmAttributes helmAttributes,
       final Payload payload,
-      final AssetKind assetKind) throws IOException
+      final AssetKind assetKind)
   {
-    // TODO: Write policy selector
     checkNotNull(path);
     if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
       throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
