@@ -62,12 +62,12 @@ public class HelmUploadHandler
 
   private final HelmAttributeParser helmPackageParser;
 
-
   @Inject
-  public HelmUploadHandler(final ContentPermissionChecker contentPermissionChecker,
-                           final HelmAttributeParser helmPackageParser,
-                           @Named("simple") final VariableResolverAdapter variableResolverAdapter,
-                           final Set<UploadDefinitionExtension> uploadDefinitionExtensions)
+  public HelmUploadHandler(
+      final ContentPermissionChecker contentPermissionChecker,
+      final HelmAttributeParser helmPackageParser,
+      @Named("simple") final VariableResolverAdapter variableResolverAdapter,
+      final Set<UploadDefinitionExtension> uploadDefinitionExtensions)
   {
     super(uploadDefinitionExtensions);
     this.contentPermissionChecker = contentPermissionChecker;

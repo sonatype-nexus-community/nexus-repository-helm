@@ -10,10 +10,8 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.internal.orient.createindex;
+package org.sonatype.repository.helm.internal.content.createindex;
 
-import java.io.IOException;
-import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -25,36 +23,28 @@ import org.sonatype.nexus.common.stateguard.Guarded;
 import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.manager.RepositoryCreatedEvent;
-import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.AssetCreatedEvent;
-import org.sonatype.nexus.repository.storage.AssetDeletedEvent;
-import org.sonatype.nexus.repository.storage.AssetEvent;
-import org.sonatype.nexus.repository.storage.AssetUpdatedEvent;
-import org.sonatype.nexus.repository.storage.StorageFacet;
-import org.sonatype.nexus.repository.storage.StorageTx;
-import org.sonatype.nexus.repository.storage.TempBlob;
-import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
-import org.sonatype.nexus.transaction.UnitOfWork;
-import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.nexus.repository.manager.RepositoryDeletedEvent;
+import org.sonatype.nexus.repository.view.Content;
+import org.sonatype.nexus.repository.view.payloads.StringPayload;
+import org.sonatype.repository.helm.internal.content.HelmContentFacet;
 import org.sonatype.repository.helm.internal.createindex.CreateIndexFacet;
-import org.sonatype.repository.helm.internal.orient.HelmFacet;
-import org.sonatype.repository.helm.internal.AssetKind;
-import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.content.recipe.HelmHostedFacet;
+import org.sonatype.repository.helm.internal.metadata.ChartIndex;
+import org.sonatype.repository.helm.internal.orient.createindex.HelmIndexInvalidationEvent;
+import org.sonatype.repository.helm.internal.util.YamlParser;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
+import org.joda.time.DateTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.common.stateguard.StateGuardLifecycleSupport.State.STARTED;
-import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_INDEX;
-import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
 
 /**
  * Facet for rebuilding Helm index.yaml files
  *
- * @since 0.0.2
+ * @since 1.0.11
  */
 @Named
 public class CreateIndexFacetImpl
@@ -63,48 +53,29 @@ public class CreateIndexFacetImpl
 {
   private final EventManager eventManager;
 
-  private CreateIndexService createIndexService;
-
   private final long interval;
 
   private static final String INDEX_YAML = "index.yaml";
 
-  private static final String TGZ_CONTENT_TYPE = "application/x-tgz";
+  private static final String INDEX_YAML_CONTENT_TYPE = "text/x-yaml";
 
   private final AtomicBoolean acceptingEvents = new AtomicBoolean(true);
+
+  private static final String API_VERSION = "v1";
+
+  private final YamlParser yamlParser;
 
   //Prevents the same event from being fired multiple times
   private final AtomicBoolean eventFired = new AtomicBoolean(false);
 
   @Inject
   public CreateIndexFacetImpl(final EventManager eventManager,
-                              final CreateIndexService createIndexService,
+                              final YamlParser yamlParser,
                               @Named("${nexus.helm.createrepo.interval:-1000}") final long interval)
   {
     this.eventManager = checkNotNull(eventManager);
-    this.createIndexService = checkNotNull(createIndexService);
     this.interval = interval;
-  }
-
-  @Subscribe
-  @Guarded(by = STARTED)
-  @AllowConcurrentEvents
-  public void on(final AssetCreatedEvent created) {
-    maybeInvalidateIndex(created);
-  }
-
-  @Subscribe
-  @Guarded(by = STARTED)
-  @AllowConcurrentEvents
-  public void on(final AssetDeletedEvent deleted) {
-    maybeInvalidateIndex(deleted);
-  }
-
-  @Subscribe
-  @Guarded(by = STARTED)
-  @AllowConcurrentEvents
-  public void on(final AssetUpdatedEvent updated) {
-    maybeInvalidateIndex(updated);
+    this.yamlParser = checkNotNull(yamlParser);
   }
 
   @Subscribe
@@ -116,16 +87,12 @@ public class CreateIndexFacetImpl
     invalidateIndex();
   }
 
-  private void maybeInvalidateIndex(final AssetEvent event) {
-    Asset asset = event.getAsset();
-    String formatName = asset.format();
-    if (HelmFormat.NAME.equals(formatName)) {
-      String assetKindString = (String) asset.formatAttributes().get(P_ASSET_KIND);
-      AssetKind assetKind = AssetKind.valueOf(assetKindString);
-      if (assetKind == HELM_PACKAGE && matchesRepository(event) && isEventRelevant(event)) {
-        invalidateIndex();
-      }
-    }
+  @Subscribe
+  @Guarded(by = STARTED)
+  @AllowConcurrentEvents
+  public void on(RepositoryDeletedEvent deletedEvent) {
+    log.debug("Deleting index.yaml for hosted repository {}", getRepository().getName());
+    deleteIndexYaml();
   }
 
   @Subscribe
@@ -136,43 +103,27 @@ public class CreateIndexFacetImpl
 
       log.info("Rebuilding Helm index for repository {}", getRepository().getName());
 
-      UnitOfWork.begin(getRepository().facet(StorageFacet.class).txSupplier());
       try {
         acceptingEvents.set(true);
         eventFired.set(false);
 
-        updateIndexYaml(createIndexService.buildIndexYaml(getRepository()));
+        createIndexYaml();
       }
       finally {
         log.info("Finished rebuilding Helm index for repository {}", getRepository().getName());
-
-        UnitOfWork.end();
       }
     }
   }
 
-  @TransactionalStoreBlob
-  protected void updateIndexYaml(final TempBlob indexYaml) {
-    if (indexYaml == null) {
-      deleteIndexYaml();
-    }
-    else {
-      createIndexYaml(indexYaml);
-    }
-  }
-
-  private void createIndexYaml(final TempBlob indexYaml) {
+  private void createIndexYaml() {
+    ChartIndex index = new ChartIndex();
+    index.setApiVersion(API_VERSION);
+    index.setGenerated(new DateTime());
     Repository repository = getRepository();
-    HelmFacet helmFacet = repository.facet(HelmFacet.class);
-    StorageTx tx = UnitOfWork.currentTx();
-    HelmAttributes attributes = new HelmAttributes(Collections.emptyMap());
-    Asset asset = helmFacet.findOrCreateAsset(tx, INDEX_YAML, HELM_INDEX, attributes);
-    try {
-      helmFacet.saveAsset(tx, asset, indexYaml, TGZ_CONTENT_TYPE, null);
-    }
-    catch (IOException ex) {
-      log.warn("Could not set blob {}", ex.getMessage(), ex);
-    }
+    HelmContentFacet helmFacet = repository.facet(HelmContentFacet.class);
+    helmFacet
+        .putIndex(INDEX_YAML, new Content(new StringPayload(yamlParser.getYamlContent(index), INDEX_YAML_CONTENT_TYPE)),
+            HELM_INDEX);
   }
 
   private void deleteIndexYaml() {
@@ -200,22 +151,6 @@ public class CreateIndexFacetImpl
         log.warn("Helm invalidation thread interrupted, proceeding with invalidation");
       }
     }
-  }
-
-  /**
-   * This prevents us firing the invalidation event multiple time unnecessarily. If we don't do this check then then
-   * created/updated/deleted events will be handled by every instance of this class and each will fire an invalidation
-   * event
-   */
-  private boolean matchesRepository(final AssetEvent assetEvent) {
-    return assetEvent.isLocal() && getRepository().getName().equals(assetEvent.getRepositoryName());
-  }
-
-  /**
-   * If this is a component (chart) then we need to rebuild the metadata.
-   */
-  private boolean isEventRelevant(final AssetEvent event) {
-    return event.getComponentId() != null;
   }
 
   /**
