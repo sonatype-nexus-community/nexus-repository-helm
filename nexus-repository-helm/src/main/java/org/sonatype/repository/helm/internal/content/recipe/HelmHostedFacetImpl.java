@@ -72,21 +72,6 @@ public class HelmHostedFacetImpl
   @Override
   public Content upload(
       final String path,
-      TempBlob tempBlob,
-      HelmAttributes helmAttributes,
-      final Payload payload,
-      final AssetKind assetKind)
-  {
-    checkNotNull(path);
-    if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
-      throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
-    }
-    return helmContentFacet.putComponent(path, tempBlob, helmAttributes, new Content(payload), assetKind);
-  }
-
-  @Override
-  public Content upload(
-      final String path,
       final TempBlob tempBlob,
       final HelmAttributes helmAttributes,
       final Payload payload,
