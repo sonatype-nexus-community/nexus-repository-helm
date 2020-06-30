@@ -12,22 +12,29 @@
  */
 package org.sonatype.nexus.plugins.helm.internal;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.sonatype.goodies.httpfixture.server.fluent.Server;
+import org.sonatype.nexus.common.app.BaseUrlHolder;
+import org.sonatype.nexus.repository.Repository;
+import org.sonatype.nexus.repository.storage.Component;
+import org.sonatype.nexus.repository.storage.ComponentMaintenance;
+
 import org.junit.After;
-import org.junit.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.sonatype.goodies.httpfixture.server.fluent.Server;
-import org.sonatype.nexus.common.app.BaseUrlHolder;
-import org.sonatype.nexus.repository.Repository;
-import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.Component;
-import org.sonatype.nexus.repository.storage.ComponentMaintenance;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.error;
 import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.file;
 import static org.sonatype.nexus.plugins.helm.HelmITConfig.configureHelmBase;
@@ -65,61 +72,45 @@ public class HelmProxyIT
 
   @Test
   public void fetchTgzPackageFile() throws Exception {
-    assertSuccessResponseMatches(client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ), MONGO_PKG_FILE_NAME_600_TGZ);
-    final Asset asset = findAsset(repository, MONGO_PKG_FILE_NAME_600_TGZ);
-    Assert.assertThat(asset.name(), is(equalTo(MONGO_PKG_FILE_NAME_600_TGZ)));
-    Assert.assertThat(asset.contentType(), is(equalTo(CONTENT_TYPE_TGZ)));
-    Assert.assertThat(asset.format(), is(equalTo(HELM_FORMAT_NAME)));
+    checkAsset(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
   }
 
   @Test
   public void fetchMetaData() throws Exception {
-    assertSuccessResponseMatches(client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML), YAML_FILE_NAME);
-    final Asset asset = findAsset(repository, YAML_FILE_NAME);
-    Assert.assertThat(asset.contentType(), is(equalTo(CONTENT_TYPE_YAML)));
-    Assert.assertThat(asset.format(), is(equalTo(HELM_FORMAT_NAME)));
+    checkAsset(YAML_FILE_NAME, CONTENT_TYPE_YAML);
   }
 
   @Test
   public void checkComponentCreated() throws Exception {
-    final Component nullComponent = findComponent(repository, MONGO_PKG_NAME);
-    Assert.assertThat(nullComponent, is(nullValue()));
+    assertFalse(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
-
-    final Component component = findComponent(repository, MONGO_PKG_NAME);
-    Assert.assertThat(component.name(), is(equalTo(MONGO_PKG_NAME)));
-    Assert.assertThat(component.format(), is(equalTo(HELM_FORMAT_NAME)));
-    Assert.assertThat(component.group(), is(nullValue()));
-    Assert.assertThat(component.version(), is(equalTo(MONGO_PKG_VERSION_600)));
+    assertTrue(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
   }
 
   @Test
   public void testDeletingComponentDeletesAllAssociatedAssets() throws Exception {
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
     final Component component = findComponent(repository, MONGO_PKG_NAME);
-    Assert.assertNotNull(component);
-    Assert.assertFalse(findAssetsByComponent(repository, component).isEmpty());
+    assertNotNull(component);
+    assertEquals(1, componentAssetTestHelper.countComponents(repository));
+    assertFalse(findAssetsByComponent(repository, component).isEmpty());
 
     ComponentMaintenance maintenanceFacet = repository.facet(ComponentMaintenance.class);
     maintenanceFacet.deleteComponent(component.getEntityMetadata().getId(), true);
 
-    Assert.assertNull(findComponent(repository, MONGO_PKG_NAME));
-    Assert.assertTrue(findAssetsByComponent(repository, component).isEmpty());
+    assertEquals(0, componentAssetTestHelper.countComponents(repository));
+    assertTrue(findAssetsByComponent(repository, component).isEmpty());
   }
 
   @Test
   public void testDeletingRemainingAssetAlsoDeletesComponent() throws Exception {
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
+    assertTrue(componentAssetTestHelper.assetExists(repository, MONGO_PKG_FILE_NAME_600_TGZ));
+    assertTrue(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
 
-    final Asset asset = findAsset(repository, MONGO_PKG_FILE_NAME_600_TGZ);
-    Assert.assertNotNull(asset);
-    Assert.assertNotNull(findComponentById(repository, asset.componentId()));
-
-    ComponentMaintenance maintenanceFacet = repository.facet(ComponentMaintenance.class);
-    maintenanceFacet.deleteAsset(asset.getEntityMetadata().getId(), true);
-
-    Assert.assertNull(findAsset(repository, MONGO_PKG_FILE_NAME_600_TGZ));
-    Assert.assertNull(findComponentById(repository, asset.componentId()));
+    componentAssetTestHelper.removeAsset(repository, MONGO_PKG_FILE_NAME_600_TGZ);
+    assertFalse(componentAssetTestHelper.assetExists(repository, MONGO_PKG_FILE_NAME_600_TGZ));
+    assertFalse(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
   }
 
   @Test
@@ -134,5 +125,14 @@ public class HelmProxyIT
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
     server.stop();
     assertSuccessResponseMatches(client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ), MONGO_PKG_FILE_NAME_600_TGZ);
+  }
+
+  public void checkAsset(final String path, final String type) throws IOException {
+    assertSuccessResponseMatches(client.fetch(path, type), path);
+    assertTrue(componentAssetTestHelper.assetExists(repository, path));
+    List<String> assetPaths = componentAssetTestHelper.findAssetPaths(repository.getName());
+    assertThat(assetPaths.get(0), is(equalTo(path)));
+    assertThat(componentAssetTestHelper.contentTypeFor(repository.getName(), path), is(equalTo(type)));
+    assertTrue(componentAssetTestHelper.attributes(repository, path).contains(HELM_FORMAT_NAME));
   }
 }
