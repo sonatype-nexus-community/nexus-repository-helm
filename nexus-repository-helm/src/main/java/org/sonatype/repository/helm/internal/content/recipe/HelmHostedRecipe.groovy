@@ -22,14 +22,11 @@ import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.RecipeSupport
 import org.sonatype.nexus.repository.Repository
 import org.sonatype.nexus.repository.Type
-import org.sonatype.nexus.repository.cache.NegativeCacheFacet
-import org.sonatype.nexus.repository.cache.NegativeCacheHandler
+import org.sonatype.nexus.repository.http.HttpHandlers
 import org.sonatype.nexus.repository.http.PartialFetchHandler
 import org.sonatype.nexus.repository.httpclient.HttpClientFacet
-import org.sonatype.nexus.repository.proxy.ProxyHandler
-import org.sonatype.nexus.repository.routing.RoutingRuleHandler
 import org.sonatype.nexus.repository.security.SecurityHandler
-import org.sonatype.nexus.repository.types.ProxyType
+import org.sonatype.nexus.repository.types.HostedType
 import org.sonatype.nexus.repository.view.ConfigurableViewFacet
 import org.sonatype.nexus.repository.view.Context
 import org.sonatype.nexus.repository.view.Matcher
@@ -39,6 +36,7 @@ import org.sonatype.nexus.repository.view.ViewFacet
 import org.sonatype.nexus.repository.view.handlers.ConditionalRequestHandler
 import org.sonatype.nexus.repository.view.handlers.ContentHeadersHandler
 import org.sonatype.nexus.repository.view.handlers.ExceptionHandler
+import org.sonatype.nexus.repository.view.handlers.FormatHighAvailabilitySupportHandler
 import org.sonatype.nexus.repository.view.handlers.HandlerContributor
 import org.sonatype.nexus.repository.view.handlers.TimingHandler
 import org.sonatype.nexus.repository.view.matchers.ActionMatcher
@@ -48,23 +46,40 @@ import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher
 import org.sonatype.repository.helm.internal.AssetKind
 import org.sonatype.repository.helm.internal.HelmFormat
 import org.sonatype.repository.helm.internal.content.HelmContentFacet
+import org.sonatype.repository.helm.internal.content.createindex.CreateIndexFacetImpl
 import org.sonatype.repository.helm.internal.security.HelmSecurityFacet
 
-import static org.sonatype.nexus.repository.http.HttpHandlers.notFound
+import static org.sonatype.nexus.repository.http.HttpMethods.DELETE
 import static org.sonatype.nexus.repository.http.HttpMethods.GET
 import static org.sonatype.nexus.repository.http.HttpMethods.HEAD
+import static org.sonatype.nexus.repository.http.HttpMethods.PUT
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_INDEX
 import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE
+import static org.sonatype.repository.helm.internal.AssetKind.HELM_PROVENANCE
 
 /**
+ * Helm Hosted Recipe
+ *
  * @since 1.0.11
  */
-@Named(HelmProxyRecipe.NAME)
+@Named(HelmHostedRecipe.NAME)
 @Singleton
-class HelmProxyRecipe
+class HelmHostedRecipe
     extends RecipeSupport
 {
-  public static final String NAME = 'helm-proxy'
+  public static final String NAME = 'helm-hosted'
+
+  @Inject
+  HostedHandlers hostedHandlers
+
+  @Inject
+  Provider<CreateIndexFacetImpl> createIndexFacet
+
+  @Inject
+  Provider<HelmContentFacet> helmFacet
+
+  @Inject
+  Provider<HelmHostedFacetImpl> hostedFacet
 
   @Inject
   Provider<HelmSecurityFacet> securityFacet
@@ -73,16 +88,7 @@ class HelmProxyRecipe
   Provider<ConfigurableViewFacet> viewFacet
 
   @Inject
-  Provider<HttpClientFacet> httpClientFacet
-
-  @Inject
-  Provider<NegativeCacheFacet> negativeCacheFacet
-
-  @Inject
-  Provider<HelmProxyFacet> proxyFacet
-
-  @Inject
-  Provider<HelmContentFacet> helmFacet
+  ExceptionHandler exceptionHandler
 
   @Inject
   TimingHandler timingHandler
@@ -91,34 +97,25 @@ class HelmProxyRecipe
   SecurityHandler securityHandler
 
   @Inject
-  ContentHeadersHandler contentHeadersHandler
-
-  @Inject
-  ExceptionHandler exceptionHandler
-
-  @Inject
-  NegativeCacheHandler negativeCacheHandler
-
-  @Inject
   PartialFetchHandler partialFetchHandler
-
-  @Inject
-  ProxyHandler proxyHandler
 
   @Inject
   ConditionalRequestHandler conditionalRequestHandler
 
   @Inject
+  ContentHeadersHandler contentHeadersHandler
+
+  @Inject
   HandlerContributor handlerContributor
 
   @Inject
-  RoutingRuleHandler routingRuleHandler
+  Provider<HttpClientFacet> httpClientFacet
 
   @Inject
-  HelmProxyRecipe(@Named(ProxyType.NAME) final Type type,
-                 @Named(HelmFormat.NAME) final Format format
-  )
-  {
+  FormatHighAvailabilitySupportHandler formatHighAvailabilitySupportHandler
+
+  @Inject
+  HelmHostedRecipe(@Named(HostedType.NAME) final Type type, @Named(HelmFormat.NAME) final Format format) {
     super(type, format)
   }
 
@@ -157,17 +154,17 @@ class HelmProxyRecipe
   }
 
   @Override
-  void apply(final @Nonnull Repository repository) throws Exception {
+  void apply(@Nonnull final Repository repository) throws Exception {
     repository.attach(securityFacet.get())
     repository.attach(configure(viewFacet.get()))
     repository.attach(httpClientFacet.get())
-    repository.attach(negativeCacheFacet.get())
-    repository.attach(proxyFacet.get())
+    repository.attach(hostedFacet.get())
     repository.attach(helmFacet.get())
+    repository.attach(createIndexFacet.get())
   }
 
   /**
-   * Configure {@link ViewFacet}.
+   * Configure {@link org.sonatype.nexus.repository.view.ViewFacet}.
    */
   private ViewFacet configure(final ConfigurableViewFacet facet) {
     Router.Builder builder = new Router.Builder()
@@ -178,21 +175,86 @@ class HelmProxyRecipe
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)
           .handler(securityHandler)
-          .handler(routingRuleHandler)
           .handler(exceptionHandler)
           .handler(handlerContributor)
-          .handler(negativeCacheHandler)
-          .handler(conditionalRequestHandler)
           .handler(partialFetchHandler)
           .handler(contentHeadersHandler)
-          .handler(proxyHandler)
+          .handler(hostedHandlers.get)
           .create())
     }
 
-    builder.defaultHandlers(notFound())
+    [chartUploadMatcher(), provenanceUploadMatcher()].each { matcher ->
+      builder.route(new Route.Builder().matcher(matcher)
+          .handler(timingHandler)
+          .handler(securityHandler)
+          .handler(exceptionHandler)
+          .handler(handlerContributor)
+          .handler(conditionalRequestHandler)
+          .handler(partialFetchHandler)
+          .handler(contentHeadersHandler)
+          .handler(hostedHandlers.upload)
+          .create())
+    }
+
+    builder.route(new Route.Builder().matcher(chartDeleteMatcher())
+        .handler(timingHandler)
+        .handler(securityHandler)
+        .handler(exceptionHandler)
+        .handler(handlerContributor)
+        .handler(conditionalRequestHandler)
+        .handler(partialFetchHandler)
+        .handler(contentHeadersHandler)
+        .handler(hostedHandlers.delete)
+        .create())
+
+    builder.defaultHandlers(HttpHandlers.notFound())
 
     facet.configure(builder.create())
 
     return facet
+  }
+
+  static Matcher chartUploadMatcher() {
+    chartMethodMatcher(PUT)
+  }
+
+  static Matcher provenanceUploadMatcher() {
+    provenanceMethodMatcher(PUT)
+  }
+
+  static Matcher chartDeleteMatcher() {
+    chartMethodMatcher(DELETE)
+  }
+
+  static Matcher chartMethodMatcher(final String... httpMethods) {
+    LogicMatchers.and(
+        new ActionMatcher(httpMethods),
+        tokenMatcherForExtensionAndName('tgz'),
+        new Matcher() {
+          @Override
+          boolean matches(final Context context) {
+            context.attributes.set(AssetKind.class, HELM_PACKAGE)
+            return true
+          }
+        }
+    )
+  }
+
+  static Matcher provenanceMethodMatcher(final String... httpMethods) {
+    LogicMatchers.and(
+        new ActionMatcher(httpMethods),
+        tokenMatcherForExtensionAndName('tgz.prov'),
+        new Matcher() {
+          @Override
+          boolean matches(final Context context) {
+            context.attributes.set(AssetKind.class, HELM_PROVENANCE)
+            return true
+          }
+        }
+    )
+  }
+
+  static TokenMatcher tokenMatcherForExtensionAndName(final String extension, final String filename = '.+') {
+    new TokenMatcher("/{filename:${filename}}.{extension:${extension}}")
   }
 }

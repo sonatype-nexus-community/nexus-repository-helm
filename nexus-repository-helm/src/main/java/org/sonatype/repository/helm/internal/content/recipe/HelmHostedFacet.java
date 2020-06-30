@@ -10,28 +10,28 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.internal.content;
+package org.sonatype.repository.helm.internal.content.recipe;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import org.sonatype.nexus.repository.Facet;
-import org.sonatype.nexus.repository.content.facet.ContentFacet;
+import org.sonatype.nexus.repository.Facet.Exposed;
 import org.sonatype.nexus.repository.view.Content;
+import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.repository.helm.internal.AssetKind;
 
 /**
+ * Helm Hosted Facet
+ *
  * @since 1.0.11
  */
-@Facet.Exposed
-public interface HelmContentFacet
-    extends ContentFacet
+@Exposed
+public interface HelmHostedFacet
+    extends Facet
 {
-  Optional<Content> getAsset(String path);
+  Content get(String path);
 
-  Content putIndex(String path, Content content, AssetKind assetKind);
-
-  Content putComponent(String path, Content content, AssetKind assetKind) throws IOException;
+  void upload(String path, Payload payload, final AssetKind assetKind) throws IOException;
 
   boolean delete(String path);
 }

@@ -1,6 +1,6 @@
 /*
  * Sonatype Nexus (TM) Open Source Version
- * Copyright (c) 2017-present Sonatype, Inc.
+ * Copyright (c) 2018-present Sonatype, Inc.
  * All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
@@ -11,6 +11,7 @@
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
 package org.sonatype.nexus.plugins.helm.internal.content;
+
 import java.net.URL;
 
 import javax.annotation.Nonnull;
@@ -37,12 +38,17 @@ public class HelmContentITSupport
 
   public static final String MONGO_PKG_VERSION_600 = "6.0.0";
 
+  public static final String MONGO_PKG_VERSION_728 = "7.2.8";
+
   public static final String TGZ_EXT = ".tgz";
 
   public static final String YAML_EXT = ".yaml";
 
   public static final String MONGO_PKG_FILE_NAME_600_TGZ = format("%s-%s%s",
       MONGO_PKG_NAME, MONGO_PKG_VERSION_600, TGZ_EXT);
+
+  public static final String MONGO_PKG_FILE_NAME_728_TGZ = format("%s-%s%s",
+      MONGO_PKG_NAME, MONGO_PKG_VERSION_728, TGZ_EXT);
 
   public static final String CONTENT_TYPE_TGZ = "application/x-tgz";
 
@@ -58,7 +64,6 @@ public class HelmContentITSupport
         systemProperty("nexus-exclude-features").value("nexus-cma-community, nexus-community-feature")
     );
   }
-
 
   @Rule
   public RepositoryRuleHelm repos = new RepositoryRuleHelm(() -> repositoryManager);
@@ -83,5 +88,4 @@ public class HelmContentITSupport
         repositoryUrl.toURI()
     );
   }
-
 }

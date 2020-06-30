@@ -1,6 +1,6 @@
 /*
  * Sonatype Nexus (TM) Open Source Version
- * Copyright (c) 2017-present Sonatype, Inc.
+ * Copyright (c) 2018-present Sonatype, Inc.
  * All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
@@ -13,17 +13,19 @@
 package org.sonatype.repository.helm.internal.content.recipe;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sonatype.nexus.common.hash.HashAlgorithm;
+import org.sonatype.nexus.repository.content.Asset;
 import org.sonatype.nexus.repository.content.facet.ContentFacetSupport;
+import org.sonatype.nexus.repository.content.facet.WritePolicy;
 import org.sonatype.nexus.repository.content.fluent.FluentAsset;
 import org.sonatype.nexus.repository.content.store.FormatStoreManager;
 import org.sonatype.nexus.repository.view.Content;
-import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.view.payloads.TempBlob;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.AssetKind;
@@ -37,6 +39,8 @@ import com.google.common.collect.ImmutableList;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.common.hash.HashAlgorithm.MD5;
 import static org.sonatype.nexus.common.hash.HashAlgorithm.SHA1;
+import static org.sonatype.nexus.repository.content.facet.WritePolicy.ALLOW_ONCE;
+import static org.sonatype.repository.helm.internal.AssetKind.HELM_PACKAGE;
 
 /**
  * @since 1.0.11
@@ -63,12 +67,23 @@ public class HelmContentFacetImpl
   }
 
   @Override
+  protected WritePolicy writePolicy(final Asset asset) {
+    WritePolicy writePolicy = super.writePolicy(asset);
+    if (writePolicy == ALLOW_ONCE) {
+      if (!Objects.equals(HELM_PACKAGE.name(), asset.kind())) {
+        writePolicy = WritePolicy.ALLOW;
+      }
+    }
+    return writePolicy;
+  }
+
+  @Override
   public Optional<Content> getAsset(final String path) {
     return assets().path(path).find().map(FluentAsset::download);
   }
 
   @Override
-  public Content putIndex(final String path, final Content content, final AssetKind assetKind) throws IOException
+  public Content putIndex(final String path, final Content content, final AssetKind assetKind)
   {
     try (TempBlob blob = blobs().ingest(content, HASHING)) {
       try (TempBlob newTempBlob = indexYamlAbsoluteUrlRewriter
@@ -106,7 +121,7 @@ public class HelmContentFacetImpl
   }
 
   @Override
-  public boolean delete(final String path) throws IOException {
+  public boolean delete(final String path) {
     return assets().path(path).find().map(FluentAsset::delete).orElse(false);
   }
 }
