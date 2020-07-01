@@ -102,7 +102,7 @@ public class HelmContentFacetImpl
   }
 
   @Override
-  public TempBlob getTempBlob(Payload payload) {
+  public TempBlob getTempBlob(final Payload payload) {
     return blobs().ingest(payload, HASHING);
   }
 
