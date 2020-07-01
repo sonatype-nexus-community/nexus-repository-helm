@@ -45,8 +45,8 @@ import static org.sonatype.repository.helm.internal.HelmFormat.NAME;
 
 /**
  * Support helm upload for web page
- *
- * @author yinlongfei
+ /**
+ * @since 1.0.11
  */
 @Singleton
 @Named(NAME)
