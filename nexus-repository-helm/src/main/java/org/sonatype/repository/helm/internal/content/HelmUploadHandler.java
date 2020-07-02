@@ -62,7 +62,7 @@ public class HelmUploadHandler
   }
 
   @Override
-  public UploadResponse handle(Repository repository, ComponentUpload upload) throws IOException {
+  public UploadResponse handle(final Repository repository, final ComponentUpload upload) throws IOException {
     HelmHostedFacet facet = repository.facet(HelmHostedFacet.class);
     HelmContentFacet helmContentFacet = repository.facet(HelmContentFacet.class);
 
