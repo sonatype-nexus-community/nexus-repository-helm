@@ -48,11 +48,11 @@ public class HostedHandlers
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     String path;
     if (assetKind == AssetKind.HELM_INDEX) {
-      path = "index.yaml";
+      path = "/index.yaml";
     }
     else {
       State state = context.getAttributes().require(State.class);
-      path = helmPathUtils.filename(state);
+      path = helmPathUtils.contentFilePath(state);
     }
     Content content = context.getRepository().facet(HelmHostedFacet.class).get(path);
 
@@ -61,7 +61,7 @@ public class HostedHandlers
 
   public final Handler upload = context -> {
     State state = context.getAttributes().require(State.class);
-    String path = helmPathUtils.buildAssetPath(state);
+    String path = helmPathUtils.buildContentAssetPath(state);
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     context.getRepository().facet(HelmHostedFacet.class).upload(path, context.getRequest().getPayload(), assetKind);
     return ok();
@@ -69,7 +69,7 @@ public class HostedHandlers
 
   public final Handler delete = context -> {
     State state = context.getAttributes().require(State.class);
-    String path = helmPathUtils.buildAssetPath(state);
+    String path = helmPathUtils.buildContentAssetPath(state);
 
     boolean deleted = context.getRepository().facet(HelmHostedFacet.class).delete(path);
 

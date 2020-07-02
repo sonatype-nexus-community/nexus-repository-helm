@@ -38,7 +38,7 @@ public class HelmProxyFacet
 {
   private final HelmPathUtils helmPathUtils;
 
-  private static final String INDEX_YAML = "index.yaml";
+  private static final String INDEX_YAML = "/index.yaml";
 
   @Inject
   public HelmProxyFacet(final HelmPathUtils helmPathUtils)
@@ -73,7 +73,7 @@ public class HelmProxyFacet
         return INDEX_YAML;
       case HELM_PACKAGE:
         TokenMatcher.State matcherState = helmPathUtils.matcherState(context);
-        return helmPathUtils.filename(matcherState);
+        return helmPathUtils.contentFilePath(matcherState);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
