@@ -55,7 +55,7 @@ public class CreateIndexFacetImpl
 
   private final long interval;
 
-  private static final String INDEX_YAML = "index.yaml";
+  private static final String INDEX_YAML = "/index.yaml";
 
   private static final String INDEX_YAML_CONTENT_TYPE = "text/x-yaml";
 
