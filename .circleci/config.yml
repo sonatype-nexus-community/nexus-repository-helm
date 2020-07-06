@@ -5,7 +5,7 @@ orbs:
   circleci-maven-release-orb: sonatype-nexus-community/circleci-maven-release-orb@0.0.15
 
 build-and-test-commands: &build-and-test-commands
-  mvn-build-test-command: mvn clean verify -PbuildKar -Dit
+  mvn-build-test-command: mvn clean verify license:check -PbuildKar -Dit -N
   mvn-collect-artifacts-command: |
     mkdir -p ~/project/artifacts/junit/
     find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/project/artifacts/junit/ \;
