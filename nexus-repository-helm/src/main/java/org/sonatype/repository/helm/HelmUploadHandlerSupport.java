@@ -24,7 +24,7 @@ import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import static org.sonatype.repository.helm.internal.HelmFormat.NAME;
 
 /**
- * @since 1.0.11
+ * @since 1.0.15
  */
 public abstract class HelmUploadHandlerSupport
     extends UploadHandlerSupport
