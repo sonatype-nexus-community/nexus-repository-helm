@@ -26,6 +26,7 @@ import org.sonatype.nexus.repository.content.facet.WritePolicy;
 import org.sonatype.nexus.repository.content.fluent.FluentAsset;
 import org.sonatype.nexus.repository.content.store.FormatStoreManager;
 import org.sonatype.nexus.repository.view.Content;
+import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.view.payloads.TempBlob;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.AssetKind;
@@ -57,9 +58,10 @@ public class HelmContentFacetImpl
   private final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter;
 
   @Inject
-  public HelmContentFacetImpl(@Named(HelmFormat.NAME) final FormatStoreManager formatStoreManager,
-                              final HelmAttributeParser helmAttributeParser,
-                              final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter)
+  public HelmContentFacetImpl(
+      @Named(HelmFormat.NAME) final FormatStoreManager formatStoreManager,
+      final HelmAttributeParser helmAttributeParser,
+      final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter)
   {
     super(formatStoreManager);
     this.helmAttributeParser = checkNotNull(helmAttributeParser);
@@ -100,6 +102,11 @@ public class HelmContentFacetImpl
   }
 
   @Override
+  public TempBlob getTempBlob(final Payload payload) {
+    return blobs().ingest(payload, HASHING);
+  }
+
+  @Override
   public Content putComponent(final String path, final Content content, final AssetKind assetKind) throws IOException
   {
     try (TempBlob blob = blobs().ingest(content, HASHING)) {
@@ -118,6 +125,28 @@ public class HelmContentFacetImpl
           .withAttribute(HelmFormat.NAME, helmAttributes)
           .download();
     }
+  }
+
+  @Override
+  public Content putComponent(
+      final String path,
+      final TempBlob tempBlob,
+      final HelmAttributes helmAttributes,
+      final Content content,
+      final AssetKind assetKind)
+  {
+    return assets()
+        .path(path)
+        .kind(assetKind.name())
+        .component(components()
+            .name(path)
+            .version(helmAttributes.getVersion())
+            .getOrCreate())
+        .getOrCreate()
+        .attach(tempBlob)
+        .markAsCached(content)
+        .withAttribute(HelmFormat.NAME, helmAttributes)
+        .download();
   }
 
   @Override
