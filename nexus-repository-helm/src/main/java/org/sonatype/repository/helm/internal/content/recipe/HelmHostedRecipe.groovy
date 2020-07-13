@@ -22,6 +22,7 @@ import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.RecipeSupport
 import org.sonatype.nexus.repository.Repository
 import org.sonatype.nexus.repository.Type
+import org.sonatype.nexus.repository.content.search.SearchFacet
 import org.sonatype.nexus.repository.http.HttpHandlers
 import org.sonatype.nexus.repository.http.PartialFetchHandler
 import org.sonatype.nexus.repository.httpclient.HttpClientFacet
@@ -86,6 +87,9 @@ class HelmHostedRecipe
 
   @Inject
   Provider<ConfigurableViewFacet> viewFacet
+
+  @Inject
+  Provider<SearchFacet> searchFacet
 
   @Inject
   ExceptionHandler exceptionHandler
@@ -161,6 +165,7 @@ class HelmHostedRecipe
     repository.attach(hostedFacet.get())
     repository.attach(helmFacet.get())
     repository.attach(createIndexFacet.get())
+    repository.attach(searchFacet.get())
   }
 
   /**
