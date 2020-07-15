@@ -139,7 +139,7 @@ public class HelmContentFacetImpl
         .path(path)
         .kind(assetKind.name())
         .component(components()
-            .name(path)
+            .name(helmAttributes.getName())
             .version(helmAttributes.getVersion())
             .getOrCreate())
         .getOrCreate()
