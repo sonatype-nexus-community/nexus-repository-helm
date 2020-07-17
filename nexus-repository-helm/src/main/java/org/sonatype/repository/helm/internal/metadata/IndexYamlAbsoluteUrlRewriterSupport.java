@@ -28,6 +28,7 @@ import org.sonatype.goodies.common.ComponentSupport;
 import org.apache.http.client.utils.URIBuilder;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.emitter.Emitter;
 import org.yaml.snakeyaml.events.CollectionEndEvent;
 import org.yaml.snakeyaml.events.CollectionStartEvent;
@@ -49,7 +50,7 @@ public class IndexYamlAbsoluteUrlRewriterSupport
   {
     try (Reader reader = new InputStreamReader(is);
          Writer writer = new OutputStreamWriter(os)) {
-      Yaml yaml = new Yaml();
+      Yaml yaml = new Yaml(new SafeConstructor());
       Emitter emitter = new Emitter(writer, new DumperOptions());
       boolean rewrite = false;
       for (Event event : yaml.parse(reader)) {

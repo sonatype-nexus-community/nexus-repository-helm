@@ -35,6 +35,7 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.Node;
@@ -66,8 +67,7 @@ public class YamlParser
     Map<String, Object> map;
 
     try {
-      Yaml yaml = new Yaml(new Constructor(), new Representer(),
-          new DumperOptions(), new Resolver());
+      Yaml yaml = new Yaml(new SafeConstructor());
       map = yaml.load(data);
     }
     catch (YAMLException e) {
