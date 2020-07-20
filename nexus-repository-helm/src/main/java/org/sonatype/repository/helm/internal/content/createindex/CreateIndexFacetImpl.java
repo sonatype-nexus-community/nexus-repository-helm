@@ -25,17 +25,13 @@ import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.manager.RepositoryCreatedEvent;
 import org.sonatype.nexus.repository.manager.RepositoryDeletedEvent;
 import org.sonatype.nexus.repository.view.Content;
-import org.sonatype.nexus.repository.view.payloads.StringPayload;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
-import org.sonatype.repository.helm.internal.createindex.CreateIndexFacet;
 import org.sonatype.repository.helm.internal.content.recipe.HelmHostedFacet;
-import org.sonatype.repository.helm.internal.metadata.ChartIndex;
-import org.sonatype.repository.helm.internal.orient.createindex.HelmIndexInvalidationEvent;
-import org.sonatype.repository.helm.internal.util.YamlParser;
+import org.sonatype.repository.helm.internal.createindex.CreateIndexFacet;
+import org.sonatype.repository.helm.internal.createindex.HelmIndexInvalidationEvent;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
-import org.joda.time.DateTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.common.stateguard.StateGuardLifecycleSupport.State.STARTED;
@@ -51,31 +47,28 @@ public class CreateIndexFacetImpl
     extends FacetSupport
     implements CreateIndexFacet, Asynchronous
 {
+  private static final String INDEX_YAML = "/index.yaml";
+
   private final EventManager eventManager;
 
   private final long interval;
 
-  private static final String INDEX_YAML = "/index.yaml";
-
-  private static final String INDEX_YAML_CONTENT_TYPE = "text/x-yaml";
-
   private final AtomicBoolean acceptingEvents = new AtomicBoolean(true);
-
-  private static final String API_VERSION = "v1";
-
-  private final YamlParser yamlParser;
 
   //Prevents the same event from being fired multiple times
   private final AtomicBoolean eventFired = new AtomicBoolean(false);
 
+  private CreateIndexService createIndexService;
+
   @Inject
-  public CreateIndexFacetImpl(final EventManager eventManager,
-                              final YamlParser yamlParser,
-                              @Named("${nexus.helm.createrepo.interval:-1000}") final long interval)
+  public CreateIndexFacetImpl(
+      final EventManager eventManager,
+      final CreateIndexService createIndexService,
+      @Named("${nexus.helm.createrepo.interval:-1000}") final long interval)
   {
     this.eventManager = checkNotNull(eventManager);
     this.interval = interval;
-    this.yamlParser = checkNotNull(yamlParser);
+    this.createIndexService = checkNotNull(createIndexService);
   }
 
   @Subscribe
@@ -107,7 +100,7 @@ public class CreateIndexFacetImpl
         acceptingEvents.set(true);
         eventFired.set(false);
 
-        createIndexYaml();
+        updateIndexYaml(createIndexService.buildIndexYaml(getRepository()));
       }
       finally {
         log.info("Finished rebuilding Helm index for repository {}", getRepository().getName());
@@ -115,15 +108,19 @@ public class CreateIndexFacetImpl
     }
   }
 
-  private void createIndexYaml() {
-    ChartIndex index = new ChartIndex();
-    index.setApiVersion(API_VERSION);
-    index.setGenerated(new DateTime());
+  protected void updateIndexYaml(final Content indexYaml) {
+    if (indexYaml == null) {
+      deleteIndexYaml();
+    }
+    else {
+      createIndexYaml(indexYaml);
+    }
+  }
+
+  private void createIndexYaml(final Content indexYaml) {
     Repository repository = getRepository();
     HelmContentFacet helmFacet = repository.facet(HelmContentFacet.class);
-    helmFacet
-        .putIndex(INDEX_YAML, new Content(new StringPayload(yamlParser.getYamlContent(index), INDEX_YAML_CONTENT_TYPE)),
-            HELM_INDEX);
+    helmFacet.putIndex(INDEX_YAML, indexYaml, HELM_INDEX);
   }
 
   private void deleteIndexYaml() {
