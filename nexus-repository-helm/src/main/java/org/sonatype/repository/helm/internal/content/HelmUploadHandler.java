@@ -89,7 +89,7 @@ public class HelmUploadHandler
         throw new ValidationErrorsException("Metadata is missing the version attribute");
       }
 
-      String path = String.format("%s-%s%s", name, version, extension);
+      String path = String.format("/%s-%s%s", name, version, extension);
 
       ensurePermitted(repository.getName(), NAME, path, Collections.emptyMap());
 

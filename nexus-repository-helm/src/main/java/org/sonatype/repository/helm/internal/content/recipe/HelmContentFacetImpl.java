@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -77,6 +78,11 @@ public class HelmContentFacetImpl
       }
     }
     return writePolicy;
+  }
+
+  @Override
+  public Iterable<FluentAsset> browseAssets(@Nullable final AssetKind assetKind) {
+    return assets().browse(assetKind.name(), Integer.MAX_VALUE, null);
   }
 
   @Override

@@ -21,7 +21,7 @@ import org.sonatype.repository.helm.internal.HelmFormat;
 /**
  * Helm places components one level above their assets.
  *
- * @since 3.next
+ * @since 1.0.15
  */
 @Singleton
 @Named(HelmFormat.NAME)

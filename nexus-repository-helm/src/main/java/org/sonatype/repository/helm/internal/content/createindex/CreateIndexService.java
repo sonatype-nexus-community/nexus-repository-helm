@@ -1,6 +1,6 @@
 /*
  * Sonatype Nexus (TM) Open Source Version
- * Copyright (c) 2008-present Sonatype, Inc.
+ * Copyright (c) 2018-present Sonatype, Inc.
  * All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
@@ -10,20 +10,17 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.internal.content.browse;
+package org.sonatype.repository.helm.internal.content.createindex;
 
-import javax.inject.Named;
-
-import org.sonatype.nexus.repository.content.browse.store.FormatBrowseModule;
-import org.sonatype.repository.helm.internal.HelmFormat;
+import org.sonatype.nexus.repository.Repository;
+import org.sonatype.nexus.repository.view.Content;
 
 /**
- * Configures the browse bindings for the helm format.
+ * Build index.yaml file for Helm Hosted
  *
  * @since 1.0.15
  */
-@Named(HelmFormat.NAME)
-public class HelmBrowseModule
-    extends FormatBrowseModule<HelmBrowseNodeDAO>
+public interface CreateIndexService
 {
+  Content buildIndexYaml(final Repository repository);
 }
