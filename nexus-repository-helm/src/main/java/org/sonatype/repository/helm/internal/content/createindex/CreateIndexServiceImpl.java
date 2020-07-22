@@ -74,7 +74,7 @@ public class CreateIndexServiceImpl
 
     ChartIndex index = new ChartIndex();
 
-    for (Asset asset : helmFacet.browseComponentAssets(AssetKind.HELM_PACKAGE)) {
+    for (Asset asset : helmFacet.browseAssets(AssetKind.HELM_PACKAGE)) {
       parseAssetIntoChartEntry(index, asset);
     }
 

@@ -88,6 +88,8 @@ public class CreateIndexFacetImpl
     deleteIndexYaml();
   }
 
+  //TODO: NEXUS-24645 add asset event handlers here when event bus is implemented for newDB
+
   @Subscribe
   public void on(final HelmIndexInvalidationEvent event) {
     if (shouldProcess(event)) {

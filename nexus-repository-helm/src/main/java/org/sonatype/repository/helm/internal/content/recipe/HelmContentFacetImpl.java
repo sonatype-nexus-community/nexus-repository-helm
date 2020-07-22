@@ -81,7 +81,7 @@ public class HelmContentFacetImpl
   }
 
   @Override
-  public Iterable<FluentAsset> browseComponentAssets(@Nullable final AssetKind assetKind) {
+  public Iterable<FluentAsset> browseAssets(@Nullable final AssetKind assetKind) {
     return assets().browse(assetKind.name(), Integer.MAX_VALUE, null);
   }
 

@@ -33,7 +33,7 @@ import org.sonatype.repository.helm.internal.AssetKind;
 public interface HelmContentFacet
     extends ContentFacet
 {
-  Iterable<FluentAsset> browseComponentAssets(@Nullable final AssetKind assetKind);
+  Iterable<FluentAsset> browseAssets(@Nullable final AssetKind assetKind);
 
   Optional<Content> getAsset(String path);
 
