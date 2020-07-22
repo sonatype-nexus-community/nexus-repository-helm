@@ -18,7 +18,7 @@ import org.sonatype.nexus.repository.view.Content;
 /**
  * Build index.yaml file for Helm Hosted
  *
- * @since 1.0.next
+ * @since 1.0.15
  */
 public interface CreateIndexService
 {
