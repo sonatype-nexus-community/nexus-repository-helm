@@ -22,7 +22,6 @@ import java.util.Map;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-
 import org.sonatype.goodies.common.ComponentSupport;
 import org.sonatype.repository.helm.internal.metadata.ChartEntry;
 import org.sonatype.repository.helm.internal.metadata.ChartIndex;
@@ -36,6 +35,7 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.Node;
@@ -67,8 +67,7 @@ public class YamlParser
     Map<String, Object> map;
 
     try {
-      Yaml yaml = new Yaml(new Constructor(), new Representer(),
-          new DumperOptions(), new Resolver());
+      Yaml yaml = new Yaml(new SafeConstructor());
       map = yaml.load(data);
     }
     catch (YAMLException e) {
@@ -77,13 +76,17 @@ public class YamlParser
     return map;
   }
 
+  public String getYamlContent(final ChartIndex index) {
+    Yaml yaml = new Yaml(new JodaPropertyConstructor(),
+        setupRepresenter(),
+        new DumperOptions(),
+        new Resolver());
+    return yaml.dumpAsMap(index);
+  }
+
   public void write(final OutputStream os, final ChartIndex index) {
     try (OutputStreamWriter writer = new OutputStreamWriter(os)) {
-      Yaml yaml = new Yaml(new JodaPropertyConstructor(),
-          setupRepresenter(),
-          new DumperOptions(),
-          new Resolver());
-      String result = yaml.dumpAsMap(index);
+      String result = getYamlContent(index);
       writer.write(result);
     }
     catch (IOException ex) {
@@ -99,19 +102,24 @@ public class YamlParser
     return representer;
   }
 
-  private class JodaPropertyConstructor extends Constructor {
+  private class JodaPropertyConstructor
+      extends Constructor
+  {
     public JodaPropertyConstructor() {
       yamlClassConstructors.put(NodeId.scalar, new TimeStampConstruct());
     }
 
-    class TimeStampConstruct extends Constructor.ConstructScalar {
+    class TimeStampConstruct
+        extends Constructor.ConstructScalar
+    {
       @Override
       public Object construct(Node nnode) {
         if (nnode.getTag().toString().equals("tag:yaml.org,2002:timestamp")) {
           Construct dateConstructor = yamlConstructors.get(Tag.TIMESTAMP);
           Date date = (Date) dateConstructor.construct(nnode);
           return new DateTime(date, DateTimeZone.UTC);
-        } else {
+        }
+        else {
           return super.construct(nnode);
         }
       }
@@ -122,7 +130,9 @@ public class YamlParser
    * Necessary to output Joda DateTime correctly with Snakey Yamls
    * See: https://bitbucket.org/asomov/snakeyaml/wiki/Howto#markdown-header-how-to-parse-jodatime
    */
-  class JodaTimeRepresenter extends Representer {
+  class JodaTimeRepresenter
+      extends Representer
+  {
     public JodaTimeRepresenter() {
       multiRepresenters.put(DateTime.class, new RepresentJodaDateTime());
     }
@@ -146,7 +156,9 @@ public class YamlParser
       }
     }
 
-    private class RepresentJodaDateTime extends RepresentDate {
+    private class RepresentJodaDateTime
+        extends RepresentDate
+    {
       public Node representData(Object data) {
         DateTime date = (DateTime) data;
         return super.representData(new Date(date.getMillis()));

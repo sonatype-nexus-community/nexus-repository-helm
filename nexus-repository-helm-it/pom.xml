@@ -2,7 +2,7 @@
 <!--
 
     Sonatype Nexus (TM) Open Source Version
-    Copyright (c) 2017-present Sonatype, Inc.
+    Copyright (c) 2018-present Sonatype, Inc.
     All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
 
     This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
@@ -19,7 +19,7 @@
   <parent>
     <groupId>org.sonatype.nexus.plugins</groupId>
     <artifactId>nexus-repository-base</artifactId>
-    <version>1.0.11-SNAPSHOT</version>
+    <version>1.0.16-SNAPSHOT</version>
   </parent>
 
   <artifactId>nexus-repository-helm-it</artifactId>
@@ -59,6 +59,20 @@
 
     <dependency>
       <groupId>org.sonatype.nexus.testsuite</groupId>
+      <artifactId>nexus-repository-content-testsupport</artifactId>
+      <version>${nxrm-version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.sonatype.nexus.testsuite</groupId>
+      <artifactId>nexus-repository-content-testsupport</artifactId>
+      <version>${nxrm-version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.sonatype.nexus.testsuite</groupId>
       <artifactId>nexus-repository-testsupport</artifactId>
       <version>${nxrm-version}</version>
       <scope>test</scope>
@@ -86,6 +100,17 @@
       <version>${nxrm-version}</version>
       <type>zip</type>
       <scope>test</scope>
+      <exclusions>
+        <!-- Avoid leaking older helm plugins from distro -->
+        <exclusion>
+          <groupId>org.sonatype.nexus.plugins</groupId>
+          <artifactId>nexus-repository-helm</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.sonatype.nexus.plugins</groupId>
+          <artifactId>nexus-restore-helm</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

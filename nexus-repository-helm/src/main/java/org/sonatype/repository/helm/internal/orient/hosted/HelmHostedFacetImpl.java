@@ -25,16 +25,16 @@ import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.StorageTx;
-import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalDeleteBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
+import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
-import org.sonatype.repository.helm.internal.orient.HelmFacet;
 import org.sonatype.repository.helm.internal.AssetKind;
+import org.sonatype.repository.helm.internal.orient.HelmFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -90,10 +90,12 @@ public class HelmHostedFacetImpl
   }
 
   @Override
-  public void upload(final String path,
-                     final Payload payload,
-                     final AssetKind assetKind) throws IOException
+  public void upload(
+      final String path,
+      final Payload payload,
+      final AssetKind assetKind) throws IOException
   {
+    checkNotNull(path);
     try (TempBlob tempBlob = facet(StorageFacet.class).createTempBlob(payload, HASH_ALGORITHMS)) {
       upload(path, tempBlob, payload, assetKind);
     }
@@ -101,12 +103,12 @@ public class HelmHostedFacetImpl
 
   @Override
   @TransactionalStoreBlob
-  public Asset upload(String path, TempBlob tempBlob, Payload payload, AssetKind assetKind) throws IOException {
+  public Asset upload(final String path, final TempBlob tempBlob, final Payload payload, final AssetKind assetKind) throws IOException {
+    checkNotNull(path);
+    checkNotNull(tempBlob);
     if (assetKind != HELM_PACKAGE && assetKind != HELM_PROVENANCE) {
       throw new IllegalArgumentException("Unsupported assetKind: " + assetKind);
     }
-    checkNotNull(path);
-    checkNotNull(tempBlob);
 
     StorageTx tx = UnitOfWork.currentTx();
     InputStream inputStream = tempBlob.get();
@@ -126,7 +128,8 @@ public class HelmHostedFacetImpl
     Optional<Asset> asset = helmFacet.findAsset(tx, path);
     if (!asset.isPresent()) {
       return false;
-    } else {
+    }
+    else {
       tx.deleteAsset(asset.get());
       return true;
     }

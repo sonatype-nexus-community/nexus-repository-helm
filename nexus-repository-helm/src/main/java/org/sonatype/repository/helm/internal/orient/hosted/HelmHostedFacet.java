@@ -17,9 +17,9 @@ import java.io.IOException;
 import org.sonatype.nexus.repository.Facet;
 import org.sonatype.nexus.repository.Facet.Exposed;
 import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
+import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.repository.helm.internal.AssetKind;
 
 /**
@@ -33,9 +33,9 @@ public interface HelmHostedFacet
 {
   Content get(String path);
 
-  void upload(String path, Payload payload, final AssetKind assetKind) throws IOException;
+  void upload(final String path, final Payload payload, final AssetKind assetKind) throws IOException;
 
-  Asset upload(String path, TempBlob tempBlob, Payload payload, AssetKind assetKind) throws IOException;
+  Asset upload(final String path, final TempBlob tempBlob, final Payload payload, final AssetKind assetKind) throws IOException;
 
   boolean delete(String path);
 }

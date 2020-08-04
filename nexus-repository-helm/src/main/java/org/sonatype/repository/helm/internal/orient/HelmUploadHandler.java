@@ -28,13 +28,12 @@ import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.upload.ComponentUpload;
-import org.sonatype.nexus.repository.upload.UploadDefinition;
-import org.sonatype.nexus.repository.upload.UploadHandlerSupport;
 import org.sonatype.nexus.repository.upload.UploadResponse;
 import org.sonatype.nexus.repository.view.PartPayload;
 import org.sonatype.nexus.rest.ValidationErrorsException;
 import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
+import org.sonatype.repository.helm.HelmUploadHandlerSupport;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.orient.hosted.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
@@ -46,37 +45,26 @@ import static org.sonatype.repository.helm.internal.HelmFormat.NAME;
 
 /**
  * Support helm upload for web page
- *
- * @author yinlongfei
+ /**
+ * @since 1.0.15
  */
 @Singleton
 @Named(NAME)
 public class HelmUploadHandler
-    extends UploadHandlerSupport
+    extends HelmUploadHandlerSupport
 {
-  private UploadDefinition definition;
-
-  private final ContentPermissionChecker contentPermissionChecker;
-
-  private final VariableResolverAdapter variableResolverAdapter;
-
-  private final HelmAttributeParser helmPackageParser;
-
-
   @Inject
-  public HelmUploadHandler(final ContentPermissionChecker contentPermissionChecker,
-                           final HelmAttributeParser helmPackageParser,
-                           @Named("simple") final VariableResolverAdapter variableResolverAdapter,
-                           final Set<UploadDefinitionExtension> uploadDefinitionExtensions)
+  public HelmUploadHandler(
+      final ContentPermissionChecker contentPermissionChecker,
+      final HelmAttributeParser helmPackageParser,
+      @Named("simple") final VariableResolverAdapter variableResolverAdapter,
+      final Set<UploadDefinitionExtension> uploadDefinitionExtensions)
   {
-    super(uploadDefinitionExtensions);
-    this.contentPermissionChecker = contentPermissionChecker;
-    this.variableResolverAdapter = variableResolverAdapter;
-    this.helmPackageParser = helmPackageParser;
+    super(contentPermissionChecker, helmPackageParser, variableResolverAdapter, uploadDefinitionExtensions);
   }
 
   @Override
-  public UploadResponse handle(Repository repository, ComponentUpload upload) throws IOException {
+  public UploadResponse handle(final Repository repository, final ComponentUpload upload) throws IOException {
     HelmHostedFacet facet = repository.facet(HelmHostedFacet.class);
     StorageFacet storageFacet = repository.facet(StorageFacet.class);
 
@@ -115,23 +103,5 @@ public class HelmUploadHandler
         UnitOfWork.end();
       }
     }
-  }
-
-  @Override
-  public UploadDefinition getDefinition() {
-    if (definition == null) {
-      definition = getDefinition(NAME, false);
-    }
-    return definition;
-  }
-
-  @Override
-  public VariableResolverAdapter getVariableResolverAdapter() {
-    return variableResolverAdapter;
-  }
-
-  @Override
-  public ContentPermissionChecker contentPermissionChecker() {
-    return contentPermissionChecker;
   }
 }

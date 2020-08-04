@@ -36,6 +36,10 @@ public class HelmPathUtils
     return match(state, "filename");
   }
 
+  public String contentFilePath(final TokenMatcher.State state) {
+    return String.format("/%s",filename(state));
+  }
+
   public String extension(final TokenMatcher.State state) {
     return match(state, "extension");
   }
@@ -61,5 +65,9 @@ public class HelmPathUtils
     String filename = filename(matcherState);
     String extension = extension(matcherState);
     return filename + "." + extension;
+  }
+
+  public String buildContentAssetPath(final TokenMatcher.State matcherState) {
+    return String.format("/%s", buildAssetPath(matcherState));
   }
 }

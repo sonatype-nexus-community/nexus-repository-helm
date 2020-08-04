@@ -1,6 +1,6 @@
 /*
  * Sonatype Nexus (TM) Open Source Version
- * Copyright (c) 2017-present Sonatype, Inc.
+ * Copyright (c) 2018-present Sonatype, Inc.
  * All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
@@ -35,6 +35,7 @@ import org.ops4j.pax.exam.Option;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.sonatype.nexus.plugins.helm.HelmITConfig.configureHelmBase;
 import static org.sonatype.nexus.plugins.helm.internal.HelmITSupport.MONGO_PKG_FILE_NAME_404_TGZ;
 import static org.sonatype.nexus.plugins.helm.internal.HelmITSupport.MONGO_PKG_FILE_NAME_600_TGZ;
 import static org.sonatype.nexus.plugins.helm.internal.HelmITSupport.MONGO_PKG_FILE_NAME_728_TGZ;
@@ -55,10 +56,7 @@ public class CleanupTaskHelmIT
 
   @Configuration
   public static Option[] configureNexus() {
-    return NexusPaxExamSupport.options(
-        NexusITSupport.configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-helm")
-    );
+    return configureHelmBase();
   }
 
   @Before

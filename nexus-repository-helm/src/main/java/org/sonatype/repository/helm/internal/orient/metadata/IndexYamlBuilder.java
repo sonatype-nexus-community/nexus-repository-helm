@@ -25,7 +25,6 @@ import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.metadata.ChartIndex;
 import org.sonatype.repository.helm.internal.util.YamlParser;
 
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**

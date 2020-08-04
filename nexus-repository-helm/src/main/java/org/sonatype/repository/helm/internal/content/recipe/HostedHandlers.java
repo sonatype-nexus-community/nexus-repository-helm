@@ -10,7 +10,7 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.internal.hosted;
+package org.sonatype.repository.helm.internal.content.recipe;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -19,10 +19,8 @@ import javax.inject.Singleton;
 import org.sonatype.goodies.common.ComponentSupport;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Handler;
-import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
 import org.sonatype.repository.helm.internal.AssetKind;
-import org.sonatype.repository.helm.internal.orient.hosted.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -32,7 +30,7 @@ import static org.sonatype.nexus.repository.http.HttpResponses.ok;
 /**
  * Helm Hosted Handlers
  *
- * @since 0.0.2
+ * @since 1.0.11
  */
 @Named
 @Singleton
@@ -46,32 +44,32 @@ public class HostedHandlers
     this.helmPathUtils = checkNotNull(helmPathUtils);
   }
 
-  final Handler get = context -> {
+  public final Handler get = context -> {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     String path;
     if (assetKind == AssetKind.HELM_INDEX) {
-      path = "index.yaml";
+      path = "/index.yaml";
     }
     else {
-      State state = context.getAttributes().require(TokenMatcher.State.class);
-      path = helmPathUtils.filename(state);
+      State state = context.getAttributes().require(State.class);
+      path = helmPathUtils.contentFilePath(state);
     }
     Content content = context.getRepository().facet(HelmHostedFacet.class).get(path);
 
     return (content != null) ? ok(content) : notFound();
   };
 
-  final Handler upload = context -> {
-    State state = context.getAttributes().require(TokenMatcher.State.class);
-    String path = helmPathUtils.buildAssetPath(state);
+  public final Handler upload = context -> {
+    State state = context.getAttributes().require(State.class);
+    String path = helmPathUtils.buildContentAssetPath(state);
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     context.getRepository().facet(HelmHostedFacet.class).upload(path, context.getRequest().getPayload(), assetKind);
     return ok();
   };
 
-  final Handler delete = context -> {
-    State state = context.getAttributes().require(TokenMatcher.State.class);
-    String path = helmPathUtils.buildAssetPath(state);
+  public final Handler delete = context -> {
+    State state = context.getAttributes().require(State.class);
+    String path = helmPathUtils.buildContentAssetPath(state);
 
     boolean deleted = context.getRepository().facet(HelmHostedFacet.class).delete(path);
 

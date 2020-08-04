@@ -10,7 +10,7 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.internal.orient.metadata;
+package org.sonatype.repository.helm.internal.metadata;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,55 +23,34 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-
 import org.sonatype.goodies.common.ComponentSupport;
-import org.sonatype.nexus.repository.Repository;
-import org.sonatype.nexus.repository.storage.StorageFacet;
-import org.sonatype.nexus.repository.storage.TempBlob;
-import org.sonatype.nexus.thread.io.StreamCopier;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.emitter.Emitter;
 import org.yaml.snakeyaml.events.CollectionEndEvent;
 import org.yaml.snakeyaml.events.CollectionStartEvent;
 import org.yaml.snakeyaml.events.Event;
 import org.yaml.snakeyaml.events.ScalarEvent;
 
-import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
-
 /**
  * Removes absolute URL entries from index.yaml
  *
- * @since 0.0.1
+ * @since 1.0.11
  */
-@Named
-@Singleton
-public class IndexYamlAbsoluteUrlRewriter
+public class IndexYamlAbsoluteUrlRewriterSupport
     extends ComponentSupport
 {
   private static final String URLS = "urls";
 
-  private StorageFacet storageFacet;
-
-  public TempBlob removeUrlsFromIndexYamlAndWriteToTempBlob(final TempBlob index,
-                                                            final Repository repository)
-  {
-    storageFacet = repository.facet(StorageFacet.class);
-
-    return new StreamCopier<>(outputStream -> updateUrls(index.get(), outputStream),
-        this::createTempBlob).read();
-  }
-
-  private void updateUrls(final InputStream is,
-                          final OutputStream os)
+  protected void updateUrls(final InputStream is,
+                            final OutputStream os)
   {
     try (Reader reader = new InputStreamReader(is);
          Writer writer = new OutputStreamWriter(os)) {
-      Yaml yaml = new Yaml();
+      Yaml yaml = new Yaml(new SafeConstructor());
       Emitter emitter = new Emitter(writer, new DumperOptions());
       boolean rewrite = false;
       for (Event event : yaml.parse(reader)) {
@@ -94,11 +73,11 @@ public class IndexYamlAbsoluteUrlRewriter
       }
     }
     catch (IOException ex) {
-      log.debug("Error rewriting urls in index.yaml", ex);
+      log.error("Error rewriting urls in index.yaml", ex);
     }
   }
 
-  private Event maybeSetAbsoluteUrlAsRelative(ScalarEvent scalarEvent) {
+  protected Event maybeSetAbsoluteUrlAsRelative(ScalarEvent scalarEvent) {
     String oldUrl = scalarEvent.getValue();
     try {
       URI uri = new URIBuilder(oldUrl).build();
@@ -114,12 +93,8 @@ public class IndexYamlAbsoluteUrlRewriter
       }
     }
     catch (URISyntaxException ex) {
-      log.debug("Invalid URI in index.yaml", ex);
+      log.error("Invalid URI in index.yaml", ex);
     }
     return scalarEvent;
-  }
-
-  private TempBlob createTempBlob(final InputStream is) {
-    return storageFacet.createTempBlob(is, HASH_ALGORITHMS);
   }
 }
