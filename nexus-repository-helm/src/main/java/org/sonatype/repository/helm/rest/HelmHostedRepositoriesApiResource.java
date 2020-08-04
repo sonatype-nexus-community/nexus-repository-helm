@@ -45,10 +45,8 @@ import static org.sonatype.nexus.rest.ApiDocConstants.REPOSITORY_UPDATED;
  * @since 1.0.0
  */
 @Api(value = API_REPOSITORY_MANAGEMENT)
-@Named
-@Singleton
-@Path(RepositoriesApiResource.RESOURCE_URI + "/helm/hosted")
-public class HelmHostedRepositoriesApiResource
+
+public abstract class HelmHostedRepositoriesApiResource
     extends AbstractRepositoriesApiResource<HelmHostedRepositoryApiRequest>
 {
   @Inject
