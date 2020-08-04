@@ -56,7 +56,7 @@
     <!-- ensure we can find the parent pom when starting from an empty local .m2 repository -->
     <repository>
       <id>rso-snapshots</id>
-      <url>https://repository.sonatype.org/content/repositories/snapshots</url>
+      <url>https://repo.sonatype.com/repository/zion-public-snapshots</url>
     </repository>
   </repositories>
 
