@@ -24,6 +24,10 @@ import org.sonatype.repository.helm.api.HelmHostedRepositoryApiRequest;
 
 import io.swagger.annotations.Api;
 
+/**
+ * @since 1.0.17
+ * @deprecated - prefer to use {@link HelmHostedRepositoriesApiResourceV1 } instead of Beta.
+ */
 @Named
 @Singleton
 @Path(RepositoriesApiResourceBeta.RESOURCE_URI + "/helm/hosted")

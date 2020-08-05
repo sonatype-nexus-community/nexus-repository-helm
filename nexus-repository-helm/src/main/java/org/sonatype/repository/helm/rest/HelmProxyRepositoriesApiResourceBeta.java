@@ -24,6 +24,10 @@ import org.sonatype.repository.helm.api.HelmProxyRepositoryApiRequest;
 
 import io.swagger.annotations.Api;
 
+/**
+ * @since 1.0.17
+ * @deprecated - prefer to use {@link HelmProxyRepositoriesApiResource } instead of Beta.
+ */
 @Named
 @Singleton
 @Path(RepositoriesApiResourceBeta.RESOURCE_URI + "/helm/proxy")
