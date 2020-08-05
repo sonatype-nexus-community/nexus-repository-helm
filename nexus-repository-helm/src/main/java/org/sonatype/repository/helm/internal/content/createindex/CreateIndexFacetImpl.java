@@ -61,6 +61,8 @@ public class CreateIndexFacetImpl
 
   private final AtomicBoolean acceptingEvents = new AtomicBoolean(true);
 
+  private static final String UPDATING_INDEX_LOG = "Updating index.yaml for hosted repository {}";
+
   //Prevents the same event from being fired multiple times
   private final AtomicBoolean eventFired = new AtomicBoolean(false);
 
@@ -100,7 +102,7 @@ public class CreateIndexFacetImpl
   @Guarded(by = STARTED)
   @AllowConcurrentEvents
   public void on(AssetCreatedEvent created) {
-    log.debug("Updating index.yaml for hosted repository {}", getRepository().getName());
+    log.debug(UPDATING_INDEX_LOG, getRepository().getName());
     maybeInvalidateIndex(created);
   }
 
@@ -108,7 +110,7 @@ public class CreateIndexFacetImpl
   @Guarded(by = STARTED)
   @AllowConcurrentEvents
   public void on(AssetUpdatedEvent updated) {
-    log.debug("Updating index.yaml for hosted repository {}", getRepository().getName());
+    log.debug(UPDATING_INDEX_LOG, getRepository().getName());
     maybeInvalidateIndex(updated);
   }
 
@@ -116,7 +118,7 @@ public class CreateIndexFacetImpl
   @Guarded(by = STARTED)
   @AllowConcurrentEvents
   public void on(AssetUploadedEvent uploaded) {
-    log.debug("Updating index.yaml for hosted repository {}", getRepository().getName());
+    log.debug(UPDATING_INDEX_LOG, getRepository().getName());
     maybeInvalidateIndex(uploaded);
   }
 
@@ -124,8 +126,10 @@ public class CreateIndexFacetImpl
   @Guarded(by = STARTED)
   @AllowConcurrentEvents
   public void on(AssetPurgedEvent purged) {
-    log.debug("Updating index.yaml for hosted repository {}", getRepository().getName());
-    invalidateIndex();
+    log.debug(UPDATING_INDEX_LOG, getRepository().getName());
+    if (getRepository().getName().equals(purged.getRepository().getName())) {
+      invalidateIndex();
+    }
   }
 
   private void maybeInvalidateIndex(final AssetEvent event) {
