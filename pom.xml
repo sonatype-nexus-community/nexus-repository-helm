@@ -24,7 +24,7 @@
   </parent>
 
   <artifactId>nexus-repository-base</artifactId>
-  <version>1.0.17</version>
+  <version>1.0.18-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>${project.groupId}:${project.artifactId}-parent</name>
 
