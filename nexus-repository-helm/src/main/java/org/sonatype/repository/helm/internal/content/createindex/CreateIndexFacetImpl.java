@@ -22,11 +22,11 @@ import org.sonatype.nexus.common.event.EventManager;
 import org.sonatype.nexus.common.stateguard.Guarded;
 import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.Repository;
-import org.sonatype.nexus.repository.content.event.asset.AssetCreateEvent;
+import org.sonatype.nexus.repository.content.event.asset.AssetCreatedEvent;
 import org.sonatype.nexus.repository.content.event.asset.AssetEvent;
-import org.sonatype.nexus.repository.content.event.asset.AssetPurgeEvent;
-import org.sonatype.nexus.repository.content.event.asset.AssetUpdateEvent;
-import org.sonatype.nexus.repository.content.event.asset.AssetUploadEvent;
+import org.sonatype.nexus.repository.content.event.asset.AssetPurgedEvent;
+import org.sonatype.nexus.repository.content.event.asset.AssetUpdatedEvent;
+import org.sonatype.nexus.repository.content.event.asset.AssetUploadedEvent;
 import org.sonatype.nexus.repository.manager.RepositoryCreatedEvent;
 import org.sonatype.nexus.repository.manager.RepositoryDeletedEvent;
 import org.sonatype.nexus.repository.view.Content;
@@ -83,7 +83,9 @@ public class CreateIndexFacetImpl
   public void on(RepositoryCreatedEvent createdEvent) {
     // at repository creation time, create index.yaml with empty entries
     log.debug("Initializing index.yaml for hosted repository {}", getRepository().getName());
-    invalidateIndex();
+    if (getRepository().getName().equals(createdEvent.getRepository().getName())) {
+      invalidateIndex();
+    }
   }
 
   @Subscribe
@@ -97,7 +99,7 @@ public class CreateIndexFacetImpl
   @Subscribe
   @Guarded(by = STARTED)
   @AllowConcurrentEvents
-  public void on(AssetCreateEvent created) {
+  public void on(AssetCreatedEvent created) {
     log.debug("Updating index.yaml for hosted repository {}", getRepository().getName());
     maybeInvalidateIndex(created);
   }
@@ -105,7 +107,7 @@ public class CreateIndexFacetImpl
   @Subscribe
   @Guarded(by = STARTED)
   @AllowConcurrentEvents
-  public void on(AssetUpdateEvent updated) {
+  public void on(AssetUpdatedEvent updated) {
     log.debug("Updating index.yaml for hosted repository {}", getRepository().getName());
     maybeInvalidateIndex(updated);
   }
@@ -113,7 +115,7 @@ public class CreateIndexFacetImpl
   @Subscribe
   @Guarded(by = STARTED)
   @AllowConcurrentEvents
-  public void on(AssetUploadEvent uploaded) {
+  public void on(AssetUploadedEvent uploaded) {
     log.debug("Updating index.yaml for hosted repository {}", getRepository().getName());
     maybeInvalidateIndex(uploaded);
   }
@@ -121,17 +123,17 @@ public class CreateIndexFacetImpl
   @Subscribe
   @Guarded(by = STARTED)
   @AllowConcurrentEvents
-  public void on(AssetPurgeEvent purged) {
+  public void on(AssetPurgedEvent purged) {
     log.debug("Updating index.yaml for hosted repository {}", getRepository().getName());
     invalidateIndex();
   }
 
   private void maybeInvalidateIndex(final AssetEvent event) {
-    if (event.getAsset().kind().equals(HELM_PACKAGE.toString())) {
+    if (event.getAsset().kind().equals(HELM_PACKAGE.toString()) &&
+        (getRepository().getName().equals(event.getRepository().getName()))) {
       invalidateIndex();
     }
   }
-  //TODO: NEXUS-24645 add asset event handlers here when event bus is implemented for newDB
 
   @Subscribe
   public void on(final HelmIndexInvalidationEvent event) {
