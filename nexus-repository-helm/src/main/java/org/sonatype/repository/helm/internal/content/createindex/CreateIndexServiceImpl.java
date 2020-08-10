@@ -28,6 +28,7 @@ import org.sonatype.nexus.repository.content.Asset;
 import org.sonatype.nexus.repository.content.AssetBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.payloads.StringPayload;
+import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
 import org.sonatype.repository.helm.internal.metadata.ChartEntry;
@@ -74,7 +75,9 @@ public class CreateIndexServiceImpl
     ChartIndex index = new ChartIndex();
 
     for (Asset asset : helmFacet.browseAssets()) {
-      parseAssetIntoChartEntry(index, asset);
+      if (AssetKind.HELM_PACKAGE.toString().equals(asset.kind())) {
+        parseAssetIntoChartEntry(index, asset);
+      }
     }
 
     index.setApiVersion(API_VERSION);
