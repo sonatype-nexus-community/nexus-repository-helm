@@ -25,7 +25,7 @@ import org.sonatype.nexus.repository.Type
 import org.sonatype.nexus.repository.cache.NegativeCacheFacet
 import org.sonatype.nexus.repository.cache.NegativeCacheHandler
 import org.sonatype.nexus.repository.content.browse.BrowseFacet
-import org.sonatype.nexus.repository.content.maintenance.SingleAssetMaintenanceFacet
+import org.sonatype.nexus.repository.content.maintenance.LastAssetMaintenanceFacet
 import org.sonatype.nexus.repository.content.search.SearchFacet
 import org.sonatype.nexus.repository.http.PartialFetchHandler
 import org.sonatype.nexus.repository.httpclient.HttpClientFacet
@@ -94,7 +94,7 @@ class HelmProxyRecipe
   Provider<BrowseFacet> browseFacet
 
   @Inject
-  Provider<SingleAssetMaintenanceFacet> maintenanceFacet
+  Provider<LastAssetMaintenanceFacet> maintenanceFacet
 
   @Inject
   TimingHandler timingHandler

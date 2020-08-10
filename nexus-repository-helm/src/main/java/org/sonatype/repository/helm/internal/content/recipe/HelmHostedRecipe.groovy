@@ -23,7 +23,7 @@ import org.sonatype.nexus.repository.RecipeSupport
 import org.sonatype.nexus.repository.Repository
 import org.sonatype.nexus.repository.Type
 import org.sonatype.nexus.repository.content.browse.BrowseFacet
-import org.sonatype.nexus.repository.content.maintenance.SingleAssetMaintenanceFacet
+import org.sonatype.nexus.repository.content.maintenance.LastAssetMaintenanceFacet
 import org.sonatype.nexus.repository.content.search.SearchFacet
 import org.sonatype.nexus.repository.http.HttpHandlers
 import org.sonatype.nexus.repository.http.PartialFetchHandler
@@ -100,7 +100,7 @@ class HelmHostedRecipe
   Provider<HttpClientFacet> httpClientFacet
 
   @Inject
-  Provider<SingleAssetMaintenanceFacet> maintenanceFacet
+  Provider<LastAssetMaintenanceFacet> maintenanceFacet
 
   @Inject
   ExceptionHandler exceptionHandler
