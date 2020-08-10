@@ -12,15 +12,11 @@
  */
 package org.sonatype.repository.helm.rest;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.ws.rs.Path;
 
-import org.sonatype.nexus.repository.rest.api.AbstractRepositoryApiRequestToConfigurationConverter;
-import org.sonatype.nexus.repository.rest.api.AuthorizingRepositoryManager;
 import org.sonatype.nexus.repository.rest.api.RepositoriesApiResourceBeta;
-import org.sonatype.repository.helm.api.HelmHostedRepositoryApiRequest;
 
 import io.swagger.annotations.Api;
 
@@ -32,10 +28,5 @@ import io.swagger.annotations.Api;
 public class HelmHostedRepositoriesApiResourceBeta
     extends HelmHostedRepositoriesApiResource
 {
-  @Inject
-  public HelmHostedRepositoriesApiResourceBeta(final AuthorizingRepositoryManager authorizingRepositoryManager,
-                                               final AbstractRepositoryApiRequestToConfigurationConverter<HelmHostedRepositoryApiRequest> configurationAdapter)
-  {
-    super(authorizingRepositoryManager, configurationAdapter);
-  }
+
 }
