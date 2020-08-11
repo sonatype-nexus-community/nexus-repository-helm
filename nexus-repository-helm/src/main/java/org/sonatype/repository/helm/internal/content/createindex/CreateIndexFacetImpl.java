@@ -23,6 +23,7 @@ import org.sonatype.nexus.common.stateguard.Guarded;
 import org.sonatype.nexus.repository.FacetSupport;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.content.event.asset.AssetCreatedEvent;
+import org.sonatype.nexus.repository.content.event.asset.AssetDeletedEvent;
 import org.sonatype.nexus.repository.content.event.asset.AssetEvent;
 import org.sonatype.nexus.repository.content.event.asset.AssetPurgedEvent;
 import org.sonatype.nexus.repository.content.event.asset.AssetUpdatedEvent;
@@ -104,6 +105,14 @@ public class CreateIndexFacetImpl
   public void on(AssetCreatedEvent created) {
     log.debug(UPDATING_INDEX_LOG, getRepository().getName());
     maybeInvalidateIndex(created);
+  }
+
+  @Subscribe
+  @Guarded(by = STARTED)
+  @AllowConcurrentEvents
+  public void on(final AssetDeletedEvent deleted) {
+    log.debug(UPDATING_INDEX_LOG, getRepository().getName());
+    maybeInvalidateIndex(deleted);
   }
 
   @Subscribe
