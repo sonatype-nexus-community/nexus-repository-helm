@@ -10,7 +10,7 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.repository.helm.internal.orient;
+package org.sonatype.repository.helm.internal.content;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -24,23 +24,21 @@ import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.rest.UploadDefinitionExtension;
 import org.sonatype.nexus.repository.security.ContentPermissionChecker;
 import org.sonatype.nexus.repository.security.VariableResolverAdapter;
-import org.sonatype.nexus.repository.storage.Asset;
-import org.sonatype.nexus.repository.storage.StorageFacet;
-import org.sonatype.nexus.repository.storage.TempBlob;
 import org.sonatype.nexus.repository.upload.ComponentUpload;
+import org.sonatype.nexus.repository.upload.UploadDefinition;
 import org.sonatype.nexus.repository.upload.UploadResponse;
+import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.PartPayload;
+import org.sonatype.nexus.repository.view.payloads.TempBlob;
 import org.sonatype.nexus.rest.ValidationErrorsException;
-import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.HelmUploadHandlerSupport;
 import org.sonatype.repository.helm.internal.AssetKind;
-import org.sonatype.repository.helm.internal.orient.hosted.HelmHostedFacet;
+import org.sonatype.repository.helm.internal.content.recipe.HelmHostedFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
 import org.apache.commons.lang3.StringUtils;
 
-import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 import static org.sonatype.repository.helm.internal.HelmFormat.NAME;
 
 /**
@@ -66,7 +64,7 @@ public class HelmUploadHandler
   @Override
   public UploadResponse handle(final Repository repository, final ComponentUpload upload) throws IOException {
     HelmHostedFacet facet = repository.facet(HelmHostedFacet.class);
-    StorageFacet storageFacet = repository.facet(StorageFacet.class);
+    HelmContentFacet helmContentFacet = repository.facet(HelmContentFacet.class);
 
     PartPayload payload = upload.getAssetUploads().get(0).getPayload();
 
@@ -77,7 +75,7 @@ public class HelmUploadHandler
       throw new IllegalArgumentException("Unsupported extension. Extension must be .tgz or .tgz.prov");
     }
 
-    try (TempBlob tempBlob = storageFacet.createTempBlob(payload, HASH_ALGORITHMS)) {
+    try (TempBlob tempBlob = helmContentFacet.getTempBlob(payload)) {
       HelmAttributes attributesFromInputStream = helmPackageParser.getAttributes(assetKind, tempBlob.get());
       String extension = assetKind.getExtension();
       String name = attributesFromInputStream.getName();
@@ -91,17 +89,31 @@ public class HelmUploadHandler
         throw new ValidationErrorsException("Metadata is missing the version attribute");
       }
 
-      String path = String.format("%s-%s%s", name, version, extension);
+      String path = String.format("/%s-%s%s", name, version, extension);
 
       ensurePermitted(repository.getName(), NAME, path, Collections.emptyMap());
-      try {
-        UnitOfWork.begin(storageFacet.txSupplier());
-        Asset asset = facet.upload(path, tempBlob, payload, assetKind);
-        return new UploadResponse(asset);
-      }
-      finally {
-        UnitOfWork.end();
-      }
+
+      Content content = facet.upload(path, tempBlob, attributesFromInputStream, payload, assetKind);
+
+      return new UploadResponse(Collections.singletonList(content), Collections.singletonList(path));
     }
+  }
+
+  @Override
+  public UploadDefinition getDefinition() {
+    if (definition == null) {
+      definition = getDefinition(NAME, false);
+    }
+    return definition;
+  }
+
+  @Override
+  public VariableResolverAdapter getVariableResolverAdapter() {
+    return variableResolverAdapter;
+  }
+
+  @Override
+  public ContentPermissionChecker contentPermissionChecker() {
+    return contentPermissionChecker;
   }
 }

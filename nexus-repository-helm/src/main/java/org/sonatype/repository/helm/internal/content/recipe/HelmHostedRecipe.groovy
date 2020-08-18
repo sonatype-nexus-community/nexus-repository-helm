@@ -22,6 +22,9 @@ import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.RecipeSupport
 import org.sonatype.nexus.repository.Repository
 import org.sonatype.nexus.repository.Type
+import org.sonatype.nexus.repository.content.browse.BrowseFacet
+import org.sonatype.nexus.repository.content.maintenance.LastAssetMaintenanceFacet
+import org.sonatype.nexus.repository.content.search.SearchFacet
 import org.sonatype.nexus.repository.http.HttpHandlers
 import org.sonatype.nexus.repository.http.PartialFetchHandler
 import org.sonatype.nexus.repository.httpclient.HttpClientFacet
@@ -88,6 +91,18 @@ class HelmHostedRecipe
   Provider<ConfigurableViewFacet> viewFacet
 
   @Inject
+  Provider<SearchFacet> searchFacet
+
+  @Inject
+  Provider<BrowseFacet> browseFacet
+
+  @Inject
+  Provider<HttpClientFacet> httpClientFacet
+
+  @Inject
+  Provider<LastAssetMaintenanceFacet> maintenanceFacet
+
+  @Inject
   ExceptionHandler exceptionHandler
 
   @Inject
@@ -107,9 +122,6 @@ class HelmHostedRecipe
 
   @Inject
   HandlerContributor handlerContributor
-
-  @Inject
-  Provider<HttpClientFacet> httpClientFacet
 
   @Inject
   FormatHighAvailabilitySupportHandler formatHighAvailabilitySupportHandler
@@ -158,9 +170,12 @@ class HelmHostedRecipe
     repository.attach(securityFacet.get())
     repository.attach(configure(viewFacet.get()))
     repository.attach(httpClientFacet.get())
+    repository.attach(maintenanceFacet.get())
     repository.attach(hostedFacet.get())
     repository.attach(helmFacet.get())
     repository.attach(createIndexFacet.get())
+    repository.attach(searchFacet.get())
+    repository.attach(browseFacet.get())
   }
 
   /**

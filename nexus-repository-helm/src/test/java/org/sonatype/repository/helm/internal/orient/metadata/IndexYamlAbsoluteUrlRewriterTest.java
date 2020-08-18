@@ -22,6 +22,7 @@ import org.sonatype.nexus.blobstore.api.Blob;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.TempBlob;
+import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
