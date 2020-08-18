@@ -12,9 +12,6 @@
  */
 package org.sonatype.repository.helm.rest;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -22,9 +19,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import org.sonatype.nexus.repository.rest.api.AbstractRepositoriesApiResource;
-import org.sonatype.nexus.repository.rest.api.AbstractRepositoryApiRequestToConfigurationConverter;
-import org.sonatype.nexus.repository.rest.api.AuthorizingRepositoryManager;
-import org.sonatype.nexus.repository.rest.api.RepositoriesApiResource;
 import org.sonatype.nexus.validation.Validate;
 import org.sonatype.repository.helm.api.HelmHostedRepositoryApiRequest;
 
@@ -45,20 +39,10 @@ import static org.sonatype.nexus.rest.ApiDocConstants.REPOSITORY_UPDATED;
  * @since 1.0.0
  */
 @Api(value = API_REPOSITORY_MANAGEMENT)
-@Named
-@Singleton
-@Path(RepositoriesApiResource.RESOURCE_URI + "/helm/hosted")
-public class HelmHostedRepositoriesApiResource
+
+public abstract class HelmHostedRepositoriesApiResource
     extends AbstractRepositoriesApiResource<HelmHostedRepositoryApiRequest>
 {
-  @Inject
-  public HelmHostedRepositoriesApiResource(
-      final AuthorizingRepositoryManager authorizingRepositoryManager,
-      final AbstractRepositoryApiRequestToConfigurationConverter<HelmHostedRepositoryApiRequest> configurationAdapter)
-  {
-    super(authorizingRepositoryManager, configurationAdapter);
-  }
-
   @ApiOperation("Create Helm hosted repository")
   @ApiResponses(value = {
       @ApiResponse(code = 201, message = REPOSITORY_CREATED),

@@ -85,7 +85,7 @@ public class CreateIndexServiceImplTest
     shaMap.put("sha256", "12345");
 
     when(assetBlob.checksums()).thenReturn(shaMap);
-    when(helmFacet.browseAssets(AssetKind.HELM_PACKAGE)).thenReturn(list);
+    when(helmFacet.browseAssets()).thenReturn(list);
     when(yamlParser.getYamlContent(anyObject())).thenReturn("index.yaml");
 
     Content result = underTest.buildIndexYaml(repository);
@@ -97,7 +97,7 @@ public class CreateIndexServiceImplTest
   public void testIndexYamlBuiltEvenWhenNoAssets() {
     when(assets.iterator()).thenReturn(assetIterator);
     when(assetIterator.next()).thenReturn(asset);
-    when(helmFacet.browseAssets(AssetKind.HELM_PACKAGE)).thenReturn(Collections.emptyList());
+    when(helmFacet.browseAssets()).thenReturn(Collections.emptyList());
     when(yamlParser.getYamlContent(anyObject())).thenReturn("index.yaml");
 
     Content result = underTest.buildIndexYaml(repository);
