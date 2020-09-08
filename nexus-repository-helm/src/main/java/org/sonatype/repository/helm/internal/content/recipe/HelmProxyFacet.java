@@ -12,19 +12,22 @@
  */
 package org.sonatype.repository.helm.internal.content.recipe;
 
+import org.sonatype.nexus.repository.cache.CacheController;
 import org.sonatype.nexus.repository.content.facet.ContentProxyFacetSupport;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
-import org.sonatype.repository.helm.internal.content.metadata.IndexYamlAbsoluteUrlRewriter;
+import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -54,10 +57,34 @@ public class HelmProxyFacet
   protected Content getCachedContent(final Context context) {
     Content content = content().getAsset(getUrl(context)).orElse(null);
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
-    if (assetKind == AssetKind.HELM_PACKAGE) {
-      return indexYamlAbsoluteUrlRewriter.removeUrlsFromIndexYamlAndWriteToTempBlob(content, getRepository());
+    if (assetKind == AssetKind.HELM_INDEX) {
+      return indexYamlAbsoluteUrlRewriter.removeUrlsFromIndexYaml(content);
     }
     return content;
+  }
+
+  /**
+   * {@link org.sonatype.nexus.repository.content.store.AssetData} required forwarding slash in path,
+   * but {@link java.net.URI#resolve(URI)} will not working correctly in this case.
+   *
+   * E.g. resolve '/index.yaml' on remote 'https://kubernetes.github.io/ingress-nginx' = 'https://kubernetes.github.io/index.yaml'
+   * will produce 404. So, remove forwarding slash during fetching.
+   */
+  @Override
+  protected Content fetch(String url, Context context, @Nullable Content stale) throws IOException {
+    String newUrl = url;
+    if (url.startsWith("/")) {
+      newUrl = url.substring(1);
+    }
+    return super.fetch(newUrl, context, stale);
+  }
+
+  @Nonnull
+  @Override
+  protected CacheController getCacheController(@Nonnull final Context context)
+  {
+    AssetKind assetKind = context.getAttributes().require(AssetKind.class);
+    return cacheControllerHolder.require(assetKind.getCacheType());
   }
 
   @Override
@@ -72,7 +99,6 @@ public class HelmProxyFacet
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
   }
-
 
   @Override
   protected String getUrl(@Nonnull final Context context) {

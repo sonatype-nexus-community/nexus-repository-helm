@@ -13,6 +13,7 @@
 package org.sonatype.repository.helm.internal.orient.proxy;
 
 import org.sonatype.nexus.common.collect.AttributesMap;
+import org.sonatype.nexus.repository.cache.CacheController;
 import org.sonatype.nexus.repository.cache.CacheInfo;
 import org.sonatype.nexus.repository.config.Configuration;
 import org.sonatype.nexus.repository.proxy.ProxyFacet;
@@ -60,7 +61,7 @@ public class HelmProxyFacetImpl
 
   private final HelmAttributeParser helmAttributeParser;
 
-  private final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter;
+  private final IndexYamlAbsoluteUrlRewriter indexYamlRewriter;
 
   private HelmFacet helmFacet;
 
@@ -73,7 +74,7 @@ public class HelmProxyFacetImpl
   {
     this.helmPathUtils = checkNotNull(helmPathUtils);
     this.helmAttributeParser = checkNotNull(helmAttributeParser);
-    this.indexYamlAbsoluteUrlRewriter = checkNotNull(indexYamlAbsoluteUrlRewriter);
+    this.indexYamlRewriter = checkNotNull(indexYamlAbsoluteUrlRewriter);
   }
 
   @Override
@@ -93,10 +94,18 @@ public class HelmProxyFacetImpl
   protected Content getCachedContent(final Context context) {
     Content content = getAsset(getUrl(context));
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
-    if (assetKind == AssetKind.HELM_PACKAGE) {
-      return indexYamlAbsoluteUrlRewriter.removeUrlsFromIndexYamlAndWriteToTempBlob(content, getRepository());
+    if (assetKind == AssetKind.HELM_INDEX) {
+      return indexYamlRewriter.removeUrlsFromIndexYaml(content);
     }
     return content;
+  }
+
+  @Nonnull
+  @Override
+  protected CacheController getCacheController(@Nonnull final Context context)
+  {
+    AssetKind assetKind = context.getAttributes().require(AssetKind.class);
+    return cacheControllerHolder.require(assetKind.getCacheType());
   }
 
   @Override

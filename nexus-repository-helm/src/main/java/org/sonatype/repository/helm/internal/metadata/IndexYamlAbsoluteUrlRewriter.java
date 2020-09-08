@@ -13,9 +13,7 @@
 package org.sonatype.repository.helm.internal.metadata;
 
 import com.google.common.io.ByteStreams;
-import org.sonatype.nexus.repository.Repository;
-import org.sonatype.nexus.repository.storage.StorageFacet;
-import org.sonatype.nexus.repository.storage.TempBlob;
+import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.payloads.BytesPayload;
 import org.sonatype.nexus.thread.io.StreamCopier;
@@ -27,8 +25,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
-
-import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 
 /**
  * Removes absolute URL entries from index.yaml
@@ -48,23 +44,24 @@ public class IndexYamlAbsoluteUrlRewriter
   }
 
   @Nullable
-  public Content removeUrlsFromIndexYamlAndWriteToTempBlob(final Content index,
-                                                           final Repository repository) {
+  public Content removeUrlsFromIndexYaml(final Content index) {
     if (index == null) {
       return null;
     }
 
     try (InputStream inputStream = index.openInputStream()) {
-      return new StreamCopier<>(outputStream -> updateUrls(inputStream, outputStream), this::createContent).read();
+      return new StreamCopier<>(outputStream -> updateUrls(inputStream, outputStream), input -> createContent(input, index.getAttributes())).read();
     } catch (IOException ex) {
       log.error("Error reading index.yaml", ex);
       return null;
     }
   }
 
-  private Content createContent(InputStream input) {
+  private Content createContent(InputStream input, AttributesMap attributes) {
     try {
-      return new Content(new BytesPayload(ByteStreams.toByteArray(input), contentType));
+      Content content = new Content(new BytesPayload(ByteStreams.toByteArray(input), contentType));
+      attributes.forEach(attr-> content.getAttributes().set(attr.getKey(), attr.getValue()));
+      return content;
     } catch (IOException ex) {
       log.error("Error rewriting urls in index.yaml", ex);
       return null;

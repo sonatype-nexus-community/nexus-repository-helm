@@ -17,7 +17,7 @@ import org.sonatype.goodies.common.ComponentSupport;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
-import org.sonatype.repository.helm.internal.content.metadata.IndexYamlAbsoluteUrlRewriter;
+import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;

@@ -71,7 +71,7 @@ public class IndexYamlAbsoluteUrlRewriterTest
   @Test
   public void checkCustomUrls() throws Exception {
     setupIndexMock(INDEX_YAML_WITH_CUSTOM_URL);
-    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository);
+    TempBlob newTempBlob = underTest.removeUrlsFromIndexYaml(tempBlob);
     assertThat(newTempBlob.get(), is(instanceOf(InputStream.class)));
     checkThatAbsoluteUrlRemoved(newTempBlob.get());
   }
@@ -79,7 +79,7 @@ public class IndexYamlAbsoluteUrlRewriterTest
   @Test
   public void removeUrlsFromIndexYaml() throws Exception {
     setupIndexMock(INDEX_YAML);
-    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository);
+    TempBlob newTempBlob = underTest.removeUrlsFromIndexYaml(tempBlob);
     assertThat(newTempBlob.get(), is(instanceOf(InputStream.class)));
     checkThatAbsoluteUrlRemoved(newTempBlob.get());
   }
@@ -87,7 +87,7 @@ public class IndexYamlAbsoluteUrlRewriterTest
   @Test
   public void doNotModifyUrlsWhenAlreadyRelative() throws Exception {
     setupIndexMock(INDEX_YAML_NO_ABSOLUTE_URLS);
-    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository);
+    TempBlob newTempBlob = underTest.removeUrlsFromIndexYaml(tempBlob);
     assertThat(newTempBlob.get(), is(instanceOf(InputStream.class)));
     checkThatAbsoluteUrlRemoved(newTempBlob.get());
   }
@@ -116,7 +116,7 @@ public class IndexYamlAbsoluteUrlRewriterTest
   @Test
   public void ensureNoExclamationMarksInYaml() throws Exception {
     setupIndexMock(INDEX_YAML);
-    TempBlob newTempBlob = underTest.removeUrlsFromIndexYamlAndWriteToTempBlob(tempBlob, repository);
+    TempBlob newTempBlob = underTest.removeUrlsFromIndexYaml(tempBlob);
     BufferedReader reader = new BufferedReader(new InputStreamReader(tempBlob.get()));
     String line;
     while ((line = reader.readLine()) != null) {
