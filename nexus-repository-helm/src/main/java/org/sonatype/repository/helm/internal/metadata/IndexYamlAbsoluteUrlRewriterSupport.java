@@ -12,20 +12,10 @@
  */
 package org.sonatype.repository.helm.internal.metadata;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
-
-import org.sonatype.goodies.common.ComponentSupport;
-
 import org.apache.http.client.utils.URIBuilder;
+import org.sonatype.goodies.common.ComponentSupport;
+import org.sonatype.nexus.repository.view.Content;
+import org.sonatype.repository.helm.internal.util.YamlParser;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -35,6 +25,15 @@ import org.yaml.snakeyaml.events.CollectionStartEvent;
 import org.yaml.snakeyaml.events.Event;
 import org.yaml.snakeyaml.events.ScalarEvent;
 
+import javax.inject.Inject;
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+import java.util.*;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Removes absolute URL entries from index.yaml
  *
@@ -43,6 +42,13 @@ import org.yaml.snakeyaml.events.ScalarEvent;
 public class IndexYamlAbsoluteUrlRewriterSupport
     extends ComponentSupport
 {
+  private YamlParser yamlParser;
+
+  @Inject
+  public IndexYamlAbsoluteUrlRewriterSupport(YamlParser yamlParser) {
+    this.yamlParser = yamlParser;
+  }
+
   private static final String URLS = "urls";
 
   protected void updateUrls(final InputStream is,
@@ -96,5 +102,27 @@ public class IndexYamlAbsoluteUrlRewriterSupport
       log.error("Invalid URI in index.yaml", ex);
     }
     return scalarEvent;
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<String> getUrls(final Content indexYaml, final String chartName, final String chartVersion) {
+    checkNotNull(chartName);
+    checkNotNull(chartVersion);
+
+    try (InputStream inputStream = indexYaml.openInputStream()) {
+      Map<String, Object> index = yamlParser.load(inputStream);
+      Map<String, Object> entries = (Map<String, Object>) index.get("entries");
+      List<Map<String, Object>> charsOfName = (List<Map<String, Object>>) entries.get(chartName);
+      Optional<Map<String, Object>> chartOfVersion = charsOfName.stream()
+              .filter(chart -> Objects.equals(chartVersion, chart.get("version")))
+              .findFirst();
+
+      return chartOfVersion
+              .map(chart-> (List<String>)chart.get(URLS))
+              .orElse(Collections.emptyList());
+    } catch (IOException e) {
+      log.error("Error reading index.yaml");
+      return Collections.emptyList();
+    }
   }
 }

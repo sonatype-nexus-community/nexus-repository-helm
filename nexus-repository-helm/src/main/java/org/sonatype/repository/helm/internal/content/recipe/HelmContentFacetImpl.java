@@ -12,14 +12,7 @@
  */
 package org.sonatype.repository.helm.internal.content.recipe;
 
-import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.collect.ImmutableList;
 import org.sonatype.nexus.common.hash.HashAlgorithm;
 import org.sonatype.nexus.repository.content.Asset;
 import org.sonatype.nexus.repository.content.facet.ContentFacetSupport;
@@ -33,10 +26,13 @@ import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
-import org.sonatype.repository.helm.internal.content.metadata.IndexYamlAbsoluteUrlRewriter;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
-import com.google.common.collect.ImmutableList;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.common.hash.HashAlgorithm.MD5;
@@ -56,17 +52,13 @@ public class HelmContentFacetImpl
 
   private final HelmAttributeParser helmAttributeParser;
 
-  private final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter;
-
   @Inject
   public HelmContentFacetImpl(
       @Named(HelmFormat.NAME) final FormatStoreManager formatStoreManager,
-      final HelmAttributeParser helmAttributeParser,
-      final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter)
+      final HelmAttributeParser helmAttributeParser)
   {
     super(formatStoreManager);
     this.helmAttributeParser = checkNotNull(helmAttributeParser);
-    this.indexYamlAbsoluteUrlRewriter = checkNotNull(indexYamlAbsoluteUrlRewriter);
   }
 
   @Override
@@ -94,16 +86,13 @@ public class HelmContentFacetImpl
   public Content putIndex(final String path, final Content content, final AssetKind assetKind)
   {
     try (TempBlob blob = blobs().ingest(content, HASHING)) {
-      try (TempBlob newTempBlob = indexYamlAbsoluteUrlRewriter
-          .removeUrlsFromIndexYamlAndWriteToTempBlob(blob, getRepository())) {
         return assets()
             .path(path)
             .kind(assetKind.name())
             .getOrCreate()
-            .attach(newTempBlob)
+            .attach(blob)
             .markAsCached(content)
             .download();
-      }
     }
   }
 

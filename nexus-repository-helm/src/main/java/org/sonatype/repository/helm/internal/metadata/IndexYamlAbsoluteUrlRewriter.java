@@ -12,16 +12,21 @@
  */
 package org.sonatype.repository.helm.internal.metadata;
 
-import java.io.InputStream;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
-
+import com.google.common.io.ByteStreams;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.TempBlob;
+import org.sonatype.nexus.repository.view.Content;
+import org.sonatype.nexus.repository.view.payloads.BytesPayload;
 import org.sonatype.nexus.thread.io.StreamCopier;
-import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriterSupport;
+import org.sonatype.repository.helm.internal.util.YamlParser;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.io.IOException;
+import java.io.InputStream;
 
 import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 
@@ -35,18 +40,34 @@ import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
 public class IndexYamlAbsoluteUrlRewriter
     extends IndexYamlAbsoluteUrlRewriterSupport
 {
-  private StorageFacet storageFacet;
+  private static final String contentType = "text/x-yaml";
 
-  public TempBlob removeUrlsFromIndexYamlAndWriteToTempBlob(final TempBlob index,
-                                                            final Repository repository)
-  {
-    storageFacet = repository.facet(StorageFacet.class);
-
-    return new StreamCopier<>(outputStream -> updateUrls(index.get(), outputStream),
-        this::createTempBlob).read();
+  @Inject
+  public IndexYamlAbsoluteUrlRewriter(YamlParser yamlParser) {
+    super(yamlParser);
   }
 
-  private TempBlob createTempBlob(final InputStream is) {
-    return storageFacet.createTempBlob(is, HASH_ALGORITHMS);
+  @Nullable
+  public Content removeUrlsFromIndexYamlAndWriteToTempBlob(final Content index,
+                                                           final Repository repository) {
+    if (index == null) {
+      return null;
+    }
+
+    try (InputStream inputStream = index.openInputStream()) {
+      return new StreamCopier<>(outputStream -> updateUrls(inputStream, outputStream), this::createContent).read();
+    } catch (IOException ex) {
+      log.error("Error reading index.yaml", ex);
+      return null;
+    }
+  }
+
+  private Content createContent(InputStream input) {
+    try {
+      return new Content(new BytesPayload(ByteStreams.toByteArray(input), contentType));
+    } catch (IOException ex) {
+      log.error("Error rewriting urls in index.yaml", ex);
+      return null;
+    }
   }
 }

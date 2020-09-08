@@ -12,11 +12,19 @@
  */
 package org.sonatype.repository.helm.internal.util;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-
+import org.apache.commons.io.FilenameUtils;
+import org.sonatype.goodies.common.ComponentSupport;
+import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
+import org.sonatype.repository.helm.internal.content.metadata.IndexYamlAbsoluteUrlRewriter;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.net.URI;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -27,8 +35,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Named
 @Singleton
-public class HelmPathUtils
+public class HelmPathUtils extends ComponentSupport
 {
+  private IndexYamlAbsoluteUrlRewriter urlRewriter;
+
+  @Inject
+  public HelmPathUtils(IndexYamlAbsoluteUrlRewriter urlRewriter) {
+    this.urlRewriter = urlRewriter;
+  }
+
   /**
    * Returns the filename from a {@link TokenMatcher.State}.
    */
@@ -36,8 +51,30 @@ public class HelmPathUtils
     return match(state, "filename");
   }
 
-  public String contentFilePath(final TokenMatcher.State state) {
-    return String.format("/%s",filename(state));
+  @Nullable
+  public String contentFilePath(final TokenMatcher.State state, final Content indexYaml) {
+    String filename = filename(state);
+    String chartName = getChartName(filename);
+    String chartVersion = getChartVersion(filename);
+    Optional<String> urlOpt = urlRewriter.getUrls(indexYaml, chartName, chartVersion).stream().findFirst();
+    if (urlOpt.isPresent()) {
+      String url = urlOpt.get();
+      URI uri = URI.create(url);
+      return uri.isAbsolute() ? url : String.format("/%s", url);
+    }
+    return null;
+  }
+
+  public String getChartName(final String filename) {
+    String filenameWithoutExt = FilenameUtils.removeExtension(filename);
+    int index = filenameWithoutExt.lastIndexOf('-');
+    return filenameWithoutExt.substring(0, index);
+  }
+
+  public String getChartVersion(final String filename) {
+    String filenameWithoutExt = FilenameUtils.removeExtension(filename);
+    int index = filenameWithoutExt.lastIndexOf('-');
+    return filenameWithoutExt.substring(index + 1);
   }
 
   public String extension(final TokenMatcher.State state) {
