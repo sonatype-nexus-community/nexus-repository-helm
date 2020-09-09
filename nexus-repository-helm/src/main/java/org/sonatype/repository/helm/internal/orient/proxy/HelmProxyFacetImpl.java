@@ -114,10 +114,9 @@ public class HelmProxyFacetImpl
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     switch(assetKind) {
       case HELM_INDEX:
-        return putMetadata(INDEX_YAML, content, assetKind);
+        return putMetadata(getUrl(context), content, assetKind);
       case HELM_PACKAGE:
-        TokenMatcher.State matcherState = helmPathUtils.matcherState(context);
-        return putComponent(content, helmPathUtils.filename(matcherState), assetKind);
+        return putComponent(content, getUrl(context), assetKind);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
@@ -218,7 +217,7 @@ public class HelmProxyFacetImpl
           log.error("index.yml file is absent in repository: " + getRepository().getName());
           return null;
         }
-        return helmPathUtils.contentFilePath(matcherState, indexOpt.get());
+        return helmPathUtils.contentFilePath(matcherState, indexOpt.get(), false);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }

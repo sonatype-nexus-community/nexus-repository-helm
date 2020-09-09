@@ -12,7 +12,6 @@
  */
 package org.sonatype.nexus.plugins.helm.internal;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.sonatype.goodies.httpfixture.server.fluent.Server;
@@ -21,8 +20,8 @@ import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.storage.ComponentMaintenance;
 
+import org.apache.http.HttpResponse;
 import org.junit.After;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.exam.Configuration;
@@ -33,8 +32,8 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.error;
 import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.file;
 import static org.sonatype.nexus.plugins.helm.HelmITConfig.configureHelmBase;
@@ -42,8 +41,6 @@ import static org.sonatype.nexus.plugins.helm.HelmITConfig.configureHelmBase;
 public class HelmProxyIT
     extends HelmITSupport
 {
-  private HelmClient client;
-
   private Repository repository;
 
   private Server server;
@@ -62,7 +59,6 @@ public class HelmProxyIT
         .serve("/" + YAML_FILE_NAME).withBehaviours(file(testData.resolveFile(YAML_FILE_NAME)))
         .start();
     repository = repos.createHelmProxy("helm-proxy-test", server.getUrl().toExternalForm());
-    client = helmClient(repository);
   }
 
   @After
@@ -72,6 +68,7 @@ public class HelmProxyIT
 
   @Test
   public void fetchTgzPackageFile() throws Exception {
+    HelmClient client = helmClient(repository);
     client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
     checkAsset(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
   }
@@ -83,6 +80,8 @@ public class HelmProxyIT
 
   @Test
   public void checkComponentCreated() throws Exception {
+    HelmClient client = helmClient(repository);
+
     client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
     assertFalse(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
@@ -91,6 +90,7 @@ public class HelmProxyIT
 
   @Test
   public void testDeletingComponentDeletesAllAssociatedAssets() throws Exception {
+    HelmClient client = helmClient(repository);
     client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
     final Component component = findComponent(repository, MONGO_PKG_NAME);
@@ -107,6 +107,8 @@ public class HelmProxyIT
 
   @Test
   public void testDeletingRemainingAssetAlsoDeletesComponent() throws Exception {
+    HelmClient client = helmClient(repository);
+
     client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
     assertTrue(componentAssetTestHelper.assetExists(repository, MONGO_PKG_FILE_NAME_600_TGZ));
@@ -119,20 +121,29 @@ public class HelmProxyIT
 
   @Test
   public void shouldCacheMetadata() throws Exception {
+    HelmClient client = helmClient(repository);
+
     client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
     server.stop();
-    assertSuccessResponseMatches(client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML), YAML_FILE_NAME);
+    // recreate client for avoid test freezing
+    assertSuccessResponseMatches(helmClient(repository).fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML), YAML_FILE_NAME);
   }
 
   @Test
   public void shouldCacheTgzPackageFile() throws Exception {
-    client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
-    client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
+
+    HelmClient helmClient = helmClient(repository);
+    helmClient.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
+    helmClient.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
     server.stop();
-    assertSuccessResponseMatches(client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ), MONGO_PKG_FILE_NAME_600_TGZ);
+    // recreate client for avoid test freezing
+    HttpResponse response = helmClient(repository).fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
+    assertSuccessResponseMatches(response, MONGO_PKG_FILE_NAME_600_TGZ);
   }
 
-  public void checkAsset(final String path, final String type) throws IOException {
+  public void checkAsset(final String path, final String type) throws Exception {
+    HelmClient client = helmClient(repository);
+
     assertSuccessResponseMatches(client.fetch(path, type), path);
     assertTrue(componentAssetTestHelper.assetExists(repository, path));
     List<String> assetPaths = componentAssetTestHelper.findAssetPaths(repository.getName());

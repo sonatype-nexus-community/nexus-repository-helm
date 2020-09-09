@@ -12,19 +12,22 @@
  */
 package org.sonatype.repository.helm.internal.util;
 
-import org.apache.commons.io.FilenameUtils;
-import org.sonatype.goodies.common.ComponentSupport;
-import org.sonatype.nexus.repository.view.Content;
-import org.sonatype.nexus.repository.view.Context;
-import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
-import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
+import java.net.URI;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.net.URI;
-import java.util.Optional;
+
+import org.sonatype.goodies.common.ComponentSupport;
+import org.sonatype.nexus.repository.view.Content;
+import org.sonatype.nexus.repository.view.Context;
+import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
+import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
+import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
+
+import org.apache.commons.io.FilenameUtils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -52,7 +55,10 @@ public class HelmPathUtils extends ComponentSupport
   }
 
   @Nullable
-  public String contentFilePath(final TokenMatcher.State state, final Content indexYaml) {
+  public String contentFilePath(
+      final State state,
+      final Content indexYaml,
+      final boolean isForwardingSlash) {
     String filename = filename(state);
     String chartName = getChartName(filename);
     String chartVersion = getChartVersion(filename);
@@ -60,7 +66,8 @@ public class HelmPathUtils extends ComponentSupport
     if (urlOpt.isPresent()) {
       String url = urlOpt.get();
       URI uri = URI.create(url);
-      return uri.isAbsolute() ? url : String.format("/%s", url);
+      String relativeUrl = isForwardingSlash ? String.format("/%s", url) : url;
+      return uri.isAbsolute() ? url : relativeUrl;
     }
     return null;
   }

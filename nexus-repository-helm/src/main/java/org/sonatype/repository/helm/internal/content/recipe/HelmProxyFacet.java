@@ -114,7 +114,7 @@ public class HelmProxyFacet
           log.error("index.yml file is absent in repository: " + getRepository().getName());
           return null;
         }
-        return helmPathUtils.contentFilePath(matcherState, indexOpt.get());
+        return helmPathUtils.contentFilePath(matcherState, indexOpt.get(), true);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
