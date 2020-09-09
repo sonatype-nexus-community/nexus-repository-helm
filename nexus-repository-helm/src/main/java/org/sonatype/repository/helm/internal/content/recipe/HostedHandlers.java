@@ -12,16 +12,16 @@
  */
 package org.sonatype.repository.helm.internal.content.recipe;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import org.sonatype.goodies.common.ComponentSupport;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Handler;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.repository.http.HttpResponses.notFound;
@@ -53,7 +53,7 @@ public class HostedHandlers
     }
     else {
       State state = context.getAttributes().require(State.class);
-      path = helmPathUtils.contentFilePath(state, indexYaml, false);
+      path = helmPathUtils.contentFilePath(state, indexYaml, true);
     }
     Content content = context.getRepository().facet(HelmHostedFacet.class).get(path);
 

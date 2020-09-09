@@ -93,7 +93,7 @@ public class HelmProxyFacet
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     switch (assetKind) {
       case HELM_INDEX:
-        content().putIndex(getUrl(context), content, assetKind);
+        return content().putIndex(getUrl(context), content, assetKind);
       case HELM_PACKAGE:
         return content().putComponent(getUrl(context), content, assetKind);
       default:

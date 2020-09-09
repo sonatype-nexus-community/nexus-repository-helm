@@ -149,6 +149,9 @@ public class HelmFacetImpl
    */
   @Override
   public Optional<Asset> findAsset(final StorageTx tx, final String assetName) {
+    if (assetName == null) {
+      return Optional.empty();
+    }
     Bucket bucket = tx.findBucket(getRepository());
     Asset asset = tx.findAssetWithProperty(P_NAME, assetName, bucket);
     return Optional.ofNullable(asset);

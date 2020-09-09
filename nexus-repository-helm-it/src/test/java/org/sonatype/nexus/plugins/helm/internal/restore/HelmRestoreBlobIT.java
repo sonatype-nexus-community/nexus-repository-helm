@@ -65,10 +65,6 @@ public class HelmRestoreBlobIT
 
   private Server proxyServer;
 
-  private HelmClient hostedClient;
-
-  private HelmClient proxyClient;
-
   private Repository hostedRepository;
 
   private Repository proxyRepository;
@@ -85,19 +81,22 @@ public class HelmRestoreBlobIT
   public void setup() throws Exception {
     BaseUrlHolder.set(this.nexusUrl.toString());
     hostedRepository = repos.createHelmHosted(HOSTED_REPO_NAME);
-    hostedClient = createHelmClient(hostedRepository);
+    HelmClient hostedClient = createHelmClient(hostedRepository);
 
     proxyServer = Server.withPort(0)
-        .serve("/" + MONGO_PATH_FULL_728_TARGZ)
+        .serve("/" + MONGO_PKG_FILE_NAME_728_TGZ)
         .withBehaviours(file(testData.resolveFile(MONGO_PKG_FILE_NAME_728_TGZ)))
+        .serve("/" + YAML_FILE_NAME)
+        .withBehaviours(file(testData.resolveFile(YAML_FILE_NAME)))
         .start();
 
     proxyRepository = repos.createHelmProxy(PROXY_REPO_NAME, "http://localhost:" + proxyServer.getPort() + "/");
-    proxyClient = createHelmClient(proxyRepository);
+    HelmClient proxyClient = createHelmClient(proxyRepository);
 
     assertThat(hostedClient.put(MONGO_PATH_FULL_728_TARGZ,
         fileToHttpEntity(MONGO_PKG_FILE_NAME_728_TGZ)).getStatusLine().getStatusCode(), is(HttpStatus.OK));
-    assertThat(proxyClient.fetch(MONGO_PATH_FULL_728_TARGZ, CONTENT_TYPE_TGZ).getStatusLine().getStatusCode(), is(HttpStatus.OK));
+    assertThat(proxyClient.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML).getStatusLine().getStatusCode(), is(HttpStatus.OK));
+    assertThat(proxyClient.fetch(MONGO_PKG_FILE_NAME_728_TGZ, CONTENT_TYPE_TGZ).getStatusLine().getStatusCode(), is(HttpStatus.OK));
   }
 
   @After
@@ -126,14 +125,14 @@ public class HelmRestoreBlobIT
   public void testNotDryRunRestore()
   {
     runBlobRestore(false);
-    testHelper.assertAssetInRepository(proxyRepository, MONGO_PATH_FULL_728_TARGZ);
+    testHelper.assertAssetInRepository(proxyRepository, MONGO_PKG_FILE_NAME_728_TGZ);
   }
 
   @Test
   public void testDryRunRestore()
   {
     runBlobRestore(true);
-    testHelper.assertAssetNotInRepository(proxyRepository, MONGO_PATH_FULL_728_TARGZ);
+    testHelper.assertAssetNotInRepository(proxyRepository, MONGO_PKG_FILE_NAME_728_TGZ);
   }
 
   private void runBlobRestore(final boolean isDryRun) {
@@ -141,7 +140,7 @@ public class HelmRestoreBlobIT
     Blob blob;
     try (StorageTx tx = getStorageTx(proxyRepository)) {
       tx.begin();
-      asset = tx.findAssetWithProperty(AssetEntityAdapter.P_NAME, MONGO_PATH_FULL_728_TARGZ,
+      asset = tx.findAssetWithProperty(AssetEntityAdapter.P_NAME, MONGO_PKG_FILE_NAME_728_TGZ,
           tx.findBucket(proxyRepository));
       assertThat(asset, Matchers.notNullValue());
       blob = tx.getBlob(asset.blobRef());
@@ -164,12 +163,12 @@ public class HelmRestoreBlobIT
     testHelper.assertComponentInRepository(proxyRepository, MONGO_PKG_NAME);
 
     testHelper.assertAssetMatchesBlob(hostedRepository, MONGO_PATH_FULL_728_TARGZ);
-    testHelper.assertAssetMatchesBlob(proxyRepository, MONGO_PATH_FULL_728_TARGZ);
+    testHelper.assertAssetMatchesBlob(proxyRepository, MONGO_PKG_FILE_NAME_728_TGZ);
 
     testHelper.assertAssetAssociatedWithComponent(hostedRepository, MONGO_PKG_NAME, MONGO_PATH_FULL_728_TARGZ);
-    testHelper.assertAssetAssociatedWithComponent(proxyRepository, MONGO_PKG_NAME, MONGO_PATH_FULL_728_TARGZ);
+    testHelper.assertAssetAssociatedWithComponent(proxyRepository, MONGO_PKG_NAME, MONGO_PKG_FILE_NAME_728_TGZ);
 
-    assertThat(hostedClient.get(MONGO_PATH_FULL_728_TARGZ).getStatusLine().getStatusCode(), is(HttpStatus.OK));
-    assertThat(proxyClient.get(MONGO_PATH_FULL_728_TARGZ).getStatusLine().getStatusCode(), is(HttpStatus.OK));
+    assertThat(createHelmClient(hostedRepository).get(MONGO_PATH_FULL_728_TARGZ).getStatusLine().getStatusCode(), is(HttpStatus.OK));
+    assertThat(createHelmClient(proxyRepository).get(MONGO_PKG_FILE_NAME_728_TGZ).getStatusLine().getStatusCode(), is(HttpStatus.OK));
   }
 }

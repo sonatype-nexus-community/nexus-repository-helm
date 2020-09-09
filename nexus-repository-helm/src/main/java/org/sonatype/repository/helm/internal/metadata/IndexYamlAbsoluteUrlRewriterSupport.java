@@ -124,7 +124,7 @@ public class IndexYamlAbsoluteUrlRewriterSupport
     try (InputStream inputStream = indexYaml.openInputStream()) {
       Map<String, Object> index = yamlParser.load(inputStream);
       Map<String, Object> entries = (Map<String, Object>) index.get("entries");
-      List<Map<String, Object>> charsOfName = (List<Map<String, Object>>) entries.get(chartName);
+      List<Map<String, Object>> charsOfName = (List<Map<String, Object>>) entries.getOrDefault(chartName, Collections.emptyList());
       Optional<Map<String, Object>> chartOfVersion = charsOfName.stream()
           .filter(chart -> Objects.equals(chartVersion, chart.get("version")))
           .findFirst();
