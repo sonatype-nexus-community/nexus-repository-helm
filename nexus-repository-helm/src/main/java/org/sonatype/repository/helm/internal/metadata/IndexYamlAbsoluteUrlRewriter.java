@@ -12,19 +12,22 @@
  */
 package org.sonatype.repository.helm.internal.metadata;
 
-import com.google.common.io.ByteStreams;
-import org.sonatype.nexus.common.collect.AttributesMap;
-import org.sonatype.nexus.repository.view.Content;
-import org.sonatype.nexus.repository.view.payloads.BytesPayload;
-import org.sonatype.nexus.thread.io.StreamCopier;
-import org.sonatype.repository.helm.internal.util.YamlParser;
+import java.io.IOException;
+import java.io.InputStream;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.IOException;
-import java.io.InputStream;
+
+import org.sonatype.nexus.common.collect.AttributesMap;
+import org.sonatype.nexus.repository.view.Content;
+import org.sonatype.nexus.repository.view.payloads.BytesPayload;
+import org.sonatype.nexus.repository.view.payloads.TempBlob;
+import org.sonatype.nexus.thread.io.StreamCopier;
+import org.sonatype.repository.helm.internal.util.YamlParser;
+
+import com.google.common.io.ByteStreams;
 
 /**
  * Removes absolute URL entries from index.yaml
@@ -41,6 +44,20 @@ public class IndexYamlAbsoluteUrlRewriter
   @Inject
   public IndexYamlAbsoluteUrlRewriter(YamlParser yamlParser) {
     super(yamlParser);
+  }
+
+  @Nullable
+  public Content removeUrlsFromIndexYaml(final TempBlob index, final AttributesMap attributes) {
+    if (index == null) {
+      return null;
+    }
+
+    try (InputStream inputStream = index.get()) {
+      return new StreamCopier<>(outputStream -> updateUrls(inputStream, outputStream), input -> createContent(input, attributes)).read();
+    } catch (IOException ex) {
+      log.error("Error reading index.yaml", ex);
+      return null;
+    }
   }
 
   @Nullable

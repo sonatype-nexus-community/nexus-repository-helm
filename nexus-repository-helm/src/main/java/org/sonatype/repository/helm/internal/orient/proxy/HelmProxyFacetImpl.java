@@ -12,6 +12,15 @@
  */
 package org.sonatype.repository.helm.internal.orient.proxy;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.repository.cache.CacheController;
 import org.sonatype.nexus.repository.cache.CacheInfo;
@@ -36,14 +45,6 @@ import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewrit
 import org.sonatype.repository.helm.internal.orient.HelmFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
@@ -125,7 +126,9 @@ public class HelmProxyFacetImpl
   private Content putMetadata(final String path, final Content content, final AssetKind assetKind) throws IOException {
     StorageFacet storageFacet = facet(StorageFacet.class);
     try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
-        return saveMetadataAsAsset(path, tempBlob, content, assetKind);
+        // save original metadata and return modified
+        saveMetadataAsAsset(path, tempBlob, content, assetKind);
+        return indexYamlRewriter.removeUrlsFromIndexYaml(tempBlob, content.getAttributes());
     }
   }
 

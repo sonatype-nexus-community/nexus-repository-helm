@@ -12,7 +12,13 @@
  */
 package org.sonatype.repository.helm.internal.content.recipe;
 
-import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.sonatype.nexus.common.hash.HashAlgorithm;
 import org.sonatype.nexus.repository.content.Asset;
 import org.sonatype.nexus.repository.content.facet.ContentFacetSupport;
@@ -26,13 +32,10 @@ import org.sonatype.repository.helm.HelmAttributes;
 import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.HelmFormat;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
+import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
+import com.google.common.collect.ImmutableList;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.common.hash.HashAlgorithm.MD5;
@@ -52,13 +55,17 @@ public class HelmContentFacetImpl
 
   private final HelmAttributeParser helmAttributeParser;
 
+  private final IndexYamlAbsoluteUrlRewriter indexYamlRewriter;
+
   @Inject
   public HelmContentFacetImpl(
       @Named(HelmFormat.NAME) final FormatStoreManager formatStoreManager,
-      final HelmAttributeParser helmAttributeParser)
+      final HelmAttributeParser helmAttributeParser,
+      final IndexYamlAbsoluteUrlRewriter indexYamlRewriter)
   {
     super(formatStoreManager);
     this.helmAttributeParser = checkNotNull(helmAttributeParser);
+    this.indexYamlRewriter = indexYamlRewriter;
   }
 
   @Override
@@ -85,14 +92,15 @@ public class HelmContentFacetImpl
   @Override
   public Content putIndex(final String path, final Content content, final AssetKind assetKind)
   {
+    // save original metadata and return modified
     try (TempBlob blob = blobs().ingest(content, HASHING)) {
-        return assets()
+        assets()
             .path(path)
             .kind(assetKind.name())
             .getOrCreate()
             .attach(blob)
-            .markAsCached(content)
-            .download();
+            .markAsCached(content);
+      return indexYamlRewriter.removeUrlsFromIndexYaml(blob, content.getAttributes());
     }
   }
 

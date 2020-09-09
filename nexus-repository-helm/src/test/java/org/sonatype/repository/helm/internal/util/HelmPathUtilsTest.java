@@ -12,15 +12,16 @@
  */
 package org.sonatype.repository.helm.internal.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.sonatype.goodies.testsupport.TestSupport;
+import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
+import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sonatype.goodies.testsupport.TestSupport;
-import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
-import org.sonatype.repository.helm.internal.content.metadata.IndexYamlAbsoluteUrlRewriter;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;

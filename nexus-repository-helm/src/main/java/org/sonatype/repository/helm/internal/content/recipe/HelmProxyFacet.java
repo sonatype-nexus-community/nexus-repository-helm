@@ -12,6 +12,15 @@
  */
 package org.sonatype.repository.helm.internal.content.recipe;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.sonatype.nexus.repository.cache.CacheController;
 import org.sonatype.nexus.repository.content.facet.ContentProxyFacetSupport;
 import org.sonatype.nexus.repository.view.Content;
@@ -21,14 +30,6 @@ import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -41,16 +42,16 @@ public class HelmProxyFacet
     extends ContentProxyFacetSupport
 {
   private final HelmPathUtils helmPathUtils;
-  private IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter;
+  private IndexYamlAbsoluteUrlRewriter indexYamlRewriter;
 
   private static final String INDEX_YAML = "/index.yaml";
 
   @Inject
   public HelmProxyFacet(final HelmPathUtils helmPathUtils,
-                        final IndexYamlAbsoluteUrlRewriter indexYamlAbsoluteUrlRewriter)
+                        final IndexYamlAbsoluteUrlRewriter indexYamlRewriter)
   {
     this.helmPathUtils = checkNotNull(helmPathUtils);
-    this.indexYamlAbsoluteUrlRewriter = checkNotNull(indexYamlAbsoluteUrlRewriter);
+    this.indexYamlRewriter = checkNotNull(indexYamlRewriter);
   }
 
   @Override
@@ -58,7 +59,7 @@ public class HelmProxyFacet
     Content content = content().getAsset(getUrl(context)).orElse(null);
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     if (assetKind == AssetKind.HELM_INDEX) {
-      return indexYamlAbsoluteUrlRewriter.removeUrlsFromIndexYaml(content);
+      return indexYamlRewriter.removeUrlsFromIndexYaml(content);
     }
     return content;
   }
@@ -92,7 +93,7 @@ public class HelmProxyFacet
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     switch (assetKind) {
       case HELM_INDEX:
-        return content().putIndex(getUrl(context), content, assetKind);
+        content().putIndex(getUrl(context), content, assetKind);
       case HELM_PACKAGE:
         return content().putComponent(getUrl(context), content, assetKind);
       default:

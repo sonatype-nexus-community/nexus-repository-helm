@@ -72,6 +72,7 @@ public class HelmProxyIT
 
   @Test
   public void fetchTgzPackageFile() throws Exception {
+    client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
     checkAsset(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
   }
 
@@ -82,6 +83,7 @@ public class HelmProxyIT
 
   @Test
   public void checkComponentCreated() throws Exception {
+    client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
     assertFalse(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
     assertTrue(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
@@ -89,6 +91,7 @@ public class HelmProxyIT
 
   @Test
   public void testDeletingComponentDeletesAllAssociatedAssets() throws Exception {
+    client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
     final Component component = findComponent(repository, MONGO_PKG_NAME);
     assertNotNull(component);
@@ -104,6 +107,7 @@ public class HelmProxyIT
 
   @Test
   public void testDeletingRemainingAssetAlsoDeletesComponent() throws Exception {
+    client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
     assertTrue(componentAssetTestHelper.assetExists(repository, MONGO_PKG_FILE_NAME_600_TGZ));
     assertTrue(componentAssetTestHelper.componentExists(repository, MONGO_PKG_NAME, MONGO_PKG_VERSION_600));
@@ -122,6 +126,7 @@ public class HelmProxyIT
 
   @Test
   public void shouldCacheTgzPackageFile() throws Exception {
+    client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
     client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
     server.stop();
     assertSuccessResponseMatches(client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ), MONGO_PKG_FILE_NAME_600_TGZ);

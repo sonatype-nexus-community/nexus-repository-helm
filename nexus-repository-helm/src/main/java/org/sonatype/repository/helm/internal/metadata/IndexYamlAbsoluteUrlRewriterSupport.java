@@ -12,10 +12,29 @@
  */
 package org.sonatype.repository.helm.internal.metadata;
 
-import org.apache.http.client.utils.URIBuilder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
 import org.sonatype.goodies.common.ComponentSupport;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.repository.helm.internal.util.YamlParser;
+
+import org.apache.http.client.utils.URIBuilder;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -24,13 +43,6 @@ import org.yaml.snakeyaml.events.CollectionEndEvent;
 import org.yaml.snakeyaml.events.CollectionStartEvent;
 import org.yaml.snakeyaml.events.Event;
 import org.yaml.snakeyaml.events.ScalarEvent;
-
-import javax.inject.Inject;
-import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
-import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -114,13 +126,14 @@ public class IndexYamlAbsoluteUrlRewriterSupport
       Map<String, Object> entries = (Map<String, Object>) index.get("entries");
       List<Map<String, Object>> charsOfName = (List<Map<String, Object>>) entries.get(chartName);
       Optional<Map<String, Object>> chartOfVersion = charsOfName.stream()
-              .filter(chart -> Objects.equals(chartVersion, chart.get("version")))
-              .findFirst();
+          .filter(chart -> Objects.equals(chartVersion, chart.get("version")))
+          .findFirst();
 
       return chartOfVersion
-              .map(chart-> (List<String>)chart.get(URLS))
-              .orElse(Collections.emptyList());
-    } catch (IOException e) {
+          .map(chart -> (List<String>) chart.get(URLS))
+          .orElse(Collections.emptyList());
+    }
+    catch (IOException e) {
       log.error("Error reading index.yaml");
       return Collections.emptyList();
     }

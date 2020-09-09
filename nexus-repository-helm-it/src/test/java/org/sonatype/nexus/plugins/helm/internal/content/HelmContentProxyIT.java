@@ -67,6 +67,9 @@ public class HelmContentProxyIT
 
   @Test
   public void fetchTgzPackageFile() throws Exception {
+    // fetch metadata first
+    client.fetch(YAML_FILE_NAME, CONTENT_TYPE_YAML);
+
     HttpResponse httpResponse = client.fetch(MONGO_PKG_FILE_NAME_600_TGZ, CONTENT_TYPE_TGZ);
 
     assertThat(status(httpResponse), is(HttpStatus.OK));
