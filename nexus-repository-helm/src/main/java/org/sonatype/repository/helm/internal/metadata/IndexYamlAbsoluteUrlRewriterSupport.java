@@ -54,11 +54,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class IndexYamlAbsoluteUrlRewriterSupport
     extends ComponentSupport
 {
-  private YamlParser yamlParser;
+  private final YamlParser yamlParser;
 
   @Inject
   public IndexYamlAbsoluteUrlRewriterSupport(YamlParser yamlParser) {
-    this.yamlParser = yamlParser;
+    this.yamlParser = checkNotNull(yamlParser);
   }
 
   private static final String URLS = "urls";

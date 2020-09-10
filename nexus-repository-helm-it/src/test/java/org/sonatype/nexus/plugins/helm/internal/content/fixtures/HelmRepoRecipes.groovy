@@ -14,9 +14,9 @@ package org.sonatype.nexus.plugins.helm.internal.content.fixtures
 
 import javax.annotation.Nonnull
 
+import org.sonatype.nexus.content.testsupport.fixtures.ConfigurationRecipes
 import org.sonatype.nexus.repository.Repository
 import org.sonatype.nexus.repository.config.Configuration
-import org.sonatype.nexus.content.testsupport.fixtures.ConfigurationRecipes
 
 import groovy.transform.CompileStatic
 

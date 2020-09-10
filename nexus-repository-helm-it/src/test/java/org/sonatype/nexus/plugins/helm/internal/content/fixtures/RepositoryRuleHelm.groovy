@@ -14,8 +14,8 @@ package org.sonatype.nexus.plugins.helm.internal.content.fixtures
 
 import javax.inject.Provider
 
-import org.sonatype.nexus.repository.manager.RepositoryManager
 import org.sonatype.nexus.content.testsupport.fixtures.RepositoryRule
+import org.sonatype.nexus.repository.manager.RepositoryManager
 
 class RepositoryRuleHelm
     extends RepositoryRule

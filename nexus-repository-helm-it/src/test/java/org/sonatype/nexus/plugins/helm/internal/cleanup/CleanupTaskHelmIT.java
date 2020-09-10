@@ -22,7 +22,6 @@ import org.sonatype.nexus.plugins.helm.internal.HelmClient;
 import org.sonatype.nexus.plugins.helm.internal.fixtures.RepositoryRuleHelm;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.Component;
-import org.sonatype.nexus.testsuite.testsupport.NexusITSupport;
 import org.sonatype.nexus.testsuite.testsupport.cleanup.CleanupITSupport;
 
 import org.apache.http.entity.ByteArrayEntity;

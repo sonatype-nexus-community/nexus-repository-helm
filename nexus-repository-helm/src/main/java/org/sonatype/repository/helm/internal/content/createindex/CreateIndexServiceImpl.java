@@ -12,7 +12,15 @@
  */
 package org.sonatype.repository.helm.internal.content.createindex;
 
-import org.joda.time.DateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import org.sonatype.goodies.common.ComponentSupport;
 import org.sonatype.nexus.common.collect.NestedAttributesMap;
 import org.sonatype.nexus.repository.Repository;
@@ -27,16 +35,16 @@ import org.sonatype.repository.helm.internal.metadata.ChartEntry;
 import org.sonatype.repository.helm.internal.metadata.ChartIndex;
 import org.sonatype.repository.helm.internal.util.YamlParser;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import org.joda.time.DateTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.sonatype.repository.helm.internal.database.HelmProperties.*;
+import static org.sonatype.repository.helm.internal.database.HelmProperties.APP_VERSION;
+import static org.sonatype.repository.helm.internal.database.HelmProperties.DESCRIPTION;
+import static org.sonatype.repository.helm.internal.database.HelmProperties.ICON;
+import static org.sonatype.repository.helm.internal.database.HelmProperties.MAINTAINERS;
+import static org.sonatype.repository.helm.internal.database.HelmProperties.NAME;
+import static org.sonatype.repository.helm.internal.database.HelmProperties.SOURCES;
+import static org.sonatype.repository.helm.internal.database.HelmProperties.VERSION;
 
 /**
  * Build index.yaml file for Helm Hosted

@@ -22,7 +22,6 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import org.sonatype.nexus.common.entity.EntityId;
 import org.sonatype.nexus.pax.exam.NexusPaxExamSupport;
 import org.sonatype.nexus.plugins.helm.internal.fixtures.RepositoryRuleHelm;
 import org.sonatype.nexus.repository.Repository;

@@ -74,7 +74,7 @@ public class IndexYamlAbsoluteUrlRewriter
     }
   }
 
-  private Content createContent(InputStream input, AttributesMap attributes) {
+  private Content createContent(final InputStream input, final AttributesMap attributes) {
     try {
       Content content = new Content(new BytesPayload(ByteStreams.toByteArray(input), contentType));
       attributes.forEach(attr-> content.getAttributes().set(attr.getKey(), attr.getValue()));

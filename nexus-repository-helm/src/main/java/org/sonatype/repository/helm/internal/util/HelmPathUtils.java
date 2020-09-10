@@ -44,7 +44,7 @@ public class HelmPathUtils extends ComponentSupport
 
   @Inject
   public HelmPathUtils(IndexYamlAbsoluteUrlRewriter urlRewriter) {
-    this.urlRewriter = urlRewriter;
+    this.urlRewriter = checkNotNull(urlRewriter);
   }
 
   /**

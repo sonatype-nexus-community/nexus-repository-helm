@@ -42,7 +42,7 @@ public class HelmProxyFacet
     extends ContentProxyFacetSupport
 {
   private final HelmPathUtils helmPathUtils;
-  private IndexYamlAbsoluteUrlRewriter indexYamlRewriter;
+  private final IndexYamlAbsoluteUrlRewriter indexYamlRewriter;
 
   private static final String INDEX_YAML = "/index.yaml";
 
@@ -72,7 +72,7 @@ public class HelmProxyFacet
    * will produce 404. So, remove forwarding slash during fetching.
    */
   @Override
-  protected Content fetch(String url, Context context, @Nullable Content stale) throws IOException {
+  protected Content fetch(final String url, final Context context, @Nullable final Content stale) throws IOException {
     String newUrl = url;
     if (url.startsWith("/")) {
       newUrl = url.substring(1);
