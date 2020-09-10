@@ -57,6 +57,15 @@ public class HelmPathUtils extends ComponentSupport
   @Nullable
   public String contentFilePath(
       final State state,
+      final boolean isForwardingSlash)
+  {
+    String filename = filename(state);
+    return isForwardingSlash ? String.format("/%s", filename) : filename;
+  }
+
+  @Nullable
+  public String contentFileUrl(
+      final State state,
       final Content indexYaml,
       final boolean isForwardingSlash) {
     String filename = filename(state);

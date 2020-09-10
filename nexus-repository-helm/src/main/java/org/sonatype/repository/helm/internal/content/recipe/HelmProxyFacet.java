@@ -56,7 +56,7 @@ public class HelmProxyFacet
 
   @Override
   protected Content getCachedContent(final Context context) {
-    Content content = content().getAsset(getUrl(context)).orElse(null);
+    Content content = content().getAsset(getAssetPath(context)).orElse(null);
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     if (assetKind == AssetKind.HELM_INDEX) {
       return indexYamlRewriter.removeUrlsFromIndexYaml(content);
@@ -93,9 +93,22 @@ public class HelmProxyFacet
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     switch (assetKind) {
       case HELM_INDEX:
-        return content().putIndex(getUrl(context), content, assetKind);
+        return content().putIndex(getAssetPath(context), content, assetKind);
       case HELM_PACKAGE:
-        return content().putComponent(getUrl(context), content, assetKind);
+        return content().putComponent(getAssetPath(context), content, assetKind);
+      default:
+        throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
+    }
+  }
+
+  private String getAssetPath(@Nonnull final Context context) {
+    AssetKind assetKind = context.getAttributes().require(AssetKind.class);
+    switch (assetKind) {
+      case HELM_INDEX:
+        return INDEX_YAML;
+      case HELM_PACKAGE:
+        TokenMatcher.State matcherState = helmPathUtils.matcherState(context);
+        return helmPathUtils.contentFilePath(matcherState, true);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
@@ -114,7 +127,7 @@ public class HelmProxyFacet
           log.error("index.yml file is absent in repository: " + getRepository().getName());
           return null;
         }
-        return helmPathUtils.contentFilePath(matcherState, indexOpt.get(), true);
+        return helmPathUtils.contentFileUrl(matcherState, indexOpt.get(), true);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }

@@ -93,7 +93,7 @@ public class HelmProxyFacetImpl
   @Nullable
   @Override
   protected Content getCachedContent(final Context context) {
-    Content content = getAsset(getUrl(context));
+    Content content = getAsset(getAssetPath(context));
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     if (assetKind == AssetKind.HELM_INDEX) {
       return indexYamlRewriter.removeUrlsFromIndexYaml(content);
@@ -114,9 +114,9 @@ public class HelmProxyFacetImpl
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     switch(assetKind) {
       case HELM_INDEX:
-        return putMetadata(getUrl(context), content, assetKind);
+        return putMetadata(getAssetPath(context), content, assetKind);
       case HELM_PACKAGE:
-        return putComponent(content, getUrl(context), assetKind);
+        return putComponent(content, getAssetPath(context), assetKind);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
@@ -204,6 +204,19 @@ public class HelmProxyFacetImpl
     tx.saveAsset(asset);
   }
 
+  private String getAssetPath(@Nonnull final Context context) {
+    AssetKind assetKind = context.getAttributes().require(AssetKind.class);
+    switch (assetKind) {
+      case HELM_INDEX:
+        return INDEX_YAML;
+      case HELM_PACKAGE:
+        TokenMatcher.State matcherState = helmPathUtils.matcherState(context);
+        return helmPathUtils.contentFilePath(matcherState, false);
+      default:
+        throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
+    }
+  }
+
   @Override
   protected String getUrl(@Nonnull final Context context) {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
@@ -217,7 +230,7 @@ public class HelmProxyFacetImpl
           log.error("index.yml file is absent in repository: " + getRepository().getName());
           return null;
         }
-        return helmPathUtils.contentFilePath(matcherState, indexOpt.get(), false);
+        return helmPathUtils.contentFileUrl(matcherState, indexOpt.get(), false);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }

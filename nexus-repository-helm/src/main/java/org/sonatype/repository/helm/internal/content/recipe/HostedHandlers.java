@@ -47,13 +47,12 @@ public class HostedHandlers
   public final Handler get = context -> {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     String path;
-    Content indexYaml = context.getRepository().facet(HelmHostedFacet.class).get("/index.yaml");
     if (assetKind == AssetKind.HELM_INDEX) {
-      return ok(indexYaml);
+      path = "/index.yaml";
     }
     else {
       State state = context.getAttributes().require(State.class);
-      path = helmPathUtils.contentFilePath(state, indexYaml, true);
+      path = helmPathUtils.contentFilePath(state, true);
     }
     Content content = context.getRepository().facet(HelmHostedFacet.class).get(path);
 
