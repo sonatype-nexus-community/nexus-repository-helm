@@ -13,11 +13,9 @@
 package org.sonatype.repository.helm.internal.content.recipe;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -64,22 +62,6 @@ public class HelmProxyFacet
     return content;
   }
 
-  /**
-   * {@link org.sonatype.nexus.repository.content.store.AssetData} required forwarding slash in path,
-   * but {@link java.net.URI#resolve(URI)} will not working correctly in this case.
-   *
-   * E.g. resolve '/index.yaml' on remote 'https://kubernetes.github.io/ingress-nginx' = 'https://kubernetes.github.io/index.yaml'
-   * will produce 404. So, remove forwarding slash during fetching.
-   */
-  @Override
-  protected Content fetch(final String url, final Context context, @Nullable final Content stale) throws IOException {
-    String newUrl = url;
-    if (url.startsWith("/")) {
-      newUrl = url.substring(1);
-    }
-    return super.fetch(newUrl, context, stale);
-  }
-
   @Nonnull
   @Override
   protected CacheController getCacheController(@Nonnull final Context context)
@@ -119,7 +101,7 @@ public class HelmProxyFacet
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
     switch (assetKind) {
       case HELM_INDEX:
-        return INDEX_YAML;
+        return "index.yaml";
       case HELM_PACKAGE:
         TokenMatcher.State matcherState = helmPathUtils.matcherState(context);
         Optional<Content> indexOpt = content().getAsset(INDEX_YAML);
@@ -127,7 +109,7 @@ public class HelmProxyFacet
           log.error("index.yml file is absent in repository: " + getRepository().getName());
           return null;
         }
-        return helmPathUtils.contentFileUrl(matcherState, indexOpt.get(), true);
+        return helmPathUtils.contentFileUrl(matcherState, indexOpt.get(), false);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
