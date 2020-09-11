@@ -42,7 +42,7 @@ public class IndexYamlAbsoluteUrlRewriter
   private static final String contentType = "text/x-yaml";
 
   @Inject
-  public IndexYamlAbsoluteUrlRewriter(YamlParser yamlParser) {
+  public IndexYamlAbsoluteUrlRewriter(final YamlParser yamlParser) {
     super(yamlParser);
   }
 

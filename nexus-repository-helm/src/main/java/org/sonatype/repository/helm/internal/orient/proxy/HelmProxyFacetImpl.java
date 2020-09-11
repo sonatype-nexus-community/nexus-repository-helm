@@ -95,10 +95,7 @@ public class HelmProxyFacetImpl
   protected Content getCachedContent(final Context context) {
     Content content = getAsset(getAssetPath(context));
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
-    if (assetKind == AssetKind.HELM_INDEX) {
-      return indexYamlRewriter.removeUrlsFromIndexYaml(content);
-    }
-    return content;
+    return assetKind == AssetKind.HELM_INDEX ? indexYamlRewriter.removeUrlsFromIndexYaml(content) : content;
   }
 
   @Nonnull

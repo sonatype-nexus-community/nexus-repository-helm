@@ -38,12 +38,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Named
 @Singleton
-public class HelmPathUtils extends ComponentSupport
+public class HelmPathUtils
+    extends ComponentSupport
 {
-  private IndexYamlAbsoluteUrlRewriter urlRewriter;
+  private final IndexYamlAbsoluteUrlRewriter urlRewriter;
 
   @Inject
-  public HelmPathUtils(IndexYamlAbsoluteUrlRewriter urlRewriter) {
+  public HelmPathUtils(final IndexYamlAbsoluteUrlRewriter urlRewriter) {
     this.urlRewriter = checkNotNull(urlRewriter);
   }
 
@@ -67,7 +68,8 @@ public class HelmPathUtils extends ComponentSupport
   public String contentFileUrl(
       final State state,
       final Content indexYaml,
-      final boolean isForwardingSlash) {
+      final boolean isForwardingSlash)
+  {
     String filename = filename(state);
     String chartName = getChartName(filename);
     String chartVersion = getChartVersion(filename);

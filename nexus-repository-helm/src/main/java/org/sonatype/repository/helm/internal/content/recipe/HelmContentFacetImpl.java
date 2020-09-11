@@ -65,7 +65,7 @@ public class HelmContentFacetImpl
   {
     super(formatStoreManager);
     this.helmAttributeParser = checkNotNull(helmAttributeParser);
-    this.indexYamlRewriter = indexYamlRewriter;
+    this.indexYamlRewriter = checkNotNull(indexYamlRewriter);
   }
 
   @Override
