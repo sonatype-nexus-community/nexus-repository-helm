@@ -55,7 +55,6 @@ public class HelmPathUtils
     return match(state, "filename");
   }
 
-  @Nullable
   public String contentFilePath(
       final State state,
       final boolean isForwardingSlash)
