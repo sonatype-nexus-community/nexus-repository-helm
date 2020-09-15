@@ -135,7 +135,7 @@ public class IndexYamlAbsoluteUrlRewriterSupport
     }
     catch (IOException e) {
       log.error("Error reading index.yaml");
-      throw new UncheckedIOException(ex);
+      throw new UncheckedIOException(e);
     }
   }
 }
