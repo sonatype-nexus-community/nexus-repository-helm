@@ -71,7 +71,7 @@ public class IndexYamlAbsoluteUrlRewriter
       return new StreamCopier<>(outputStream -> updateUrls(inputStream, outputStream), input -> createContent(input, index.getAttributes())).read();
     } catch (IOException ex) {
       log.error("Error reading index.yaml", ex);
-      return null;
+      throw new UncheckedIOException(ex);
     }
   }
 
@@ -82,7 +82,7 @@ public class IndexYamlAbsoluteUrlRewriter
       return content;
     } catch (IOException ex) {
       log.error("Error rewriting urls in index.yaml", ex);
-      return null;
+      throw new UncheckedIOException(ex);
     }
   }
 }

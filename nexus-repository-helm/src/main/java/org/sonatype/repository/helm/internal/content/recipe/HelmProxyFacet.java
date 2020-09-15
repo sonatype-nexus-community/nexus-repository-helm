@@ -13,6 +13,7 @@
 package org.sonatype.repository.helm.internal.content.recipe;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -128,7 +129,7 @@ public class HelmProxyFacet
       return Optional.ofNullable(get(indexYamlContext));
     }
     catch (IOException e) {
-      return Optional.empty();
+      throw new UncheckedIOException(e);
     }
   }
 

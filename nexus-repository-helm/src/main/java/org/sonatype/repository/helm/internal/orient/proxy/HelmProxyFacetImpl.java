@@ -13,6 +13,7 @@
 package org.sonatype.repository.helm.internal.orient.proxy;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -247,7 +248,7 @@ public class HelmProxyFacetImpl
       return Optional.ofNullable(get(indexYamlContext));
     }
     catch (IOException e) {
-      return Optional.empty();
+      throw new UncheckedIOException(e);
     }
   }
 
