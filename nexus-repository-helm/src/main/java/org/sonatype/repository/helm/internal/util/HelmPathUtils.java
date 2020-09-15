@@ -12,9 +12,6 @@
  */
 package org.sonatype.repository.helm.internal.util;
 
-import java.net.URI;
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -70,13 +67,7 @@ public class HelmPathUtils
   {
     String chartName = getChartName(filename);
     String chartVersion = getChartVersion(filename);
-    Optional<String> urlOpt = urlRewriter.getFirstUrl(indexYaml, chartName, chartVersion);
-    if (urlOpt.isPresent()) {
-      String url = urlOpt.get();
-      URI uri = URI.create(url);
-      return uri.isAbsolute() ? url : url;
-    }
-    return null;
+    return urlRewriter.getFirstUrl(indexYaml, chartName, chartVersion).orElse(null);
   }
 
   public String getChartName(final String filename) {
