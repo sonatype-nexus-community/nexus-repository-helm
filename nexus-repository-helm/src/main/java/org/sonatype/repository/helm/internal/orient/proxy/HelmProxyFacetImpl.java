@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sonatype.nexus.common.collect.AttributesMap;
+import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.cache.CacheController;
 import org.sonatype.nexus.repository.cache.CacheInfo;
 import org.sonatype.nexus.repository.config.Configuration;
@@ -37,6 +38,7 @@ import org.sonatype.nexus.repository.transaction.TransactionalTouchMetadata;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.Payload;
+import org.sonatype.nexus.repository.view.Request;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.transaction.UnitOfWork;
 import org.sonatype.repository.helm.HelmAttributes;
@@ -224,12 +226,42 @@ public class HelmProxyFacetImpl
         TokenMatcher.State matcherState = helmPathUtils.matcherState(context);
         Optional<Content> indexOpt = Optional.ofNullable(getAsset(INDEX_YAML));
         if (!indexOpt.isPresent()) {
+          log.info("Try to refetch index.yml file in repository: " + getRepository().getName());
+          indexOpt = fetchIndexYamlContext(context);
+        }
+        if (!indexOpt.isPresent()) {
           log.error("index.yml file is absent in repository: " + getRepository().getName());
           return null;
         }
-        return helmPathUtils.contentFileUrl(matcherState, indexOpt.get(), false);
+        String filename = helmPathUtils.filename(matcherState);
+        return helmPathUtils.contentFileUrl(filename, indexOpt.get());
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
+  }
+
+  private Optional<Content> fetchIndexYamlContext(@Nonnull final Context context)
+  {
+    Context indexYamlContext = buildContextForRepositoryIndexYaml(context);
+    try {
+      return Optional.ofNullable(get(indexYamlContext));
+    }
+    catch (IOException e) {
+      return Optional.empty();
+    }
+  }
+
+  private Context buildContextForRepositoryIndexYaml(final Context contextPackage) {
+    Repository repository = contextPackage.getRepository();
+
+    Request request = new Request.Builder()
+        .action(contextPackage.getRequest().getAction())
+        .path(INDEX_YAML)
+        .build();
+
+    Context indexYamlContext = new Context(repository, request);
+    indexYamlContext.getAttributes().backing().putAll(contextPackage.getAttributes().backing());
+    indexYamlContext.getAttributes().set(AssetKind.class, AssetKind.HELM_INDEX);
+    return indexYamlContext;
   }
 }

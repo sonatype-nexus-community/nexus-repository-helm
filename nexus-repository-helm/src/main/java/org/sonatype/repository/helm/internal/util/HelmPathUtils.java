@@ -65,19 +65,16 @@ public class HelmPathUtils
 
   @Nullable
   public String contentFileUrl(
-      final State state,
-      final Content indexYaml,
-      final boolean isForwardingSlash)
+      final String filename,
+      final Content indexYaml)
   {
-    String filename = filename(state);
     String chartName = getChartName(filename);
     String chartVersion = getChartVersion(filename);
-    Optional<String> urlOpt = urlRewriter.getUrls(indexYaml, chartName, chartVersion).stream().findFirst();
+    Optional<String> urlOpt = urlRewriter.getFirstUrl(indexYaml, chartName, chartVersion);
     if (urlOpt.isPresent()) {
       String url = urlOpt.get();
       URI uri = URI.create(url);
-      String relativeUrl = isForwardingSlash ? String.format("/%s", url) : url;
-      return uri.isAbsolute() ? url : relativeUrl;
+      return uri.isAbsolute() ? url : url;
     }
     return null;
   }

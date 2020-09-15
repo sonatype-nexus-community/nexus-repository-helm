@@ -117,7 +117,7 @@ public class IndexYamlAbsoluteUrlRewriterSupport
   }
 
   @SuppressWarnings("unchecked")
-  public List<String> getUrls(final Content indexYaml, final String chartName, final String chartVersion) {
+  public Optional<String> getFirstUrl(final Content indexYaml, final String chartName, final String chartVersion) {
     checkNotNull(chartName);
     checkNotNull(chartVersion);
 
@@ -130,12 +130,11 @@ public class IndexYamlAbsoluteUrlRewriterSupport
           .findFirst();
 
       return chartOfVersion
-          .map(chart -> (List<String>) chart.get(URLS))
-          .orElse(emptyList());
+          .flatMap(chart -> ((List<String>) chart.get(URLS)).stream().findFirst());
     }
     catch (IOException e) {
       log.error("Error reading index.yaml");
-      return emptyList();
+      return Optional.empty();
     }
   }
 }

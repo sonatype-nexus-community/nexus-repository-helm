@@ -14,6 +14,7 @@ package org.sonatype.repository.helm.internal.metadata;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -56,7 +57,7 @@ public class IndexYamlAbsoluteUrlRewriter
       return new StreamCopier<>(outputStream -> updateUrls(inputStream, outputStream), input -> createContent(input, attributes)).read();
     } catch (IOException ex) {
       log.error("Error reading index.yaml", ex);
-      return null;
+      throw new UncheckedIOException(ex);
     }
   }
 
