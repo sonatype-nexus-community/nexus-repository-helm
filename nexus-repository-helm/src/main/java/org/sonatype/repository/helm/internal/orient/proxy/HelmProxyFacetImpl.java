@@ -12,16 +12,6 @@
  */
 package org.sonatype.repository.helm.internal.orient.proxy;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.Collections;
-import java.util.Optional;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.cache.CacheController;
@@ -48,6 +38,15 @@ import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewrit
 import org.sonatype.repository.helm.internal.orient.HelmFacet;
 import org.sonatype.repository.helm.internal.util.HelmAttributeParser;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.Collections;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.repository.helm.internal.HelmFormat.HASH_ALGORITHMS;
@@ -245,7 +244,11 @@ public class HelmProxyFacetImpl
   {
     Context indexYamlContext = buildContextForRepositoryIndexYaml(context);
     try {
-      return Optional.ofNullable(get(indexYamlContext));
+      Optional<Content> indexOpt = Optional.ofNullable(fetch(indexYamlContext, null));
+      if (indexOpt.isPresent()) {
+        store(indexYamlContext, indexOpt.get());
+      }
+      return Optional.ofNullable(getAsset(INDEX_YAML));
     }
     catch (IOException e) {
       throw new UncheckedIOException(e);

@@ -12,15 +12,6 @@
  */
 package org.sonatype.repository.helm.internal.content.recipe;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.Optional;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.cache.CacheController;
 import org.sonatype.nexus.repository.content.facet.ContentProxyFacetSupport;
@@ -32,6 +23,14 @@ import org.sonatype.repository.helm.internal.AssetKind;
 import org.sonatype.repository.helm.internal.content.HelmContentFacet;
 import org.sonatype.repository.helm.internal.metadata.IndexYamlAbsoluteUrlRewriter;
 import org.sonatype.repository.helm.internal.util.HelmPathUtils;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -126,7 +125,11 @@ public class HelmProxyFacet
   {
     Context indexYamlContext = buildContextForRepositoryIndexYaml(context);
     try {
-      return Optional.ofNullable(get(indexYamlContext));
+      Optional<Content> indexOpt = Optional.ofNullable(fetch(indexYamlContext, null));
+      if (indexOpt.isPresent()) {
+        store(indexYamlContext, indexOpt.get());
+      }
+      return content().getAsset(INDEX_YAML);
     }
     catch (IOException e) {
       throw new UncheckedIOException(e);
