@@ -244,11 +244,9 @@ public class HelmProxyFacetImpl
   {
     Context indexYamlContext = buildContextForRepositoryIndexYaml(context);
     try {
-      Optional<Content> indexOpt = Optional.ofNullable(fetch(indexYamlContext, null));
-      if (indexOpt.isPresent()) {
-        store(indexYamlContext, indexOpt.get());
-      }
-      return Optional.ofNullable(getAsset(INDEX_YAML));
+        // fetch index.yaml file and return original metadata
+        get(indexYamlContext);
+        return Optional.ofNullable(getAsset(INDEX_YAML));
     }
     catch (IOException e) {
       throw new UncheckedIOException(e);
