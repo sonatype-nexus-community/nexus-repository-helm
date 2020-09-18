@@ -22,6 +22,12 @@
 
 [![DepShield Badge](https://depshield.sonatype.org/badges/sonatype-nexus-community/nexus-repository-helm/depshield.svg)](https://depshield.github.io)
 
+> **Huzzah!** Helm is now part of Nexus Repository Manager. Version 3.20 includes the Helm plugin by default. 
+>The plugin source code is now in [nexus-public](https://github.com/sonatype/nexus-public) in [nexus-repository-helm](https://github.com/sonatype/nexus-public/tree/master/plugins/nexus-repository-helm).
+> **Filing issues:** Upgrade to the latest version of Nexus Repository Manager 3, to get the latest fixes and improvements, before filing any issues or feature requests at https://issues.sonatype.org/.
+> **Upgrading:** If you are using a version prior to 3.20 and upgrade to a newer version you will not be able to install the community plugin. 
+>No other changes are required and your existing data will remain intact.
+
 # Table Of Contents
 * [Release notes](https://help.sonatype.com/display/NXRM3/2020+Release+Notes#id-2020ReleaseNotes-RepositoryManager3.21.0)
 * [Developing](#developing)
